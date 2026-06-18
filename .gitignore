@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.tanstack/
+.lovable/
+
+.DS_Store
+*.log
+
+.env
+.env.*
+!.env.example
+
+.cache/
+.vite/
+coverage/
