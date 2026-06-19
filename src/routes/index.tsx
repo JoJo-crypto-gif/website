@@ -1,25 +1,34 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect, useRef } from "react";
-import { motion, useScroll, useSpring, useTransform } from "framer-motion";
-import heroImg from "@/assets/hero.jpg";
+import {
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+  useTransform,
+} from "framer-motion";
+import { ArrowUpRight } from "lucide-react";
+import heroImg from "@/assets/hero.png";
 import heroVideo1 from "@/assets/hero/1.mp4";
 import heroVideo2 from "@/assets/hero/2.mp4";
 import heroVideo3 from "@/assets/hero/3.mp4";
+import heroVideo4 from "@/assets/hero/4.mp4";
 import whoweareImg from "@/assets/whoweare.png";
 import pillarLegacy from "@/assets/pillar-legacy.png";
 import pillarCollab from "@/assets/pillar-collab.png";
 import pillarOwnership from "@/assets/pillar-ownership.png";
-import videoPoster from "@/assets/video-poster.jpg";
-import bgSto from "@/assets/bg-sto.jpg";
-import bgConsulting from "@/assets/bg-consulting.jpg";
-import pAqueduct from "@/assets/p-aqueduct.jpg";
-import pTransit from "@/assets/p-transit.jpg";
-import pUniversity from "@/assets/p-university.jpg";
-import pDatacenter from "@/assets/p-datacenter.jpg";
-import pHospital from "@/assets/p-hospital.jpg";
-import pMuseum from "@/assets/p-museum.jpg";
+import assembleVideo from "@/assets/assemble.mp4";
+import bgSto from "@/assets/bg-sto.png";
+import bgConsulting from "@/assets/bg-consulting.png";
+import pAqueduct from "@/assets/p-aqueduct.png";
+import pTransit from "@/assets/p-transit.png";
+import pUniversity from "@/assets/p-university.png";
+import pDatacenter from "@/assets/p-datacenter.png";
+import pHospital from "@/assets/p-hospital.png";
+import pMuseum from "@/assets/p-museum.png";
 
-const heroVideos = [heroVideo1, heroVideo2, heroVideo3];
+const heroVideos = [heroVideo1, heroVideo2, heroVideo3, heroVideo4];
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -78,11 +87,73 @@ const pillars = [
   },
 ];
 
+const assemblyStages = [
+  {
+    step: "01",
+    eyebrow: "Systems Engineering",
+    title: "Defining the architecture.",
+    body: "Our engineers establish the foundational framework, ensuring that every aerodynamic and mechanical subsystem seamlessly integrates to form a cohesive, high-performance platform.",
+  },
+  {
+    step: "02",
+    eyebrow: "Precision Manufacturing",
+    title: "Engineering tolerances meet reality.",
+    body: "Advanced fabrication techniques and strict quality control transform digital blueprints into physical components, engineering propulsion and structural systems with exact precision.",
+  },
+  {
+    step: "03",
+    eyebrow: "Flight Test Engineering",
+    title: "Validating the design.",
+    body: "Rigorous testing and simulation push the engineered systems beyond their limits, verifying performance data to certify the platform is ready for demanding real-world applications.",
+  },
+];
+
+const ASSEMBLY_SCRUB_END = 0.66;
+
 const stats = [
-  { value: "$4B+", label: "Annual R&D Investment" },
-  { value: "45", label: "Allied Nations Served" },
-  { value: "30K+", label: "Engineers & Scientists" },
-  { value: "100%", label: "Mission Success Rate" },
+  { end: 4, prefix: "$", suffix: "B+", label: "Annual R&D Investment" },
+  { end: 45, prefix: "", suffix: "", label: "Allied Nations Served" },
+  { end: 30, prefix: "", suffix: "K+", label: "Engineers & Scientists" },
+  { end: 100, prefix: "", suffix: "%", label: "Mission Success Rate" },
+];
+
+const operatingDivisions = [
+  {
+    n: "01",
+    eyebrow: "Aeronautics & Advanced Aircraft",
+    name: "Air dominance from concept to carrier-ready production.",
+    body: "Integrated fighter, lift, and experimental aircraft teams compress the distance between advanced research, flight test, and mission-ready deployment.",
+    img: bgSto,
+    signal: "Stealth / Lift / Strike",
+    cta: "Explore Aeronautics",
+  },
+  {
+    n: "02",
+    eyebrow: "Autonomous ISR Systems",
+    name: "Persistent awareness across contested airspace.",
+    body: "Long-endurance autonomy, edge sensing, and operator-centered command tools turn raw theater data into fast, actionable intelligence.",
+    img: pillarOwnership,
+    signal: "Autonomy / Sensors / ISR",
+    cta: "Explore ISR Systems",
+  },
+  {
+    n: "03",
+    eyebrow: "Tactical Defense Systems",
+    name: "Layered protection for multi-domain operations.",
+    body: "Precision effectors, integrated air defense, and tactical control systems protect allied forces while expanding decision speed in the field.",
+    img: bgConsulting,
+    signal: "Missile Defense / C2 / Deterrence",
+    cta: "Explore Defense Systems",
+  },
+  {
+    n: "04",
+    eyebrow: "Space & Command Networks",
+    name: "Orbital infrastructure connected to every mission edge.",
+    body: "Secure satellite architectures, resilient communications, and mission networks keep aircraft, commanders, and allied partners synchronized.",
+    img: pUniversity,
+    signal: "Space / Comms / Command",
+    cta: "Explore Space Networks",
+  },
 ];
 
 const projects = [
@@ -136,6 +207,49 @@ const projects = [
   },
 ];
 
+const newsPosts = [
+  {
+    category: "Autonomous ISR",
+    date: "June 12, 2026",
+    title: "MQ-X Vanguard clears autonomous flight-readiness review.",
+    excerpt:
+      "AeroDefense teams completed the final systems review for the MQ-X Vanguard autonomy stack, validating endurance, sensor fusion, and command handoff profiles.",
+    readTime: "4 min read",
+    img: pAqueduct,
+    href: "/news/autonomous-isr-flight-readiness",
+  },
+  {
+    category: "Advanced Aircraft",
+    date: "May 28, 2026",
+    title: "Digital production cells accelerate next-gen aircraft assembly.",
+    excerpt:
+      "New synchronized manufacturing cells are reducing airframe integration cycles while improving traceability across stealth materials and flight-critical systems.",
+    readTime: "5 min read",
+    img: bgSto,
+    href: "/news/advanced-aircraft-production",
+  },
+  {
+    category: "Space Command",
+    date: "May 09, 2026",
+    title: "Orbital command network expands allied mission coverage.",
+    excerpt:
+      "The latest secure communications node links air, space, and ground assets into a resilient mission fabric for coalition operations.",
+    readTime: "3 min read",
+    img: pUniversity,
+    href: "/news/space-command-network",
+  },
+  {
+    category: "Tactical Defense",
+    date: "April 22, 2026",
+    title: "Layered defense modernization enters operational evaluation.",
+    excerpt:
+      "AeroDefense tactical systems teams began field evaluation of a new integrated defense architecture built for contested multi-domain environments.",
+    readTime: "4 min read",
+    img: bgConsulting,
+    href: "/news/tactical-defense-modernization",
+  },
+];
+
 const quotes = [
   {
     body: "AeroDefense's focus on next-generation autonomy lets our allied forces think and act faster as they secure global peace in highly contested environments.",
@@ -164,6 +278,7 @@ function Index() {
       <MissionDriven />
       <Stats />
       <BusinessGroups />
+      <LatestNews />
       <Portfolio />
       <Voices />
       <Closing />
@@ -410,9 +525,13 @@ function Pillars() {
         </p>
       </div>
 
-      <div className="col-span-12 lg:col-span-8 space-y-24 lg:space-y-32">
-        {pillars.map((p) => (
-          <article key={p.n} className="group">
+      <div className="col-span-12 lg:col-span-8 space-y-24 lg:space-y-0">
+        {pillars.map((p, index) => (
+          <article
+            key={p.n}
+            style={{ zIndex: index + 1 }}
+            className="group relative bg-background lg:sticky lg:top-28"
+          >
             <div className="flex items-baseline gap-6 mb-8">
               <span className="text-5xl font-display font-bold text-accent/25 italic tracking-tighter group-hover:text-accent transition-colors">
                 {p.n}
@@ -454,58 +573,242 @@ function Pillars() {
 }
 
 function MissionDriven() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const shouldReduceMotion = useReducedMotion();
+  const [videoDuration, setVideoDuration] = useState(0);
+  const [activeStage, setActiveStage] = useState(0);
+  const scrubProgress = useMotionValue(0);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const syncMetadata = () => {
+      if (!Number.isFinite(video.duration)) return;
+
+      setVideoDuration(video.duration);
+      video.pause();
+
+      if (shouldReduceMotion) {
+        video.currentTime = video.duration;
+        setActiveStage(assemblyStages.length - 1);
+      } else {
+        video.currentTime = scrubProgress.get() * video.duration;
+      }
+    };
+
+    syncMetadata();
+    video.addEventListener("loadedmetadata", syncMetadata);
+
+    return () => video.removeEventListener("loadedmetadata", syncMetadata);
+  }, [scrubProgress, shouldReduceMotion]);
+
+  useEffect(() => {
+    let frame = 0;
+
+    const updateScrub = () => {
+      const section = sectionRef.current;
+      if (!section) {
+        frame = window.requestAnimationFrame(updateScrub);
+        return;
+      }
+
+      const rect = section.getBoundingClientRect();
+      const scrollRange = Math.max(1, rect.height - window.innerHeight);
+      const sectionProgress = Math.min(1, Math.max(0, -rect.top / scrollRange));
+      const assemblyProgress = Math.min(1, sectionProgress / ASSEMBLY_SCRUB_END);
+      scrubProgress.set(assemblyProgress);
+
+      const nextStage = Math.min(
+        assemblyStages.length - 1,
+        Math.floor(assemblyProgress * assemblyStages.length),
+      );
+      setActiveStage((current) => (current === nextStage ? current : nextStage));
+
+      if (shouldReduceMotion || videoDuration <= 0) return;
+
+      const video = videoRef.current;
+      if (!video) return;
+
+      const nextTime = Math.min(videoDuration, Math.max(0, assemblyProgress * videoDuration));
+      if (Math.abs(video.currentTime - nextTime) > 0.03) {
+        video.currentTime = nextTime;
+      }
+
+      frame = requestAnimationFrame(updateScrub);
+    };
+
+    frame = requestAnimationFrame(updateScrub);
+
+    return () => cancelAnimationFrame(frame);
+  }, [scrubProgress, shouldReduceMotion, videoDuration]);
+
+  const currentStage = shouldReduceMotion
+    ? assemblyStages[assemblyStages.length - 1]
+    : assemblyStages[activeStage];
+
   return (
     <section
+      ref={sectionRef}
       id="innovation"
-      className="bg-foreground text-background px-8 lg:px-16 xl:px-20 py-24 lg:py-32 border-b border-border"
+      className="relative h-[400vh] bg-foreground text-background"
     >
-      <div className="grid grid-cols-12 gap-y-12 lg:gap-12 items-end">
-        <div className="col-span-12 lg:col-span-5">
-          <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-accent mb-8 block">
-            03 / Mission Driven
-          </span>
-          <h2 className="font-display text-5xl lg:text-7xl font-extrabold tracking-tighter leading-[0.9] mb-8">
-            Engineering excellence.
-          </h2>
-          <p className="text-background/70 max-w-md leading-relaxed mb-8">
-            AeroDefense is founded on the belief that securing the future requires unparalleled
-            engineering. At every level, our people are empowered to think critically and innovate
-            relentlessly — driven by mission success and unwavering accountability.
-          </p>
-          <a
-            href="#"
-            className="inline-block text-[11px] uppercase tracking-widest font-bold border-b border-background pb-1 hover:text-accent hover:border-accent transition-colors"
-          >
-            Explore careers →
-          </a>
-        </div>
-        <div className="col-span-12 lg:col-span-7 relative group cursor-pointer">
-          <img
-            src={videoPoster}
-            alt="Aerospace engineer inspecting drone payload"
-            width={1536}
-            height={864}
-            loading="lazy"
-            className="w-full aspect-video object-cover"
+      <div className="sticky top-0 h-screen overflow-hidden border-b border-background/10">
+        <div className="absolute inset-0 bg-foreground">
+          <video
+            ref={videoRef}
+            src={assembleVideo}
+            muted
+            playsInline
+            preload="auto"
+            aria-label="Aircraft assembly sequence"
+            className="h-full w-full scale-125 object-cover object-[40%_center] opacity-80"
+            disablePictureInPicture
           />
-          <div className="absolute inset-0 grid place-items-center">
-            <div className="size-20 rounded-full bg-background/15 backdrop-blur-md border border-background/30 grid place-items-center group-hover:bg-accent group-hover:border-accent transition-colors">
-              <div className="w-0 h-0 border-t-[10px] border-t-transparent border-l-[14px] border-l-background border-b-[10px] border-b-transparent ml-1" />
+          <div className="absolute inset-0 bg-gradient-to-r from-foreground via-foreground/70 to-foreground/10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-transparent to-foreground/35" />
+        </div>
+
+        <div className="relative z-10 grid h-full grid-cols-12 items-end gap-y-8 px-8 pb-10 pt-24 lg:items-center lg:gap-12 lg:px-16 lg:pb-16 xl:px-20">
+          <div className="col-span-12 max-w-xl lg:col-span-5">
+            <span className="mb-8 block text-[10px] font-bold uppercase tracking-[0.4em] text-accent">
+              03 / Mission Driven
+            </span>
+            <h2 className="mb-8 font-display text-5xl font-extrabold leading-[0.9] tracking-tighter sm:text-6xl lg:text-7xl">
+              Assemble the impossible.
+            </h2>
+            <motion.div
+              key={currentStage.step}
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.24, ease: "easeOut" }}
+              className="min-h-36"
+            >
+              <span className="mb-4 block text-[10px] font-bold uppercase tracking-[0.35em] text-accent">
+                {currentStage.step} / {currentStage.eyebrow}
+              </span>
+              <h3 className="mb-4 max-w-lg font-display text-2xl font-bold leading-none tracking-tight sm:text-3xl">
+                {currentStage.title}
+              </h3>
+              <p className="max-w-md text-sm leading-relaxed text-background/70">
+                {currentStage.body}
+              </p>
+            </motion.div>
+          </div>
+
+          <div className="col-span-12 lg:col-span-7 lg:self-end">
+            <div className="ml-auto grid max-w-2xl grid-cols-1 gap-3 border-t border-background/20 pt-5 sm:grid-cols-3">
+              {assemblyStages.map((stage, index) => (
+                <div
+                  key={stage.step}
+                  className={`transition-colors duration-300 ${
+                    index === activeStage || shouldReduceMotion
+                      ? "text-background"
+                      : "text-background/35"
+                  }`}
+                >
+                  <span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-accent">
+                    {stage.step}
+                  </span>
+                  <span className="block text-[10px] uppercase tracking-[0.25em]">
+                    {stage.eyebrow}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
-          <div className="mt-4 flex flex-wrap justify-between items-baseline gap-4 text-[10px] uppercase tracking-widest text-background/60">
-            <span>AERODEFENSE_MISSION_V1 — 02:14</span>
-            <span>Unmanned Systems Payload Testing</span>
-          </div>
         </div>
+
+        <motion.div
+          style={{ scaleX: shouldReduceMotion ? 1 : scrubProgress }}
+          className="absolute bottom-0 left-0 z-20 h-1 w-full origin-left bg-accent"
+        />
       </div>
     </section>
   );
 }
 
-function Stats() {
+function CountUpStatValue({ stat, start }: { stat: (typeof stats)[number]; start: boolean }) {
+  const shouldReduceMotion = useReducedMotion();
+  const [value, setValue] = useState(shouldReduceMotion ? stat.end : 0);
+  const hasAnimated = useRef(false);
+
+  useEffect(() => {
+    if (shouldReduceMotion) {
+      setValue(stat.end);
+      hasAnimated.current = true;
+      return;
+    }
+
+    if (!start || hasAnimated.current) return;
+
+    hasAnimated.current = true;
+    const duration = 1400;
+    const startedAt = window.performance.now();
+    let frame = 0;
+
+    const tick = (now: number) => {
+      const progress = Math.min(1, (now - startedAt) / duration);
+      const eased = 1 - Math.pow(1 - progress, 3);
+
+      setValue(Math.round(stat.end * eased));
+
+      if (progress < 1) {
+        frame = window.requestAnimationFrame(tick);
+      } else {
+        setValue(stat.end);
+      }
+    };
+
+    frame = window.requestAnimationFrame(tick);
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [shouldReduceMotion, start, stat.end]);
+
   return (
-    <section className="bg-foreground text-background py-24 lg:py-32 px-8 lg:px-16 xl:px-20 relative overflow-hidden border-b border-background/10">
+    <>
+      {stat.prefix}
+      {value}
+      {stat.suffix}
+    </>
+  );
+}
+
+function Stats() {
+  const gridRef = useRef<HTMLDivElement>(null);
+  const shouldReduceMotion = useReducedMotion();
+  const [countsStarted, setCountsStarted] = useState(false);
+
+  useEffect(() => {
+    if (shouldReduceMotion) {
+      setCountsStarted(true);
+      return;
+    }
+
+    const grid = gridRef.current;
+    if (!grid || !("IntersectionObserver" in window)) {
+      setCountsStarted(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+
+        setCountsStarted(true);
+        observer.disconnect();
+      },
+      { threshold: 0.25 },
+    );
+
+    observer.observe(grid);
+
+    return () => observer.disconnect();
+  }, [shouldReduceMotion]);
+
+  return (
+    <section className="relative z-30 -mt-[100vh] min-h-screen overflow-hidden border-y border-background/15 bg-foreground px-8 py-24 text-background shadow-[0_-70px_140px_rgba(0,0,0,0.78)] lg:px-16 lg:py-32 xl:px-20">
       <div className="mb-16 flex flex-col lg:flex-row justify-between gap-8 lg:items-end">
         <div>
           <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-accent block mb-4">
@@ -522,14 +825,14 @@ function Stats() {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
+      <div ref={gridRef} className="grid grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
         {stats.map((s, i) => (
           <div key={s.label} className="group cursor-default">
             <span className="block text-[10px] uppercase mb-6 text-accent font-bold tracking-widest">
               {String(i + 1).padStart(2, "0")}
             </span>
             <div className="font-display text-6xl lg:text-7xl xl:text-8xl tracking-tighter font-extrabold group-hover:translate-x-2 transition-transform duration-500">
-              {s.value}
+              <CountUpStatValue stat={s} start={countsStarted} />
             </div>
             <div className="h-px w-full bg-background/15 mt-6 group-hover:bg-accent transition-colors" />
             <span className="text-[10px] uppercase tracking-widest mt-4 block opacity-70">
@@ -548,64 +851,188 @@ function Stats() {
 }
 
 function BusinessGroups() {
-  const groups = [
-    {
-      eyebrow: "Aeronautics Division",
-      name: "Skunkworks & Advanced Aircraft",
-      body: "The world's premier aerospace engineering firm, delivering stealth fighters, hypersonic prototypes, and autonomous air vehicles designed for absolute air superiority.",
-      img: bgSto,
-      cta: "Explore Aeronautics",
-    },
-    {
-      eyebrow: "Defense & Space",
-      name: "Tactical Systems",
-      body: "A top-tier provider of missile defense, strategic deterrence, and satellite architectures — ensuring that our allied forces maintain control across every contested domain.",
-      img: bgConsulting,
-      cta: "Explore Tactical Systems",
-    },
-  ];
-  return (
-    <section id="groups" className="px-8 lg:px-16 xl:px-20 py-24 lg:py-32 border-b border-border">
-      <div className="mb-16 flex flex-col lg:flex-row justify-between gap-6 lg:items-end">
-        <div>
-          <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-accent block mb-4">
+  const sectionRef = useRef<HTMLElement>(null);
+  const shouldReduceMotion = useReducedMotion();
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end end"],
+  });
+  const trackX = useTransform(
+    scrollYProgress,
+    [0, 1],
+    ["0vw", shouldReduceMotion ? "0vw" : `-${(operatingDivisions.length - 1) * 100}vw`],
+  );
+  const imageParallax = useTransform(scrollYProgress, [0, 1], [0, shouldReduceMotion ? 0 : 96]);
+
+  if (shouldReduceMotion) {
+    return (
+      <section
+        id="groups"
+        className="border-b border-background/15 bg-foreground px-8 py-24 text-background lg:px-16 lg:py-32 xl:px-20"
+      >
+        <div className="mb-14 max-w-3xl">
+          <span className="mb-4 block text-[10px] font-bold uppercase tracking-[0.4em] text-accent">
             05 / Operating Divisions
           </span>
-          <h2 className="font-display text-4xl lg:text-6xl font-extrabold tracking-tighter leading-[0.95] max-w-3xl">
+          <h2 className="font-display text-4xl font-extrabold leading-[0.95] tracking-tighter lg:text-6xl">
             Integrated forces pushing the bleeding edge.
           </h2>
+          <p className="mt-6 max-w-xl text-sm leading-relaxed text-background/65">
+            Four mission divisions operate as one connected aerospace ecosystem, moving from
+            aircraft and autonomy to tactical defense and orbital command networks.
+          </p>
         </div>
-      </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {groups.map((g) => (
-          <article key={g.name} className="group flex flex-col">
-            <div className="relative overflow-hidden bg-muted">
+        <div className="grid gap-5 lg:grid-cols-2">
+          {operatingDivisions.map((division) => (
+            <article
+              key={division.eyebrow}
+              className="overflow-hidden border border-background/15 bg-background/5"
+            >
               <img
-                src={g.img}
-                alt={g.name}
-                width={1024}
-                height={1280}
+                src={division.img}
+                alt={division.eyebrow}
                 loading="lazy"
-                className="w-full aspect-[4/5] object-cover group-hover:scale-[1.03] transition-transform duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
+                className="aspect-[16/10] w-full object-cover opacity-80"
               />
-            </div>
-            <div className="pt-6">
-              <span className="text-[10px] uppercase tracking-widest text-accent font-bold block mb-3">
-                {g.eyebrow}
-              </span>
-              <h3 className="font-display text-3xl lg:text-4xl font-bold tracking-tight mb-4">
-                {g.name}
-              </h3>
-              <p className="max-w-xl leading-relaxed opacity-75 mb-6">{g.body}</p>
-              <a
-                href="#"
-                className="inline-block text-[11px] uppercase tracking-widest font-bold border-b border-foreground pb-1 hover:text-accent hover:border-accent transition-colors"
+              <div className="p-6 lg:p-8">
+                <span className="mb-4 block text-[10px] font-bold uppercase tracking-[0.35em] text-accent">
+                  {division.n} / {division.eyebrow}
+                </span>
+                <h3 className="mb-4 font-display text-3xl font-bold leading-none tracking-tight">
+                  {division.name}
+                </h3>
+                <p className="text-sm leading-relaxed text-background/65">{division.body}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section
+      ref={sectionRef}
+      id="groups"
+      className="relative border-b border-background/15 bg-foreground text-background lg:h-[400vh]"
+    >
+      <div className="px-8 pb-10 pt-24 lg:hidden">
+        <span className="mb-4 block text-[10px] font-bold uppercase tracking-[0.4em] text-accent">
+          05 / Operating Divisions
+        </span>
+        <h2 className="font-display text-4xl font-extrabold leading-[0.95] tracking-tighter">
+          Integrated forces pushing the bleeding edge.
+        </h2>
+        <p className="mt-6 text-sm leading-relaxed text-background/65">
+          Four mission divisions operate as one connected aerospace ecosystem.
+        </p>
+      </div>
+
+      <div className="relative overflow-hidden lg:sticky lg:top-0 lg:h-screen">
+        <div className="pointer-events-none absolute left-16 top-24 z-20 hidden max-w-xl xl:left-20 lg:block">
+          <span className="mb-4 block text-[10px] font-bold uppercase tracking-[0.4em] text-accent">
+            05 / Operating Divisions
+          </span>
+          <h2 className="font-display max-w-3xl text-5xl font-extrabold leading-[0.92] tracking-tighter xl:text-6xl">
+            Integrated forces pushing the bleeding edge.
+          </h2>
+          <p className="mt-6 max-w-md text-sm leading-relaxed text-background/60">
+            Aircraft, autonomy, tactical defense, and orbital command networks engineered as one
+            mission ecosystem.
+          </p>
+        </div>
+
+        <motion.div style={{ x: trackX }} className="hidden h-full w-[400vw] lg:flex">
+          {operatingDivisions.map((division, index) => (
+            <article
+              key={division.eyebrow}
+              className="group relative h-screen w-screen shrink-0 overflow-hidden border-r border-background/10"
+            >
+              <motion.img
+                src={division.img}
+                alt={division.eyebrow}
+                loading={index === 0 ? "eager" : "lazy"}
+                style={{ x: imageParallax }}
+                className="absolute inset-y-0 -left-24 h-full w-[calc(100%+12rem)] scale-105 object-cover opacity-75 transition-transform duration-[1400ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-foreground via-foreground/70 to-foreground/20" />
+              <div className="absolute inset-0 bg-gradient-to-t from-foreground/85 via-transparent to-foreground/30" />
+
+              <div className="relative z-10 grid h-full grid-cols-12 items-end gap-8 px-16 pb-16 pt-56 xl:px-20">
+                <div className="col-span-6 col-start-7 max-w-2xl">
+                  <span className="mb-6 block text-[10px] font-bold uppercase tracking-[0.35em] text-accent">
+                    {division.n} / {division.eyebrow}
+                  </span>
+                  <h3 className="mb-6 font-display text-5xl font-extrabold leading-[0.9] tracking-tighter xl:text-7xl">
+                    {division.name}
+                  </h3>
+                  <p className="mb-8 max-w-xl text-sm leading-relaxed text-background/70">
+                    {division.body}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-5">
+                    <span className="border border-background/20 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-background/70">
+                      {division.signal}
+                    </span>
+                    <a
+                      href="#platforms"
+                      className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-background transition-colors hover:text-accent"
+                    >
+                      {division.cta}
+                      <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </article>
+          ))}
+        </motion.div>
+
+        <div className="px-8 pb-24 lg:hidden">
+          <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3">
+            {operatingDivisions.map((division) => (
+              <article
+                key={division.eyebrow}
+                className="min-w-[82vw] snap-start overflow-hidden border border-background/15 bg-background/5"
               >
-                {g.cta} →
-              </a>
-            </div>
-          </article>
-        ))}
+                <div className="relative overflow-hidden">
+                  <img
+                    src={division.img}
+                    alt={division.eyebrow}
+                    loading="lazy"
+                    className="aspect-[4/5] w-full object-cover opacity-80"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-transparent to-transparent" />
+                  <span className="absolute bottom-4 left-4 text-[10px] font-bold uppercase tracking-[0.35em] text-accent">
+                    {division.n}
+                  </span>
+                </div>
+                <div className="p-5">
+                  <span className="mb-3 block text-[10px] font-bold uppercase tracking-widest text-accent">
+                    {division.eyebrow}
+                  </span>
+                  <h3 className="mb-4 font-display text-2xl font-bold leading-none tracking-tight">
+                    {division.name}
+                  </h3>
+                  <p className="mb-5 text-xs leading-relaxed text-background/65">{division.body}</p>
+                  <a
+                    href="#platforms"
+                    className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-background transition-colors hover:text-accent"
+                  >
+                    {division.cta}
+                    <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+                  </a>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+
+        <div className="absolute bottom-0 left-0 z-20 hidden h-1 w-full bg-background/10 lg:block">
+          <motion.div
+            style={{ scaleX: scrollYProgress }}
+            className="h-full w-full origin-left bg-accent"
+          />
+        </div>
       </div>
     </section>
   );
@@ -620,7 +1047,7 @@ function Portfolio() {
       <div className="mb-16 flex flex-col lg:flex-row justify-between gap-6 lg:items-end">
         <div>
           <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-accent block mb-4">
-            06 / Advanced Platforms
+            07 / Advanced Platforms
           </span>
           <h2 className="font-display text-4xl lg:text-6xl font-extrabold tracking-tighter leading-[0.95] max-w-3xl">
             Machines built to dominate.
@@ -662,12 +1089,140 @@ function Portfolio() {
   );
 }
 
+function LatestNews() {
+  const shouldReduceMotion = useReducedMotion();
+  const [featuredPost, ...supportingPosts] = newsPosts;
+
+  return (
+    <section
+      id="news"
+      className="relative overflow-hidden border-b border-border bg-background px-8 py-24 lg:px-16 lg:py-32 xl:px-20"
+    >
+      <div className="mb-12 flex flex-col gap-6 lg:mb-16 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <span className="mb-4 block text-[10px] font-bold uppercase tracking-[0.4em] text-accent">
+            06 / Latest Blog
+          </span>
+          <h2 className="max-w-3xl font-display text-4xl font-extrabold leading-[0.95] tracking-tighter lg:text-6xl">
+            Latest blog.
+          </h2>
+          <p className="mt-6 max-w-xl text-sm leading-relaxed opacity-70">
+            Mission briefings from aircraft programs, autonomous systems, tactical defense, and
+            secure command networks.
+          </p>
+        </div>
+        <a
+          href="/news"
+          className="inline-flex items-center gap-2 self-start text-[11px] font-bold uppercase tracking-widest transition-colors hover:text-accent lg:self-end"
+        >
+          View all blogs
+          <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+        </a>
+      </div>
+
+      <motion.article
+        initial={shouldReduceMotion ? false : { opacity: 0, y: 24 }}
+        whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.25 }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        className="group grid overflow-hidden border border-foreground/10 bg-foreground text-background lg:grid-cols-12"
+      >
+        <a
+          href={featuredPost.href}
+          className="relative block overflow-hidden bg-muted lg:col-span-7"
+        >
+          <img
+            src={featuredPost.img}
+            alt={featuredPost.title}
+            loading="lazy"
+            className="aspect-[16/11] w-full object-cover opacity-90 transition duration-[1400ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.05] lg:aspect-[16/10]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-foreground/50 via-transparent to-transparent lg:bg-gradient-to-r lg:from-transparent lg:to-foreground/20" />
+        </a>
+
+        <div className="flex flex-col justify-between p-6 sm:p-8 lg:col-span-5 lg:p-10 xl:p-12">
+          <div>
+            <div className="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] font-bold uppercase tracking-widest">
+              <span className="text-accent">{featuredPost.category}</span>
+              <span className="text-background/45">{featuredPost.date}</span>
+              <span className="text-background/45">{featuredPost.readTime}</span>
+            </div>
+            <a href={featuredPost.href}>
+              <h3 className="font-display text-4xl font-extrabold leading-[0.9] tracking-tighter sm:text-5xl xl:text-6xl">
+                {featuredPost.title}
+              </h3>
+            </a>
+            <p className="mt-6 max-w-xl text-sm leading-relaxed text-background/70">
+              {featuredPost.excerpt}
+            </p>
+          </div>
+          <a
+            href={featuredPost.href}
+            className="mt-10 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-background transition-colors hover:text-accent"
+          >
+            Read featured briefing
+            <ArrowUpRight
+              className="h-3.5 w-3.5 transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1"
+              aria-hidden="true"
+            />
+          </a>
+        </div>
+      </motion.article>
+
+      <div className="mt-5 grid gap-5 md:grid-cols-3 lg:mt-6">
+        {supportingPosts.map((post, index) => (
+          <motion.article
+            key={post.href}
+            initial={shouldReduceMotion ? false : { opacity: 0, y: 22 }}
+            whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.25 }}
+            transition={{ duration: 0.5, delay: shouldReduceMotion ? 0 : index * 0.08 }}
+            className="group flex flex-col overflow-hidden border border-foreground/10 bg-background transition-colors duration-500 hover:border-accent/60"
+          >
+            <a href={post.href} className="relative block overflow-hidden bg-muted">
+              <img
+                src={post.img}
+                alt={post.title}
+                loading="lazy"
+                className="aspect-[16/10] w-full object-cover opacity-80 transition duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.06] group-hover:opacity-100"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-foreground/40 via-transparent to-transparent opacity-60" />
+            </a>
+            <div className="flex flex-1 flex-col p-5 lg:p-6">
+              <div className="mb-5 flex flex-wrap items-center gap-x-3 gap-y-2 text-[10px] font-bold uppercase tracking-widest">
+                <span className="text-accent">{post.category}</span>
+                <span className="opacity-45">{post.readTime}</span>
+              </div>
+              <a href={post.href}>
+                <h3 className="font-display text-2xl font-bold leading-none tracking-tight">
+                  {post.title}
+                </h3>
+              </a>
+              <p className="mt-4 flex-1 text-sm leading-relaxed opacity-70">{post.excerpt}</p>
+              <a
+                href={post.href}
+                className="mt-7 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest opacity-70 transition-all duration-500 hover:text-accent group-hover:translate-x-1 group-hover:opacity-100"
+              >
+                Read blog
+                <ArrowUpRight
+                  className="h-3.5 w-3.5 transition-transform duration-500 group-hover:-translate-y-1"
+                  aria-hidden="true"
+                />
+              </a>
+            </div>
+          </motion.article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function Voices() {
   return (
     <section className="px-8 lg:px-16 xl:px-20 py-24 lg:py-32 border-b border-border">
       <div className="mb-16">
         <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-accent block mb-4">
-          07 / Defense Leadership
+          08 / Defense Leadership
         </span>
         <h2 className="font-display text-4xl lg:text-5xl font-extrabold tracking-tighter leading-[0.95] max-w-3xl">
           Uncompromised standards from the top down.
@@ -695,7 +1250,7 @@ function Closing() {
     <section id="contact" className="px-8 lg:px-16 xl:px-20 py-32 lg:py-40 text-center relative">
       <div className="max-w-4xl mx-auto space-y-10">
         <span className="text-accent font-bold uppercase tracking-[0.4em] text-[11px]">
-          08 / Securing the future
+          09 / Securing the future
         </span>
         <h2 className="font-display text-5xl lg:text-7xl xl:text-8xl font-extrabold tracking-tighter leading-[0.9] text-balance">
           Partnering for global security.
