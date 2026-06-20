@@ -259,6 +259,7 @@ function Hero() {
         src={heroVideo}
         poster={heroImg}
         muted
+        defaultMuted
         playsInline
         preload="auto"
         autoPlay

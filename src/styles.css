@@ -13,8 +13,8 @@
   --color-border: rgb(7 29 52 / 0.15);
   --color-muted: #e7eef5;
   --color-muted-foreground: #40546a;
-  --font-display: "Inter Tight", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-display: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Outfit", ui-monospace, monospace;
   --ease-signature: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
