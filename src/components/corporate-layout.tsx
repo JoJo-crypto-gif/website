@@ -1,5 +1,6 @@
 import { ArrowUpRight, Mail, MapPin, Menu, Phone, X } from "lucide-react";
 import { useState, type ReactNode } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { businessUnits, corporateNav } from "@/lib/corporate-data";
 
 export function CorporateNav({ overlay = false }: { overlay?: boolean }) {
@@ -96,17 +97,48 @@ export function CorporateNav({ overlay = false }: { overlay?: boolean }) {
           }`}
         >
           <span className="sr-only">{mobileMenuOpen ? "Close navigation" : "Open navigation"}</span>
-          {mobileMenuOpen ? (
-            <X className="h-4 w-4" aria-hidden="true" />
-          ) : (
-            <Menu className="h-4 w-4" aria-hidden="true" />
-          )}
+          <div className="relative h-4 w-4">
+            <AnimatePresence mode="wait">
+              {mobileMenuOpen ? (
+                <motion.div
+                  key="close"
+                  initial={{ opacity: 0, rotate: -90, scale: 0.5 }}
+                  animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                  exit={{ opacity: 0, rotate: 90, scale: 0.5 }}
+                  transition={{ duration: 0.2, ease: "easeInOut" }}
+                  className="absolute inset-0 flex items-center justify-center"
+                >
+                  <X className="h-4 w-4" aria-hidden="true" />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="menu"
+                  initial={{ opacity: 0, rotate: 90, scale: 0.5 }}
+                  animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                  exit={{ opacity: 0, rotate: -90, scale: 0.5 }}
+                  transition={{ duration: 0.2, ease: "easeInOut" }}
+                  className="absolute inset-0 flex items-center justify-center"
+                >
+                  <Menu className="h-4 w-4" aria-hidden="true" />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </button>
       </div>
 
-      {mobileMenuOpen ? (
-        <div id="corporate-mobile-nav" className={`border-t px-6 py-7 lg:hidden ${panelTone}`}>
-          <div className="grid gap-3">
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            id="corporate-mobile-nav"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className={`overflow-hidden lg:hidden border-t ${panelTone}`}
+          >
+            <div className="px-6 py-7">
+              <div className="grid gap-3">
             {corporateNav.map((item) => (
               <a
                 key={item.href}
@@ -149,9 +181,11 @@ export function CorporateNav({ overlay = false }: { overlay?: boolean }) {
                 </a>
               ))}
             </div>
-          </div>
-        </div>
-      ) : null}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 }

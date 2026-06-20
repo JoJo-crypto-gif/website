@@ -818,7 +818,7 @@ function BusinessGroups() {
         </p>
       </div>
 
-      <div className="relative overflow-hidden lg:sticky lg:top-0 lg:h-screen">
+      <div className="relative lg:overflow-hidden lg:sticky lg:top-0 lg:h-screen">
         <div className="pointer-events-none absolute left-16 top-24 z-20 hidden max-w-xl p-6 lg:block xl:left-20">
           <span className="mb-4 block text-[10px] font-bold uppercase tracking-[0.4em] text-primary">
             05 / Operating Divisions
@@ -877,44 +877,43 @@ function BusinessGroups() {
           ))}
         </motion.div>
 
-        <div className="px-8 pb-24 lg:hidden">
-          <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3">
-            {operatingDivisions.map((division) => (
-              <article
-                key={division.eyebrow}
-                className="min-w-[82vw] snap-start overflow-hidden border border-background/15 bg-background/5"
-              >
-                <div className="relative overflow-hidden">
-                  <img
-                    src={division.img}
-                    alt={division.eyebrow}
-                    loading="lazy"
-                    className="aspect-[4/5] w-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/10 via-transparent to-transparent" />
-                  <span className="absolute bottom-4 left-4 text-[10px] font-bold uppercase tracking-[0.35em] text-primary">
-                    {division.n}
+        <div className="relative lg:hidden">
+          {operatingDivisions.map((division, index) => (
+            <article
+              key={division.eyebrow}
+              className="sticky top-0 h-[100dvh] w-full overflow-hidden"
+              style={{ zIndex: index }}
+            >
+              <img
+                src={division.img}
+                alt={division.eyebrow}
+                loading="lazy"
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-foreground/95 via-foreground/60 to-transparent" />
+              
+              <div className="absolute inset-0 flex flex-col justify-end px-8 pb-20 pt-24 sm:px-12">
+                <div className="max-w-md">
+                  <span className="mb-4 block text-[10px] font-bold uppercase tracking-[0.35em] text-primary drop-shadow-md">
+                    {division.n} / {division.eyebrow}
                   </span>
-                </div>
-                <div className="bg-foreground p-5">
-                  <span className="mb-3 block text-[10px] font-bold uppercase tracking-widest text-primary">
-                    {division.eyebrow}
-                  </span>
-                  <h3 className="mb-4 font-display text-2xl font-bold leading-none tracking-tight">
+                  <h3 className="mb-4 font-display text-3xl font-extrabold leading-tight tracking-tighter sm:text-4xl">
                     {division.name}
                   </h3>
-                  <p className="mb-5 text-xs leading-relaxed text-background/65">{division.body}</p>
+                  <p className="mb-8 text-sm leading-relaxed text-background/80">
+                    {division.body}
+                  </p>
                   <a
                     href={division.href}
-                    className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-background transition-colors hover:text-primary"
+                    className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-background transition-colors hover:text-primary"
                   >
                     {division.cta}
                     <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
                   </a>
                 </div>
-              </article>
-            ))}
-          </div>
+              </div>
+            </article>
+          ))}
         </div>
 
         <div className="absolute bottom-0 left-0 z-20 hidden h-1 w-full bg-background/10 lg:block">
@@ -929,12 +928,29 @@ function BusinessGroups() {
 }
 
 function Portfolio() {
+  const containerRef = useRef<HTMLElement | null>(null);
+
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start end", "end start"],
+  });
+
+  const imageParallax = useTransform(scrollYProgress, [0, 1], [-25, 25]);
+  const yImage = useSpring(imageParallax, { stiffness: 150, damping: 24, mass: 0.3 });
+
   return (
     <section
+      ref={containerRef}
       id="platforms"
       className="px-8 lg:px-16 xl:px-20 py-28 lg:py-40 border-b border-border"
     >
-      <div className="mb-16 flex flex-col lg:flex-row justify-between gap-6 lg:items-end">
+      <motion.div 
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 1, ease: "easeOut" }}
+        className="mb-16 flex flex-col lg:flex-row justify-between gap-6 lg:items-end"
+      >
         <div>
           <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary block mb-4">
             07 / Featured Products
@@ -953,21 +969,26 @@ function Portfolio() {
         >
           View all products →
         </a>
-      </div>
+      </motion.div>
       <div className="grid grid-cols-12 gap-4 lg:gap-6">
-        {featuredProducts.map((p) => (
-          <a
+        {featuredProducts.map((p, index) => (
+          <motion.a
             key={p.slug}
             href={p.href}
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, ease: "easeOut", delay: index * 0.1 }}
             className={`group col-span-12 block ${p.span}`}
             aria-label={`View product details for ${p.name}`}
           >
             <div className="overflow-hidden bg-muted">
-              <img
+              <motion.img
+                style={{ y: yImage }}
                 src={p.image}
                 alt={p.name}
                 loading="lazy"
-                className="h-[340px] w-full object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03] sm:h-[420px] lg:h-[520px]"
+                className="h-[340px] w-full object-cover scale-[1.1] transition-transform duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.13] sm:h-[420px] lg:h-[520px]"
               />
             </div>
             <div className="mt-3 flex flex-wrap justify-between items-baseline gap-x-4 gap-y-1 text-[10px] uppercase tracking-widest">
@@ -976,7 +997,7 @@ function Portfolio() {
                 {p.service} / {p.company}
               </span>
             </div>
-          </a>
+          </motion.a>
         ))}
       </div>
     </section>
