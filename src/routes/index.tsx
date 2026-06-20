@@ -267,12 +267,13 @@ function Hero() {
         className="absolute inset-0 z-0 h-full w-full object-cover"
       />
 
-      <div className="absolute inset-0 z-10 bg-foreground/10" />
+      <div className="absolute inset-0 z-10 bg-gradient-to-r from-foreground/95 via-foreground/50 to-transparent" />
+      <div className="absolute inset-0 z-10 bg-gradient-to-t from-foreground/80 via-transparent to-transparent" />
 
       {/* Content */}
       <div className="relative z-20 px-8 lg:px-16 xl:px-20 w-full flex flex-col items-start">
         <div
-          className={`max-w-4xl border border-white/15 bg-foreground/24 p-6 shadow-2xl shadow-black/25 backdrop-blur-sm transition-all duration-[1500ms] ease-out sm:p-8 lg:p-10 ${
+          className={`max-w-4xl transition-all duration-[1500ms] ease-out ${
             isMounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
@@ -818,7 +819,7 @@ function BusinessGroups() {
       </div>
 
       <div className="relative overflow-hidden lg:sticky lg:top-0 lg:h-screen">
-        <div className="pointer-events-none absolute left-16 top-24 z-20 hidden max-w-xl border border-background/15 bg-foreground/28 p-6 shadow-2xl shadow-black/25 backdrop-blur-sm xl:left-20 lg:block">
+        <div className="pointer-events-none absolute left-16 top-24 z-20 hidden max-w-xl p-6 lg:block xl:left-20">
           <span className="mb-4 block text-[10px] font-bold uppercase tracking-[0.4em] text-primary">
             05 / Operating Divisions
           </span>
@@ -844,10 +845,11 @@ function BusinessGroups() {
                 style={{ x: imageParallax }}
                 className="absolute inset-y-0 -left-24 h-full w-[calc(100%+12rem)] scale-105 object-cover transition-transform duration-[1400ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110"
               />
-              <div className="absolute inset-0 bg-foreground/10" />
+              <div className="absolute inset-0 bg-gradient-to-l from-foreground/95 via-foreground/40 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-foreground/90 via-foreground/20 to-transparent" />
 
               <div className="relative z-10 grid h-full grid-cols-12 items-end gap-8 px-16 pb-16 pt-56 xl:px-20">
-                <div className="col-span-6 col-start-7 max-w-2xl border border-background/15 bg-foreground/28 p-8 shadow-2xl shadow-black/25 backdrop-blur-md">
+                <div className="col-span-6 col-start-7 max-w-2xl p-8">
                   <span className="mb-6 block text-[10px] font-bold uppercase tracking-[0.35em] text-primary">
                     {division.n} / {division.eyebrow}
                   </span>
@@ -894,7 +896,7 @@ function BusinessGroups() {
                     {division.n}
                   </span>
                 </div>
-                <div className="border-t border-background/10 bg-foreground/35 p-5 backdrop-blur-md">
+                <div className="bg-foreground p-5">
                   <span className="mb-3 block text-[10px] font-bold uppercase tracking-widest text-primary">
                     {division.eyebrow}
                   </span>
