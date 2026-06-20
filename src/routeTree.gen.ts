@@ -9,38 +9,337 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SustainabilityRouteImport } from './routes/sustainability'
+import { Route as InnovationRouteImport } from './routes/innovation'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as CompanyRouteImport } from './routes/company'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ServicesIndexRouteImport } from './routes/services/index'
+import { Route as ProductsIndexRouteImport } from './routes/products/index'
+import { Route as NewsIndexRouteImport } from './routes/news/index'
+import { Route as CareersIndexRouteImport } from './routes/careers/index'
+import { Route as BusinessesIndexRouteImport } from './routes/businesses/index'
+import { Route as ServicesSlugRouteImport } from './routes/services/$slug'
+import { Route as ProductsSlugRouteImport } from './routes/products/$slug'
+import { Route as NewsSlugRouteImport } from './routes/news/$slug'
+import { Route as CareersSlugRouteImport } from './routes/careers/$slug'
+import { Route as BusinessesResearchRouteImport } from './routes/businesses/research'
+import { Route as BusinessesMiningRouteImport } from './routes/businesses/mining'
+import { Route as BusinessesDronesRouteImport } from './routes/businesses/drones'
+import { Route as BusinessesConsultingRouteImport } from './routes/businesses/consulting'
+import { Route as BusinessesAviationRouteImport } from './routes/businesses/aviation'
+import { Route as CareersSlugApplyRouteImport } from './routes/careers/$slug_.apply'
 
+const SustainabilityRoute = SustainabilityRouteImport.update({
+  id: '/sustainability',
+  path: '/sustainability',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InnovationRoute = InnovationRouteImport.update({
+  id: '/innovation',
+  path: '/innovation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompanyRoute = CompanyRouteImport.update({
+  id: '/company',
+  path: '/company',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ServicesIndexRoute = ServicesIndexRouteImport.update({
+  id: '/services/',
+  path: '/services/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProductsIndexRoute = ProductsIndexRouteImport.update({
+  id: '/products/',
+  path: '/products/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewsIndexRoute = NewsIndexRouteImport.update({
+  id: '/news/',
+  path: '/news/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CareersIndexRoute = CareersIndexRouteImport.update({
+  id: '/careers/',
+  path: '/careers/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BusinessesIndexRoute = BusinessesIndexRouteImport.update({
+  id: '/businesses/',
+  path: '/businesses/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesSlugRoute = ServicesSlugRouteImport.update({
+  id: '/services/$slug',
+  path: '/services/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProductsSlugRoute = ProductsSlugRouteImport.update({
+  id: '/products/$slug',
+  path: '/products/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewsSlugRoute = NewsSlugRouteImport.update({
+  id: '/news/$slug',
+  path: '/news/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CareersSlugRoute = CareersSlugRouteImport.update({
+  id: '/careers/$slug',
+  path: '/careers/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BusinessesResearchRoute = BusinessesResearchRouteImport.update({
+  id: '/businesses/research',
+  path: '/businesses/research',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BusinessesMiningRoute = BusinessesMiningRouteImport.update({
+  id: '/businesses/mining',
+  path: '/businesses/mining',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BusinessesDronesRoute = BusinessesDronesRouteImport.update({
+  id: '/businesses/drones',
+  path: '/businesses/drones',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BusinessesConsultingRoute = BusinessesConsultingRouteImport.update({
+  id: '/businesses/consulting',
+  path: '/businesses/consulting',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BusinessesAviationRoute = BusinessesAviationRouteImport.update({
+  id: '/businesses/aviation',
+  path: '/businesses/aviation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CareersSlugApplyRoute = CareersSlugApplyRouteImport.update({
+  id: '/careers/$slug_/apply',
+  path: '/careers/$slug/apply',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/company': typeof CompanyRoute
+  '/contact': typeof ContactRoute
+  '/innovation': typeof InnovationRoute
+  '/sustainability': typeof SustainabilityRoute
+  '/businesses/aviation': typeof BusinessesAviationRoute
+  '/businesses/consulting': typeof BusinessesConsultingRoute
+  '/businesses/drones': typeof BusinessesDronesRoute
+  '/businesses/mining': typeof BusinessesMiningRoute
+  '/businesses/research': typeof BusinessesResearchRoute
+  '/careers/$slug': typeof CareersSlugRoute
+  '/news/$slug': typeof NewsSlugRoute
+  '/products/$slug': typeof ProductsSlugRoute
+  '/services/$slug': typeof ServicesSlugRoute
+  '/businesses/': typeof BusinessesIndexRoute
+  '/careers/': typeof CareersIndexRoute
+  '/news/': typeof NewsIndexRoute
+  '/products/': typeof ProductsIndexRoute
+  '/services/': typeof ServicesIndexRoute
+  '/careers/$slug/apply': typeof CareersSlugApplyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/company': typeof CompanyRoute
+  '/contact': typeof ContactRoute
+  '/innovation': typeof InnovationRoute
+  '/sustainability': typeof SustainabilityRoute
+  '/businesses/aviation': typeof BusinessesAviationRoute
+  '/businesses/consulting': typeof BusinessesConsultingRoute
+  '/businesses/drones': typeof BusinessesDronesRoute
+  '/businesses/mining': typeof BusinessesMiningRoute
+  '/businesses/research': typeof BusinessesResearchRoute
+  '/careers/$slug': typeof CareersSlugRoute
+  '/news/$slug': typeof NewsSlugRoute
+  '/products/$slug': typeof ProductsSlugRoute
+  '/services/$slug': typeof ServicesSlugRoute
+  '/businesses': typeof BusinessesIndexRoute
+  '/careers': typeof CareersIndexRoute
+  '/news': typeof NewsIndexRoute
+  '/products': typeof ProductsIndexRoute
+  '/services': typeof ServicesIndexRoute
+  '/careers/$slug/apply': typeof CareersSlugApplyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/company': typeof CompanyRoute
+  '/contact': typeof ContactRoute
+  '/innovation': typeof InnovationRoute
+  '/sustainability': typeof SustainabilityRoute
+  '/businesses/aviation': typeof BusinessesAviationRoute
+  '/businesses/consulting': typeof BusinessesConsultingRoute
+  '/businesses/drones': typeof BusinessesDronesRoute
+  '/businesses/mining': typeof BusinessesMiningRoute
+  '/businesses/research': typeof BusinessesResearchRoute
+  '/careers/$slug': typeof CareersSlugRoute
+  '/news/$slug': typeof NewsSlugRoute
+  '/products/$slug': typeof ProductsSlugRoute
+  '/services/$slug': typeof ServicesSlugRoute
+  '/businesses/': typeof BusinessesIndexRoute
+  '/careers/': typeof CareersIndexRoute
+  '/news/': typeof NewsIndexRoute
+  '/products/': typeof ProductsIndexRoute
+  '/services/': typeof ServicesIndexRoute
+  '/careers/$slug_/apply': typeof CareersSlugApplyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/company'
+    | '/contact'
+    | '/innovation'
+    | '/sustainability'
+    | '/businesses/aviation'
+    | '/businesses/consulting'
+    | '/businesses/drones'
+    | '/businesses/mining'
+    | '/businesses/research'
+    | '/careers/$slug'
+    | '/news/$slug'
+    | '/products/$slug'
+    | '/services/$slug'
+    | '/businesses/'
+    | '/careers/'
+    | '/news/'
+    | '/products/'
+    | '/services/'
+    | '/careers/$slug/apply'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/about'
+    | '/company'
+    | '/contact'
+    | '/innovation'
+    | '/sustainability'
+    | '/businesses/aviation'
+    | '/businesses/consulting'
+    | '/businesses/drones'
+    | '/businesses/mining'
+    | '/businesses/research'
+    | '/careers/$slug'
+    | '/news/$slug'
+    | '/products/$slug'
+    | '/services/$slug'
+    | '/businesses'
+    | '/careers'
+    | '/news'
+    | '/products'
+    | '/services'
+    | '/careers/$slug/apply'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/company'
+    | '/contact'
+    | '/innovation'
+    | '/sustainability'
+    | '/businesses/aviation'
+    | '/businesses/consulting'
+    | '/businesses/drones'
+    | '/businesses/mining'
+    | '/businesses/research'
+    | '/careers/$slug'
+    | '/news/$slug'
+    | '/products/$slug'
+    | '/services/$slug'
+    | '/businesses/'
+    | '/careers/'
+    | '/news/'
+    | '/products/'
+    | '/services/'
+    | '/careers/$slug_/apply'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
+  CompanyRoute: typeof CompanyRoute
+  ContactRoute: typeof ContactRoute
+  InnovationRoute: typeof InnovationRoute
+  SustainabilityRoute: typeof SustainabilityRoute
+  BusinessesAviationRoute: typeof BusinessesAviationRoute
+  BusinessesConsultingRoute: typeof BusinessesConsultingRoute
+  BusinessesDronesRoute: typeof BusinessesDronesRoute
+  BusinessesMiningRoute: typeof BusinessesMiningRoute
+  BusinessesResearchRoute: typeof BusinessesResearchRoute
+  CareersSlugRoute: typeof CareersSlugRoute
+  NewsSlugRoute: typeof NewsSlugRoute
+  ProductsSlugRoute: typeof ProductsSlugRoute
+  ServicesSlugRoute: typeof ServicesSlugRoute
+  BusinessesIndexRoute: typeof BusinessesIndexRoute
+  CareersIndexRoute: typeof CareersIndexRoute
+  NewsIndexRoute: typeof NewsIndexRoute
+  ProductsIndexRoute: typeof ProductsIndexRoute
+  ServicesIndexRoute: typeof ServicesIndexRoute
+  CareersSlugApplyRoute: typeof CareersSlugApplyRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sustainability': {
+      id: '/sustainability'
+      path: '/sustainability'
+      fullPath: '/sustainability'
+      preLoaderRoute: typeof SustainabilityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/innovation': {
+      id: '/innovation'
+      path: '/innovation'
+      fullPath: '/innovation'
+      preLoaderRoute: typeof InnovationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/company': {
+      id: '/company'
+      path: '/company'
+      fullPath: '/company'
+      preLoaderRoute: typeof CompanyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +347,136 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/services/': {
+      id: '/services/'
+      path: '/services'
+      fullPath: '/services/'
+      preLoaderRoute: typeof ServicesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/products/': {
+      id: '/products/'
+      path: '/products'
+      fullPath: '/products/'
+      preLoaderRoute: typeof ProductsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/news/': {
+      id: '/news/'
+      path: '/news'
+      fullPath: '/news/'
+      preLoaderRoute: typeof NewsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/careers/': {
+      id: '/careers/'
+      path: '/careers'
+      fullPath: '/careers/'
+      preLoaderRoute: typeof CareersIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/businesses/': {
+      id: '/businesses/'
+      path: '/businesses'
+      fullPath: '/businesses/'
+      preLoaderRoute: typeof BusinessesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services/$slug': {
+      id: '/services/$slug'
+      path: '/services/$slug'
+      fullPath: '/services/$slug'
+      preLoaderRoute: typeof ServicesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/products/$slug': {
+      id: '/products/$slug'
+      path: '/products/$slug'
+      fullPath: '/products/$slug'
+      preLoaderRoute: typeof ProductsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/news/$slug': {
+      id: '/news/$slug'
+      path: '/news/$slug'
+      fullPath: '/news/$slug'
+      preLoaderRoute: typeof NewsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/careers/$slug': {
+      id: '/careers/$slug'
+      path: '/careers/$slug'
+      fullPath: '/careers/$slug'
+      preLoaderRoute: typeof CareersSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/businesses/research': {
+      id: '/businesses/research'
+      path: '/businesses/research'
+      fullPath: '/businesses/research'
+      preLoaderRoute: typeof BusinessesResearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/businesses/mining': {
+      id: '/businesses/mining'
+      path: '/businesses/mining'
+      fullPath: '/businesses/mining'
+      preLoaderRoute: typeof BusinessesMiningRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/businesses/drones': {
+      id: '/businesses/drones'
+      path: '/businesses/drones'
+      fullPath: '/businesses/drones'
+      preLoaderRoute: typeof BusinessesDronesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/businesses/consulting': {
+      id: '/businesses/consulting'
+      path: '/businesses/consulting'
+      fullPath: '/businesses/consulting'
+      preLoaderRoute: typeof BusinessesConsultingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/businesses/aviation': {
+      id: '/businesses/aviation'
+      path: '/businesses/aviation'
+      fullPath: '/businesses/aviation'
+      preLoaderRoute: typeof BusinessesAviationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/careers/$slug_/apply': {
+      id: '/careers/$slug_/apply'
+      path: '/careers/$slug/apply'
+      fullPath: '/careers/$slug/apply'
+      preLoaderRoute: typeof CareersSlugApplyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
+  CompanyRoute: CompanyRoute,
+  ContactRoute: ContactRoute,
+  InnovationRoute: InnovationRoute,
+  SustainabilityRoute: SustainabilityRoute,
+  BusinessesAviationRoute: BusinessesAviationRoute,
+  BusinessesConsultingRoute: BusinessesConsultingRoute,
+  BusinessesDronesRoute: BusinessesDronesRoute,
+  BusinessesMiningRoute: BusinessesMiningRoute,
+  BusinessesResearchRoute: BusinessesResearchRoute,
+  CareersSlugRoute: CareersSlugRoute,
+  NewsSlugRoute: NewsSlugRoute,
+  ProductsSlugRoute: ProductsSlugRoute,
+  ServicesSlugRoute: ServicesSlugRoute,
+  BusinessesIndexRoute: BusinessesIndexRoute,
+  CareersIndexRoute: CareersIndexRoute,
+  NewsIndexRoute: NewsIndexRoute,
+  ProductsIndexRoute: ProductsIndexRoute,
+  ServicesIndexRoute: ServicesIndexRoute,
+  CareersSlugApplyRoute: CareersSlugApplyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

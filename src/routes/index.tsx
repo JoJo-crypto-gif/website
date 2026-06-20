@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, type KeyboardEvent, type PointerEvent } from "react";
 import {
+  AnimatePresence,
   motion,
   useMotionValue,
   useReducedMotion,
@@ -9,41 +10,34 @@ import {
   useTransform,
 } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
+import { CorporateFooter, CorporateNav } from "@/components/corporate-layout";
+import { corporateLeaders, featuredProducts } from "@/lib/corporate-data";
 import heroImg from "@/assets/hero.png";
-import heroVideo1 from "@/assets/hero/1.mp4";
-import heroVideo2 from "@/assets/hero/2.mp4";
-import heroVideo3 from "@/assets/hero/3.mp4";
-import heroVideo4 from "@/assets/hero/4.mp4";
-import whoweareImg from "@/assets/whoweare.png";
-import pillarLegacy from "@/assets/pillar-legacy.png";
-import pillarCollab from "@/assets/pillar-collab.png";
-import pillarOwnership from "@/assets/pillar-ownership.png";
+import heroVideo from "@/assets/hero/hero.mp4";
 import assembleVideo from "@/assets/assemble.mp4";
-import bgSto from "@/assets/bg-sto.png";
-import bgConsulting from "@/assets/bg-consulting.png";
-import pAqueduct from "@/assets/p-aqueduct.png";
-import pTransit from "@/assets/p-transit.png";
-import pUniversity from "@/assets/p-university.png";
-import pDatacenter from "@/assets/p-datacenter.png";
-import pHospital from "@/assets/p-hospital.png";
-import pMuseum from "@/assets/p-museum.png";
-
-const heroVideos = [heroVideo1, heroVideo2, heroVideo3, heroVideo4];
+import aviationAirport from "@/assets/stock/aviation-airport.jpg";
+import aviationHangar from "@/assets/stock/aviation-hangar.jpg";
+import consultingBriefing from "@/assets/stock/consulting-briefing.jpg";
+import consultingTeam from "@/assets/stock/consulting-team.jpg";
+import droneFlight from "@/assets/stock/drone-flight.jpg";
+import dronePilot from "@/assets/stock/drone-pilot.jpg";
+import miningAerial from "@/assets/stock/mining-aerial.jpg";
+import researchLab from "@/assets/stock/research-lab.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "AeroDefense Corp. | Advanced Aerospace & Security" },
+      { title: "Stratos Group | Aviation-Led Corporate Group" },
       {
         name: "description",
         content:
-          "Pioneering the future of aerospace and defense. AeroDefense Corp. delivers next-generation autonomous systems and advanced manufacturing for global security.",
+          "Stratos Group is a corporate aviation and industrial group operating across aviation, drones, consulting, research, and responsible resource operations.",
       },
-      { property: "og:title", content: "AeroDefense Corp. | Advanced Aerospace" },
+      { property: "og:title", content: "Stratos Group | Aviation-Led Corporate Group" },
       {
         property: "og:description",
         content:
-          "Pioneering the future of aerospace and defense. AeroDefense Corp. delivers next-generation autonomous systems and advanced manufacturing for global security.",
+          "Stratos Group is a corporate aviation and industrial group operating across aviation, drones, consulting, research, and responsible resource operations.",
       },
       { property: "og:image", content: heroImg },
       { property: "og:type", content: "website" },
@@ -58,360 +52,254 @@ const pillars = [
   {
     n: "01",
     eyebrow: "Innovation",
-    title: "Defining the next generation of flight.",
-    body: "At AeroDefense, innovation is not just an objective—it's our foundation. We push the boundaries of physics and engineering to develop autonomous systems, advanced stealth capabilities, and next-generation propulsion.",
-    cta: "Explore R&D",
-    href: "#innovation",
-    img: pillarLegacy,
-    caption: "Advanced Composites Lab — Facility 04",
+    title: "Practical technology for aviation and industry.",
+    body: "At Stratos, innovation connects aviation programs, drone operations, applied research, consulting, and responsible resource systems into practical work customers can deploy.",
+    cta: "Explore innovation",
+    href: "/innovation",
+    img: researchLab,
+    caption: "Applied Technology Lab / Facility 04",
   },
   {
     n: "02",
-    eyebrow: "Security",
-    title: "Protecting what matters most.",
-    body: "We equip our allied forces with the unmatched capabilities required to maintain air dominance. Our platforms are designed for survivability, precision, and unwavering reliability in contested environments.",
-    cta: "Defense Systems",
-    href: "#platforms",
-    img: pillarCollab,
-    caption: "Multi-Domain Integration Testing",
+    eyebrow: "Aviation",
+    title: "Moving people, data, and industries safely.",
+    body: "Our aviation and drone teams build dependable flight systems, fleet services, and operational tools for organizations that need safety, reliability, and scale.",
+    cta: "Aviation services",
+    href: "/services/aviation",
+    img: aviationAirport,
+    caption: "Fleet Operations Review",
   },
   {
     n: "03",
-    eyebrow: "Global Reach",
-    title: "Operational everywhere.",
-    body: "From the stratosphere to deep space, our advanced platforms provide global reach and persistent domain awareness. We ensure complete operational superiority across every domain, anywhere in the world.",
-    cta: "Global Footprint",
-    href: "#groups",
-    img: pillarOwnership,
-    caption: "High Altitude ISR Operations",
+    eyebrow: "Corporate Reach",
+    title: "A broader group behind every operation.",
+    body: "From consulting and research to mining operations and aerial intelligence, our divisions help customers modernize complex systems with clarity and discipline.",
+    cta: "View services",
+    href: "/services",
+    img: consultingTeam,
+    caption: "Aerial Resource Intelligence",
   },
 ];
 
 const assemblyStages = [
   {
     step: "01",
-    eyebrow: "Systems Engineering",
-    title: "Defining the architecture.",
-    body: "Our engineers establish the foundational framework, ensuring that every aerodynamic and mechanical subsystem seamlessly integrates to form a cohesive, high-performance platform.",
+    eyebrow: "Program Planning",
+    title: "Defining the operating model.",
+    body: "Our teams map the business need first, aligning aviation, data, field operations, and customer objectives before technical work moves forward.",
   },
   {
     step: "02",
-    eyebrow: "Precision Manufacturing",
-    title: "Engineering tolerances meet reality.",
-    body: "Advanced fabrication techniques and strict quality control transform digital blueprints into physical components, engineering propulsion and structural systems with exact precision.",
+    eyebrow: "Integrated Delivery",
+    title: "Connecting teams and technology.",
+    body: "Aviation specialists, drone teams, consultants, researchers, and operators work together so every program moves from concept into practical execution.",
   },
   {
     step: "03",
-    eyebrow: "Flight Test Engineering",
-    title: "Validating the design.",
-    body: "Rigorous testing and simulation push the engineered systems beyond their limits, verifying performance data to certify the platform is ready for demanding real-world applications.",
+    eyebrow: "Operational Readiness",
+    title: "Making the program dependable.",
+    body: "Before launch, each solution is reviewed for safety, reliability, field usability, governance, and long-term value across the customer environment.",
   },
 ];
 
 const ASSEMBLY_SCRUB_END = 0.66;
 
 const stats = [
-  { end: 4, prefix: "$", suffix: "B+", label: "Annual R&D Investment" },
-  { end: 45, prefix: "", suffix: "", label: "Allied Nations Served" },
-  { end: 30, prefix: "", suffix: "K+", label: "Engineers & Scientists" },
-  { end: 100, prefix: "", suffix: "%", label: "Mission Success Rate" },
+  { end: 4, prefix: "$", suffix: "B+", label: "Annual Technology Investment" },
+  { end: 45, prefix: "", suffix: "", label: "Markets Served" },
+  { end: 30, prefix: "", suffix: "K+", label: "Specialists & Operators" },
+  { end: 5, prefix: "", suffix: "", label: "Core Business Divisions" },
 ];
 
 const operatingDivisions = [
   {
     n: "01",
-    eyebrow: "Aeronautics & Advanced Aircraft",
-    name: "Air dominance from concept to carrier-ready production.",
-    body: "Integrated fighter, lift, and experimental aircraft teams compress the distance between advanced research, flight test, and mission-ready deployment.",
-    img: bgSto,
-    signal: "Stealth / Lift / Strike",
-    cta: "Explore Aeronautics",
+    eyebrow: "Aviation",
+    name: "Aircraft programs from concept to fleet support.",
+    body: "Integrated aircraft, maintenance, and digital operations teams connect advanced research with dependable aviation programs for operators at scale.",
+    img: aviationAirport,
+    signal: "Aircraft / Fleet / Services",
+    cta: "Explore Aviation",
+    href: "/services/aviation",
   },
   {
     n: "02",
-    eyebrow: "Autonomous ISR Systems",
-    name: "Persistent awareness across contested airspace.",
-    body: "Long-endurance autonomy, edge sensing, and operator-centered command tools turn raw theater data into fast, actionable intelligence.",
-    img: pillarOwnership,
-    signal: "Autonomy / Sensors / ISR",
-    cta: "Explore ISR Systems",
+    eyebrow: "Drones & Autonomous Systems",
+    name: "Aerial intelligence for complex environments.",
+    body: "Autonomy, edge sensing, and operator-centered tools turn field conditions into reliable data for infrastructure, logistics, and remote operations.",
+    img: droneFlight,
+    signal: "Autonomy / Sensors / Data",
+    cta: "Explore Drones",
+    href: "/services/drones",
   },
   {
     n: "03",
-    eyebrow: "Tactical Defense Systems",
-    name: "Layered protection for multi-domain operations.",
-    body: "Precision effectors, integrated air defense, and tactical control systems protect allied forces while expanding decision speed in the field.",
-    img: bgConsulting,
-    signal: "Missile Defense / C2 / Deterrence",
-    cta: "Explore Defense Systems",
+    eyebrow: "Consulting & Research",
+    name: "Advisory and applied research for industrial change.",
+    body: "Strategy, transformation, materials research, and prototype programs help aviation and industrial customers modernize with confidence.",
+    img: consultingTeam,
+    signal: "Advisory / Labs / Programs",
+    cta: "Explore Consulting",
+    href: "/services/consulting",
   },
   {
     n: "04",
-    eyebrow: "Space & Command Networks",
-    name: "Orbital infrastructure connected to every mission edge.",
-    body: "Secure satellite architectures, resilient communications, and mission networks keep aircraft, commanders, and allied partners synchronized.",
-    img: pUniversity,
-    signal: "Space / Comms / Command",
-    cta: "Explore Space Networks",
-  },
-];
-
-const projects = [
-  {
-    img: pDatacenter,
-    name: "Project F-Next",
-    service: "Next-Gen Air Dominance",
-    company: "Skunkworks Div.",
-    span: "lg:col-span-8",
-    aspect: "aspect-[21/10]",
-  },
-  {
-    img: pAqueduct,
-    name: "MQ-X Vanguard",
-    service: "Autonomous ISR",
-    company: "Unmanned Systems",
-    span: "lg:col-span-4",
-    aspect: "aspect-[3/4]",
-  },
-  {
-    img: pTransit,
-    name: "C-22 Heavy Lift",
-    service: "Strategic Mobility",
-    company: "Aeronautics",
-    span: "lg:col-span-4",
-    aspect: "aspect-[3/4]",
-  },
-  {
-    img: pUniversity,
-    name: "Orbital Defender",
-    service: "Space Systems",
-    company: "Space Div.",
-    span: "lg:col-span-4",
-    aspect: "aspect-[3/4]",
-  },
-  {
-    img: pHospital,
-    name: "L-19 Sentinel",
-    service: "Early Warning",
-    company: "Defense Capabilities",
-    span: "lg:col-span-4",
-    aspect: "aspect-[3/4]",
-  },
-  {
-    img: pMuseum,
-    name: "X-44 Hypersonic",
-    service: "Advanced Propulsion",
-    company: "Skunkworks Div.",
-    span: "lg:col-span-12",
-    aspect: "aspect-[21/9]",
+    eyebrow: "Mining & Resource Operations",
+    name: "Responsible resource systems connected to aerial intelligence.",
+    body: "Mining programs combine ground operations, aerial survey, environmental monitoring, and logistics to support safer resource development.",
+    img: miningAerial,
+    signal: "Survey / Automation / Logistics",
+    cta: "Explore Mining",
+    href: "/services/mining",
   },
 ];
 
 const newsPosts = [
   {
-    category: "Autonomous ISR",
+    category: "Drones",
     date: "June 12, 2026",
-    title: "MQ-X Vanguard clears autonomous flight-readiness review.",
+    title: "Drone operations platform completes readiness review.",
     excerpt:
-      "AeroDefense teams completed the final systems review for the MQ-X Vanguard autonomy stack, validating endurance, sensor fusion, and command handoff profiles.",
+      "Stratos teams completed a readiness review for a new drone operations platform, validating endurance, data quality, and operator handoff profiles.",
     readTime: "4 min read",
-    img: pAqueduct,
-    href: "/news/autonomous-isr-flight-readiness",
+    img: dronePilot,
+    href: "/news/drone-operations-readiness",
   },
   {
-    category: "Advanced Aircraft",
+    category: "Aviation",
     date: "May 28, 2026",
-    title: "Digital production cells accelerate next-gen aircraft assembly.",
+    title: "Digital production cells accelerate aircraft assembly.",
     excerpt:
-      "New synchronized manufacturing cells are reducing airframe integration cycles while improving traceability across stealth materials and flight-critical systems.",
+      "New synchronized manufacturing cells are reducing integration cycles while improving traceability across materials and flight-critical systems.",
     readTime: "5 min read",
-    img: bgSto,
+    img: aviationHangar,
     href: "/news/advanced-aircraft-production",
   },
   {
-    category: "Space Command",
+    category: "Research",
     date: "May 09, 2026",
-    title: "Orbital command network expands allied mission coverage.",
+    title: "Research network expands industrial operations coverage.",
     excerpt:
-      "The latest secure communications node links air, space, and ground assets into a resilient mission fabric for coalition operations.",
+      "The latest connected operations work links aviation programs, field teams, and industrial assets into a more resilient operating network.",
     readTime: "3 min read",
-    img: pUniversity,
-    href: "/news/space-command-network",
+    img: researchLab,
+    href: "/news/connected-operations-network",
   },
   {
-    category: "Tactical Defense",
+    category: "Consulting",
     date: "April 22, 2026",
-    title: "Layered defense modernization enters operational evaluation.",
+    title: "Industrial modernization program enters operational evaluation.",
     excerpt:
-      "AeroDefense tactical systems teams began field evaluation of a new integrated defense architecture built for contested multi-domain environments.",
+      "Consulting teams began field evaluation of a new modernization framework built for complex aviation and industrial environments.",
     readTime: "4 min read",
-    img: bgConsulting,
-    href: "/news/tactical-defense-modernization",
+    img: consultingBriefing,
+    href: "/news/industrial-systems-modernization",
   },
 ];
 
-const quotes = [
+const closingPaths = [
   {
-    body: "AeroDefense's focus on next-generation autonomy lets our allied forces think and act faster as they secure global peace in highly contested environments.",
-    name: "Gen. Richard Vance (Ret.)",
-    role: "Former USAF Chief of Staff",
+    number: "01",
+    eyebrow: "Products",
+    title: "Find the right platform.",
+    body: "Explore aircraft, autonomous systems, research programs, and connected industrial products from across the group.",
+    cta: "View product gallery",
+    href: "/products",
+    image: aviationHangar,
   },
   {
-    body: "Being partnered with AeroDefense lets us take on the most complex defense challenges while giving our warfighters a real edge in multi-domain operations.",
-    name: "David H. Layton",
-    role: "Director, Global Security",
+    number: "02",
+    eyebrow: "Services",
+    title: "Bring a complex operation into focus.",
+    body: "Engage specialist teams across aviation, drones, consulting, research, and responsible resource operations.",
+    cta: "Explore our services",
+    href: "/services",
+    image: dronePilot,
   },
   {
-    body: "AeroDefense's commitment to uncompromised engineering was the natural choice to ensure the multi-generational air superiority our forces require.",
-    name: "Dr. Sarah Wallington",
-    role: "Chief Engineer, Aeronautics",
+    number: "03",
+    eyebrow: "Partnerships",
+    title: "Build the next program together.",
+    body: "Start a direct conversation about partnerships, sales, technical programs, or a customer requirement.",
+    cta: "Start a conversation",
+    href: "/contact#contact-desk",
+    image: consultingBriefing,
   },
 ];
 
 function Index() {
   return (
     <main className="bg-background text-foreground font-mono">
-      <Nav />
+      <CorporateNav overlay />
       <Hero />
       <WhoWeAre />
       <Pillars />
-      <MissionDriven />
+      <HowWeBuild />
       <Stats />
       <BusinessGroups />
       <LatestNews />
       <Portfolio />
       <Voices />
       <Closing />
-      <Footer />
+      <CorporateFooter />
     </main>
   );
 }
 
-function Nav() {
-  return (
-    <nav className="fixed top-0 z-50 w-full border-b border-white/10 bg-black/40 backdrop-blur-md text-white">
-      <div className="flex items-center justify-between px-6 lg:px-10 py-4">
-        <div className="flex items-center gap-4">
-          <span className="font-display font-extrabold text-2xl tracking-tighter">AERODEFENSE</span>
-          <span className="hidden md:inline-block text-[9px] border border-white/25 px-1.5 py-0.5 uppercase tracking-widest">
-            Corp.
-          </span>
-        </div>
-        <div className="flex items-center gap-8 uppercase tracking-widest text-[10px] font-medium">
-          <a href="#platforms" className="hidden sm:block hover:text-accent transition-colors">
-            Platforms
-          </a>
-          <a href="#capabilities" className="hidden sm:block hover:text-accent transition-colors">
-            Capabilities
-          </a>
-          <a href="#innovation" className="hidden md:block hover:text-accent transition-colors">
-            Innovation
-          </a>
-          <a
-            href="#contact"
-            className="bg-white text-black px-4 py-2 hover:bg-accent hover:text-white transition-colors duration-300"
-          >
-            Contact
-          </a>
-        </div>
-      </div>
-    </nav>
-  );
-}
-
 function Hero() {
-  const [videoIndex, setVideoIndex] = useState(0);
   const [isMounted, setIsMounted] = useState(false);
-  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // Control video playback based on active videoIndex
-  useEffect(() => {
-    heroVideos.forEach((_, idx) => {
-      const video = videoRefs.current[idx];
-      if (video) {
-        if (idx === videoIndex) {
-          video.currentTime = 0;
-          video.play().catch((err) => {
-            console.warn(`Autoplay or play failed for video ${idx}:`, err);
-          });
-        } else {
-          video.pause();
-          video.currentTime = 0;
-        }
-      }
-    });
-  }, [videoIndex]);
-
   return (
-    <header className="relative min-h-screen flex flex-col justify-end overflow-hidden border-b border-border text-white pt-20 pb-16 lg:pb-24">
-      {/* Background Videos (Preloaded and Cross-faded) */}
-      {heroVideos.map((src, idx) => (
-        <video
-          key={src}
-          ref={(el) => {
-            videoRefs.current[idx] = el;
-          }}
-          src={src}
-          muted
-          playsInline
-          preload="auto"
-          autoPlay={idx === 0}
-          onEnded={() => {
-            if (idx === videoIndex) {
-              setVideoIndex((prev) => (prev + 1) % heroVideos.length);
-            }
-          }}
-          className={`absolute inset-0 w-full h-full object-cover z-0 transition-opacity duration-[1500ms] ease-in-out ${
-            idx === videoIndex ? "opacity-100" : "opacity-0 pointer-events-none"
-          }`}
-        />
-      ))}
+    <header className="brand-dark relative flex min-h-screen flex-col justify-end overflow-hidden border-b border-border pb-16 pt-20 text-white lg:pb-24">
+      <video
+        src={heroVideo}
+        poster={heroImg}
+        muted
+        playsInline
+        preload="auto"
+        autoPlay
+        loop
+        className="absolute inset-0 z-0 h-full w-full object-cover"
+      />
 
-      {/* Dark Overlay for Text Readability */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20 z-10" />
+      <div className="absolute inset-0 z-10 bg-foreground/10" />
 
       {/* Content */}
       <div className="relative z-20 px-8 lg:px-16 xl:px-20 w-full flex flex-col items-start">
         <div
-          className={`space-y-2 mb-6 transition-all duration-[1500ms] ease-out delay-[300ms] ${
+          className={`max-w-4xl border border-white/15 bg-foreground/24 p-6 shadow-2xl shadow-black/25 backdrop-blur-sm transition-all duration-[1500ms] ease-out sm:p-8 lg:p-10 ${
             isMounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          <div className="h-px w-20 bg-accent/80 animate-line" />
-          <span className="text-accent font-semibold uppercase tracking-[0.4em] block text-xs md:text-sm drop-shadow-md">
-            Advanced Aerospace & Defense
-          </span>
-        </div>
-
-        <h1
-          className={`font-display text-5xl sm:text-6xl md:text-8xl lg:text-[110px] xl:text-[130px] leading-[0.85] font-extrabold tracking-tighter text-balance text-white drop-shadow-xl transition-all duration-[1500ms] ease-out delay-[700ms] ${
-            isMounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
-        >
-          AIR
-          <br />
-          <span className="text-accent">DOMINANCE.</span>
-        </h1>
-
-        <div
-          className={`mt-10 max-w-2xl flex flex-col items-start transition-all duration-[1500ms] ease-out delay-[1100ms] ${
-            isMounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
-        >
-          <p className="text-lg md:text-xl leading-relaxed text-pretty text-white/90 drop-shadow-md mb-10">
-            Delivering next-generation autonomous and crewed flight systems to ensure global
-            security and technological superiority.
-          </p>
-
-          <div className="flex flex-col justify-start items-start">
-            <span className="text-[9px] uppercase tracking-widest text-white/60 mb-4 drop-shadow-sm">
-              [ Scroll to explore capabilities ]
+          <div className="mb-6 space-y-2 transition-all duration-[1500ms] ease-out delay-[300ms]">
+            <div className="h-px w-20 bg-primary/80 animate-line" />
+            <span className="text-primary font-semibold uppercase tracking-[0.4em] block text-xs md:text-sm drop-shadow-md">
+              Aviation-Led Corporate Group
             </span>
-            <div className="h-16 w-px bg-white/30" />
+          </div>
+
+          <h1 className="font-display text-5xl sm:text-6xl md:text-8xl lg:text-[110px] xl:text-[130px] leading-[0.85] font-extrabold tracking-tighter text-balance text-white drop-shadow-xl">
+            AVIATION
+            <br />
+            <span className="text-primary">LEADS.</span>
+          </h1>
+
+          <div className="mt-10 max-w-2xl flex flex-col items-start">
+            <p className="text-lg md:text-xl leading-relaxed text-pretty text-white/90 drop-shadow-md mb-10">
+              Building aircraft, drones, advisory teams, research programs, and responsible resource
+              operations for a more connected industrial future.
+            </p>
+
+            <div className="flex flex-col justify-start items-start">
+              <span className="text-[9px] uppercase tracking-widest text-white/60 mb-4 drop-shadow-sm">
+                [ Scroll to explore the group ]
+              </span>
+              <div className="h-16 w-px bg-white/30" />
+            </div>
           </div>
         </div>
       </div>
@@ -461,17 +349,17 @@ function WhoWeAre() {
         transition={{ duration: 1, ease: "easeOut" }}
         className="col-span-12 lg:col-span-4 p-8 lg:p-16 xl:p-20 border-r border-border h-full flex flex-col justify-start"
       >
-        <h2 className="text-[10px] font-bold uppercase tracking-[0.4em] text-accent mb-10">
+        <h2 className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary mb-10">
           01 / Who we are
         </h2>
         <p className="text-2xl lg:text-3xl leading-[1.1] tracking-tight font-display font-medium text-balance">
-          AeroDefense unites brilliant minds in aerospace engineering, autonomous systems, and
-          advanced defense manufacturing to secure the future.
+          Stratos is an aviation-led corporate group uniting aircraft programs, drones, consulting,
+          research, and responsible resource operations.
         </p>
         <p className="mt-8 max-w-md opacity-70 leading-relaxed">
-          With unmatched access to advanced R&D and bleeding-edge technology, our divisions
-          collaborate across a thriving ecosystem — built to provide our allied forces with the
-          decisive advantage required for multi-domain supremacy.
+          Our divisions share engineering discipline, operational data, and applied research so
+          customers can modernize complex systems without losing sight of safety, reliability, and
+          long-term value.
         </p>
       </motion.div>
       <motion.div
@@ -485,8 +373,8 @@ function WhoWeAre() {
         <div className="overflow-hidden relative aspect-[21/10] w-full">
           <motion.img
             style={{ y: yImage }}
-            src={whoweareImg}
-            alt="Advanced stealth aircraft prototype"
+            src={aviationHangar}
+            alt="Aircraft undergoing maintenance inside an aviation hangar"
             width={1536}
             height={864}
             loading="lazy"
@@ -494,8 +382,8 @@ function WhoWeAre() {
           />
         </div>
         <div className="mt-4 flex flex-wrap justify-between items-baseline gap-4 text-[10px] uppercase tracking-widest opacity-70">
-          <span>Project F-Next Final Assembly</span>
-          <span>Aeronautics Division / Skunkworks</span>
+          <span>Aviation Program Final Assembly</span>
+          <span>Aviation Division / Research Campus</span>
         </div>
       </motion.div>
     </section>
@@ -506,22 +394,23 @@ function Pillars() {
   return (
     <section
       id="capabilities"
-      className="py-24 lg:py-32 px-8 lg:px-16 xl:px-20 grid grid-cols-12 gap-y-12 lg:gap-12 border-b border-border"
+      className="py-28 lg:py-40 px-8 lg:px-16 xl:px-20 grid grid-cols-12 gap-y-14 lg:gap-16 border-b border-border"
     >
       <div className="col-span-12 lg:col-span-4 lg:sticky lg:top-28 h-fit space-y-6">
-        <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-accent">
+        <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary">
           02 / Our Capabilities
         </span>
         <h2 className="text-4xl sm:text-5xl lg:text-6xl font-display font-extrabold tracking-tighter leading-[0.9]">
-          INNOVATION.
+          AVIATION.
           <br />
-          SECURITY.
+          DRONES.
           <br />
-          REACH.
+          INDUSTRY.
         </h2>
-        <div className="h-px w-12 bg-accent" />
+        <div className="h-px w-12 bg-primary" />
         <p className="opacity-70 leading-relaxed max-w-sm">
-          Three pillars define how our platforms operate — and why they dominate the skies.
+          Three pillars define how the group moves from aviation leadership into broader industrial
+          value.
         </p>
       </div>
 
@@ -533,7 +422,7 @@ function Pillars() {
             className="group relative bg-background lg:sticky lg:top-28"
           >
             <div className="flex items-baseline gap-6 mb-8">
-              <span className="text-5xl font-display font-bold text-accent/25 italic tracking-tighter group-hover:text-accent transition-colors">
+              <span className="text-5xl font-display font-bold text-primary/25 italic tracking-tighter group-hover:text-primary transition-colors">
                 {p.n}
               </span>
               <div>
@@ -558,7 +447,7 @@ function Pillars() {
                 <p className="text-sm leading-snug mb-4">{p.body}</p>
                 <a
                   href={p.href}
-                  className="text-[10px] uppercase tracking-widest font-bold border-b border-foreground pb-0.5 hover:text-accent hover:border-accent transition-colors"
+                  className="text-[10px] uppercase tracking-widest font-bold border-b border-foreground pb-0.5 hover:text-primary hover:border-primary transition-colors"
                 >
                   {p.cta} →
                 </a>
@@ -572,7 +461,7 @@ function Pillars() {
   );
 }
 
-function MissionDriven() {
+function HowWeBuild() {
   const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const shouldReduceMotion = useReducedMotion();
@@ -662,7 +551,7 @@ function MissionDriven() {
             muted
             playsInline
             preload="auto"
-            aria-label="Aircraft assembly sequence"
+            aria-label="Corporate aviation assembly sequence"
             className="h-full w-full scale-125 object-cover object-[40%_center] opacity-80"
             disablePictureInPicture
           />
@@ -672,11 +561,11 @@ function MissionDriven() {
 
         <div className="relative z-10 grid h-full grid-cols-12 items-end gap-y-8 px-8 pb-10 pt-24 lg:items-center lg:gap-12 lg:px-16 lg:pb-16 xl:px-20">
           <div className="col-span-12 max-w-xl lg:col-span-5">
-            <span className="mb-8 block text-[10px] font-bold uppercase tracking-[0.4em] text-accent">
-              03 / Mission Driven
+            <span className="mb-8 block text-[10px] font-bold uppercase tracking-[0.4em] text-primary">
+              03 / How We Build
             </span>
             <h2 className="mb-8 font-display text-5xl font-extrabold leading-[0.9] tracking-tighter sm:text-6xl lg:text-7xl">
-              Assemble the impossible.
+              From idea to operation.
             </h2>
             <motion.div
               key={currentStage.step}
@@ -685,7 +574,7 @@ function MissionDriven() {
               transition={{ duration: 0.24, ease: "easeOut" }}
               className="min-h-36"
             >
-              <span className="mb-4 block text-[10px] font-bold uppercase tracking-[0.35em] text-accent">
+              <span className="mb-4 block text-[10px] font-bold uppercase tracking-[0.35em] text-primary">
                 {currentStage.step} / {currentStage.eyebrow}
               </span>
               <h3 className="mb-4 max-w-lg font-display text-2xl font-bold leading-none tracking-tight sm:text-3xl">
@@ -708,7 +597,7 @@ function MissionDriven() {
                       : "text-background/35"
                   }`}
                 >
-                  <span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-accent">
+                  <span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-primary">
                     {stage.step}
                   </span>
                   <span className="block text-[10px] uppercase tracking-[0.25em]">
@@ -722,7 +611,7 @@ function MissionDriven() {
 
         <motion.div
           style={{ scaleX: shouldReduceMotion ? 1 : scrubProgress }}
-          className="absolute bottom-0 left-0 z-20 h-1 w-full origin-left bg-accent"
+          className="absolute bottom-0 left-0 z-20 h-1 w-full origin-left bg-primary"
         />
       </div>
     </section>
@@ -808,33 +697,32 @@ function Stats() {
   }, [shouldReduceMotion]);
 
   return (
-    <section className="relative z-30 -mt-[100vh] min-h-screen overflow-hidden border-y border-background/15 bg-foreground px-8 py-24 text-background shadow-[0_-70px_140px_rgba(0,0,0,0.78)] lg:px-16 lg:py-32 xl:px-20">
+    <section className="relative z-30 -mt-[100vh] min-h-screen overflow-hidden border-y border-background/15 bg-foreground px-8 py-28 text-background shadow-[0_-70px_140px_rgba(0,0,0,0.78)] lg:px-16 lg:py-40 xl:px-20">
       <div className="mb-16 flex flex-col lg:flex-row justify-between gap-8 lg:items-end">
         <div>
-          <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-accent block mb-4">
+          <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary block mb-4">
             04 / At a glance
           </span>
           <h2 className="font-display text-4xl lg:text-5xl font-extrabold tracking-tighter max-w-2xl leading-[0.95]">
-            A global force, achieved through uncompromising standards.
+            A corporate group built around aviation discipline.
           </h2>
         </div>
         <p className="max-w-sm text-background/60 text-[12px] leading-relaxed">
-          AeroDefense stands as a prime contractor for defense technology worldwide — built on
-          decades of expertise, massive R&D investments, and a commitment to never failing the
-          mission.
+          Stratos connects aircraft programs, autonomous drones, consulting, research, and
+          responsible resource operations across a growing global footprint.
         </p>
       </div>
 
       <div ref={gridRef} className="grid grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
         {stats.map((s, i) => (
           <div key={s.label} className="group cursor-default">
-            <span className="block text-[10px] uppercase mb-6 text-accent font-bold tracking-widest">
+            <span className="block text-[10px] uppercase mb-6 text-primary font-bold tracking-widest">
               {String(i + 1).padStart(2, "0")}
             </span>
             <div className="font-display text-6xl lg:text-7xl xl:text-8xl tracking-tighter font-extrabold group-hover:translate-x-2 transition-transform duration-500">
               <CountUpStatValue stat={s} start={countsStarted} />
             </div>
-            <div className="h-px w-full bg-background/15 mt-6 group-hover:bg-accent transition-colors" />
+            <div className="mt-6 h-px w-full bg-background/15 transition-colors group-hover:bg-primary" />
             <span className="text-[10px] uppercase tracking-widest mt-4 block opacity-70">
               {s.label}
             </span>
@@ -843,8 +731,8 @@ function Stats() {
       </div>
 
       <p className="mt-20 pt-8 border-t border-background/10 max-w-2xl text-background/40 text-[10px] leading-relaxed italic">
-        * Based on public disclosures and unclassified mission metrics. See AeroDefense Legal Notice
-        for additional information.
+        * Corporate metrics are presented for concept demonstration and will be refined as the full
+        company profile is completed.
       </p>
     </section>
   );
@@ -868,18 +756,18 @@ function BusinessGroups() {
     return (
       <section
         id="groups"
-        className="border-b border-background/15 bg-foreground px-8 py-24 text-background lg:px-16 lg:py-32 xl:px-20"
+        className="border-b border-background/15 bg-foreground px-8 py-28 text-background lg:px-16 lg:py-40 xl:px-20"
       >
         <div className="mb-14 max-w-3xl">
-          <span className="mb-4 block text-[10px] font-bold uppercase tracking-[0.4em] text-accent">
+          <span className="mb-4 block text-[10px] font-bold uppercase tracking-[0.4em] text-primary">
             05 / Operating Divisions
           </span>
           <h2 className="font-display text-4xl font-extrabold leading-[0.95] tracking-tighter lg:text-6xl">
-            Integrated forces pushing the bleeding edge.
+            Businesses connected by aviation discipline.
           </h2>
           <p className="mt-6 max-w-xl text-sm leading-relaxed text-background/65">
-            Four mission divisions operate as one connected aerospace ecosystem, moving from
-            aircraft and autonomy to tactical defense and orbital command networks.
+            Five corporate divisions operate as one connected industrial ecosystem, moving from
+            aircraft and autonomy to consulting, research, and resource operations.
           </p>
         </div>
         <div className="grid gap-5 lg:grid-cols-2">
@@ -892,10 +780,10 @@ function BusinessGroups() {
                 src={division.img}
                 alt={division.eyebrow}
                 loading="lazy"
-                className="aspect-[16/10] w-full object-cover opacity-80"
+                className="aspect-[16/10] w-full object-cover"
               />
               <div className="p-6 lg:p-8">
-                <span className="mb-4 block text-[10px] font-bold uppercase tracking-[0.35em] text-accent">
+                <span className="mb-4 block text-[10px] font-bold uppercase tracking-[0.35em] text-primary">
                   {division.n} / {division.eyebrow}
                 </span>
                 <h3 className="mb-4 font-display text-3xl font-bold leading-none tracking-tight">
@@ -917,28 +805,28 @@ function BusinessGroups() {
       className="relative border-b border-background/15 bg-foreground text-background lg:h-[400vh]"
     >
       <div className="px-8 pb-10 pt-24 lg:hidden">
-        <span className="mb-4 block text-[10px] font-bold uppercase tracking-[0.4em] text-accent">
+        <span className="mb-4 block text-[10px] font-bold uppercase tracking-[0.4em] text-primary">
           05 / Operating Divisions
         </span>
         <h2 className="font-display text-4xl font-extrabold leading-[0.95] tracking-tighter">
-          Integrated forces pushing the bleeding edge.
+          Businesses connected by aviation discipline.
         </h2>
         <p className="mt-6 text-sm leading-relaxed text-background/65">
-          Four mission divisions operate as one connected aerospace ecosystem.
+          Aviation, drones, consulting, research, and mining operate as one corporate ecosystem.
         </p>
       </div>
 
       <div className="relative overflow-hidden lg:sticky lg:top-0 lg:h-screen">
-        <div className="pointer-events-none absolute left-16 top-24 z-20 hidden max-w-xl xl:left-20 lg:block">
-          <span className="mb-4 block text-[10px] font-bold uppercase tracking-[0.4em] text-accent">
+        <div className="pointer-events-none absolute left-16 top-24 z-20 hidden max-w-xl border border-background/15 bg-foreground/28 p-6 shadow-2xl shadow-black/25 backdrop-blur-sm xl:left-20 lg:block">
+          <span className="mb-4 block text-[10px] font-bold uppercase tracking-[0.4em] text-primary">
             05 / Operating Divisions
           </span>
           <h2 className="font-display max-w-3xl text-5xl font-extrabold leading-[0.92] tracking-tighter xl:text-6xl">
-            Integrated forces pushing the bleeding edge.
+            Businesses connected by aviation discipline.
           </h2>
           <p className="mt-6 max-w-md text-sm leading-relaxed text-background/60">
-            Aircraft, autonomy, tactical defense, and orbital command networks engineered as one
-            mission ecosystem.
+            Aircraft, autonomous systems, consulting, research, and mining connected as one
+            corporate system.
           </p>
         </div>
 
@@ -953,14 +841,13 @@ function BusinessGroups() {
                 alt={division.eyebrow}
                 loading={index === 0 ? "eager" : "lazy"}
                 style={{ x: imageParallax }}
-                className="absolute inset-y-0 -left-24 h-full w-[calc(100%+12rem)] scale-105 object-cover opacity-75 transition-transform duration-[1400ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110"
+                className="absolute inset-y-0 -left-24 h-full w-[calc(100%+12rem)] scale-105 object-cover transition-transform duration-[1400ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-foreground via-foreground/70 to-foreground/20" />
-              <div className="absolute inset-0 bg-gradient-to-t from-foreground/85 via-transparent to-foreground/30" />
+              <div className="absolute inset-0 bg-foreground/10" />
 
               <div className="relative z-10 grid h-full grid-cols-12 items-end gap-8 px-16 pb-16 pt-56 xl:px-20">
-                <div className="col-span-6 col-start-7 max-w-2xl">
-                  <span className="mb-6 block text-[10px] font-bold uppercase tracking-[0.35em] text-accent">
+                <div className="col-span-6 col-start-7 max-w-2xl border border-background/15 bg-foreground/28 p-8 shadow-2xl shadow-black/25 backdrop-blur-md">
+                  <span className="mb-6 block text-[10px] font-bold uppercase tracking-[0.35em] text-primary">
                     {division.n} / {division.eyebrow}
                   </span>
                   <h3 className="mb-6 font-display text-5xl font-extrabold leading-[0.9] tracking-tighter xl:text-7xl">
@@ -974,8 +861,8 @@ function BusinessGroups() {
                       {division.signal}
                     </span>
                     <a
-                      href="#platforms"
-                      className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-background transition-colors hover:text-accent"
+                      href={division.href}
+                      className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-background transition-colors hover:text-primary"
                     >
                       {division.cta}
                       <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -999,15 +886,15 @@ function BusinessGroups() {
                     src={division.img}
                     alt={division.eyebrow}
                     loading="lazy"
-                    className="aspect-[4/5] w-full object-cover opacity-80"
+                    className="aspect-[4/5] w-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-transparent to-transparent" />
-                  <span className="absolute bottom-4 left-4 text-[10px] font-bold uppercase tracking-[0.35em] text-accent">
+                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/10 via-transparent to-transparent" />
+                  <span className="absolute bottom-4 left-4 text-[10px] font-bold uppercase tracking-[0.35em] text-primary">
                     {division.n}
                   </span>
                 </div>
-                <div className="p-5">
-                  <span className="mb-3 block text-[10px] font-bold uppercase tracking-widest text-accent">
+                <div className="border-t border-background/10 bg-foreground/35 p-5 backdrop-blur-md">
+                  <span className="mb-3 block text-[10px] font-bold uppercase tracking-widest text-primary">
                     {division.eyebrow}
                   </span>
                   <h3 className="mb-4 font-display text-2xl font-bold leading-none tracking-tight">
@@ -1015,8 +902,8 @@ function BusinessGroups() {
                   </h3>
                   <p className="mb-5 text-xs leading-relaxed text-background/65">{division.body}</p>
                   <a
-                    href="#platforms"
-                    className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-background transition-colors hover:text-accent"
+                    href={division.href}
+                    className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-background transition-colors hover:text-primary"
                   >
                     {division.cta}
                     <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -1030,7 +917,7 @@ function BusinessGroups() {
         <div className="absolute bottom-0 left-0 z-20 hidden h-1 w-full bg-background/10 lg:block">
           <motion.div
             style={{ scaleX: scrollYProgress }}
-            className="h-full w-full origin-left bg-accent"
+            className="h-full w-full origin-left bg-primary"
           />
         </div>
       </div>
@@ -1042,47 +929,51 @@ function Portfolio() {
   return (
     <section
       id="platforms"
-      className="px-8 lg:px-16 xl:px-20 py-24 lg:py-32 border-b border-border"
+      className="px-8 lg:px-16 xl:px-20 py-28 lg:py-40 border-b border-border"
     >
       <div className="mb-16 flex flex-col lg:flex-row justify-between gap-6 lg:items-end">
         <div>
-          <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-accent block mb-4">
-            07 / Advanced Platforms
+          <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary block mb-4">
+            07 / Featured Products
           </span>
           <h2 className="font-display text-4xl lg:text-6xl font-extrabold tracking-tighter leading-[0.95] max-w-3xl">
-            Machines built to dominate.
+            Featured products across the group.
           </h2>
           <p className="max-w-xl mt-6 opacity-70 leading-relaxed">
-            From next-generation stealth fighters to autonomous high-altitude ISR drones. Our
-            platforms are engineered to survive and succeed in the most demanding environments on
-            Earth.
+            From aviation concepts and drone operations to consulting programs, research campuses,
+            and resource intelligence systems, each product opens into a detailed product page.
           </p>
         </div>
         <a
-          href="#"
-          className="self-start lg:self-end text-[11px] uppercase tracking-widest font-bold border-b border-foreground pb-1 hover:text-accent hover:border-accent transition-colors"
+          href="/products"
+          className="self-start lg:self-end text-[11px] uppercase tracking-widest font-bold border-b border-foreground pb-1 hover:text-primary hover:border-primary transition-colors"
         >
-          View all platforms →
+          View all products →
         </a>
       </div>
       <div className="grid grid-cols-12 gap-4 lg:gap-6">
-        {projects.map((p) => (
-          <figure key={p.name} className={`col-span-12 ${p.span}`}>
+        {featuredProducts.map((p) => (
+          <a
+            key={p.slug}
+            href={p.href}
+            className={`group col-span-12 block ${p.span}`}
+            aria-label={`View product details for ${p.name}`}
+          >
             <div className="overflow-hidden bg-muted">
               <img
-                src={p.img}
+                src={p.image}
                 alt={p.name}
                 loading="lazy"
-                className={`w-full ${p.aspect} object-cover hover:scale-[1.03] transition-transform duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)]`}
+                className="h-[340px] w-full object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03] sm:h-[420px] lg:h-[520px]"
               />
             </div>
-            <figcaption className="mt-3 flex flex-wrap justify-between items-baseline gap-x-4 gap-y-1 text-[10px] uppercase tracking-widest">
+            <div className="mt-3 flex flex-wrap justify-between items-baseline gap-x-4 gap-y-1 text-[10px] uppercase tracking-widest">
               <span className="font-bold">{p.name}</span>
-              <span className="opacity-60">
+              <span className="opacity-60 transition-colors group-hover:text-primary group-hover:opacity-100">
                 {p.service} / {p.company}
               </span>
-            </figcaption>
-          </figure>
+            </div>
+          </a>
         ))}
       </div>
     </section>
@@ -1096,24 +987,24 @@ function LatestNews() {
   return (
     <section
       id="news"
-      className="relative overflow-hidden border-b border-border bg-background px-8 py-24 lg:px-16 lg:py-32 xl:px-20"
+      className="relative overflow-hidden border-b border-border bg-background px-8 py-28 lg:px-16 lg:py-40 xl:px-20"
     >
       <div className="mb-12 flex flex-col gap-6 lg:mb-16 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <span className="mb-4 block text-[10px] font-bold uppercase tracking-[0.4em] text-accent">
+          <span className="mb-4 block text-[10px] font-bold uppercase tracking-[0.4em] text-primary">
             06 / Latest Blog
           </span>
           <h2 className="max-w-3xl font-display text-4xl font-extrabold leading-[0.95] tracking-tighter lg:text-6xl">
             Latest blog.
           </h2>
           <p className="mt-6 max-w-xl text-sm leading-relaxed opacity-70">
-            Mission briefings from aircraft programs, autonomous systems, tactical defense, and
-            secure command networks.
+            Corporate briefings from aviation programs, autonomous systems, consulting, research,
+            and resource operations.
           </p>
         </div>
         <a
           href="/news"
-          className="inline-flex items-center gap-2 self-start text-[11px] font-bold uppercase tracking-widest transition-colors hover:text-accent lg:self-end"
+          className="inline-flex items-center gap-2 self-start text-[11px] font-bold uppercase tracking-widest transition-colors hover:text-primary lg:self-end"
         >
           View all blogs
           <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -1143,7 +1034,7 @@ function LatestNews() {
         <div className="flex flex-col justify-between p-6 sm:p-8 lg:col-span-5 lg:p-10 xl:p-12">
           <div>
             <div className="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] font-bold uppercase tracking-widest">
-              <span className="text-accent">{featuredPost.category}</span>
+              <span className="text-primary">{featuredPost.category}</span>
               <span className="text-background/45">{featuredPost.date}</span>
               <span className="text-background/45">{featuredPost.readTime}</span>
             </div>
@@ -1158,7 +1049,7 @@ function LatestNews() {
           </div>
           <a
             href={featuredPost.href}
-            className="mt-10 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-background transition-colors hover:text-accent"
+            className="mt-10 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-background transition-colors hover:text-primary"
           >
             Read featured briefing
             <ArrowUpRight
@@ -1177,7 +1068,7 @@ function LatestNews() {
             whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.25 }}
             transition={{ duration: 0.5, delay: shouldReduceMotion ? 0 : index * 0.08 }}
-            className="group flex flex-col overflow-hidden border border-foreground/10 bg-background transition-colors duration-500 hover:border-accent/60"
+            className="group flex flex-col overflow-hidden border border-foreground/10 bg-surface transition-colors duration-500 hover:border-primary/60"
           >
             <a href={post.href} className="relative block overflow-hidden bg-muted">
               <img
@@ -1190,7 +1081,7 @@ function LatestNews() {
             </a>
             <div className="flex flex-1 flex-col p-5 lg:p-6">
               <div className="mb-5 flex flex-wrap items-center gap-x-3 gap-y-2 text-[10px] font-bold uppercase tracking-widest">
-                <span className="text-accent">{post.category}</span>
+                <span className="text-primary">{post.category}</span>
                 <span className="opacity-45">{post.readTime}</span>
               </div>
               <a href={post.href}>
@@ -1201,7 +1092,7 @@ function LatestNews() {
               <p className="mt-4 flex-1 text-sm leading-relaxed opacity-70">{post.excerpt}</p>
               <a
                 href={post.href}
-                className="mt-7 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest opacity-70 transition-all duration-500 hover:text-accent group-hover:translate-x-1 group-hover:opacity-100"
+                className="mt-7 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest opacity-70 transition-all duration-500 hover:text-primary group-hover:translate-x-1 group-hover:opacity-100"
               >
                 Read blog
                 <ArrowUpRight
@@ -1218,150 +1109,321 @@ function LatestNews() {
 }
 
 function Voices() {
+  const [activeLeaderIndex, setActiveLeaderIndex] = useState(0);
+  const prefersReducedMotion = useReducedMotion();
+  const portraitX = useMotionValue(0);
+  const portraitY = useMotionValue(0);
+  const smoothPortraitX = useSpring(portraitX, { stiffness: 110, damping: 24, mass: 0.6 });
+  const smoothPortraitY = useSpring(portraitY, { stiffness: 110, damping: 24, mass: 0.6 });
+  const activeLeader = corporateLeaders[activeLeaderIndex];
+
+  const activateLeader = (index: number) => {
+    setActiveLeaderIndex(index);
+    portraitX.set(0);
+    portraitY.set(0);
+  };
+
+  const handlePortraitMove = (event: PointerEvent<HTMLDivElement>) => {
+    if (prefersReducedMotion) return;
+
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const x = (event.clientX - bounds.left) / bounds.width - 0.5;
+    const y = (event.clientY - bounds.top) / bounds.height - 0.5;
+    portraitX.set(x * 14);
+    portraitY.set(y * 14);
+  };
+
+  const resetPortrait = () => {
+    portraitX.set(0);
+    portraitY.set(0);
+  };
+
+  const handleLeaderKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
+    let nextIndex = index;
+
+    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+      nextIndex = (index + 1) % corporateLeaders.length;
+    } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+      nextIndex = (index - 1 + corporateLeaders.length) % corporateLeaders.length;
+    } else if (event.key === "Home") {
+      nextIndex = 0;
+    } else if (event.key === "End") {
+      nextIndex = corporateLeaders.length - 1;
+    } else {
+      return;
+    }
+
+    event.preventDefault();
+    activateLeader(nextIndex);
+    document.getElementById(`leader-tab-${corporateLeaders[nextIndex].id}`)?.focus();
+  };
+
   return (
-    <section className="px-8 lg:px-16 xl:px-20 py-24 lg:py-32 border-b border-border">
-      <div className="mb-16">
-        <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-accent block mb-4">
-          08 / Defense Leadership
-        </span>
-        <h2 className="font-display text-4xl lg:text-5xl font-extrabold tracking-tighter leading-[0.95] max-w-3xl">
-          Uncompromised standards from the top down.
-        </h2>
+    <section
+      id="leadership"
+      className="overflow-hidden border-b border-border px-8 py-28 lg:px-16 lg:py-40 xl:px-20"
+    >
+      <div className="mb-14 flex flex-col gap-8 lg:mb-20 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <span className="mb-4 block text-[10px] font-bold uppercase tracking-[0.4em] text-primary">
+            08 / Corporate Leadership
+          </span>
+          <h2 className="max-w-3xl font-display text-4xl font-extrabold leading-[0.95] tracking-tighter sm:text-5xl lg:text-6xl">
+            Leadership for a broader industrial future.
+          </h2>
+        </div>
+        <p className="max-w-md text-sm leading-relaxed opacity-70">
+          The group is led by operators who connect aviation discipline, industrial insight, and
+          responsible growth across every business.
+        </p>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-16">
-        {quotes.map((q) => (
-          <blockquote key={q.name} className="border-t border-foreground/30 pt-6">
-            <p className="font-display text-xl lg:text-2xl leading-snug tracking-tight mb-8 text-balance">
-              “{q.body}”
-            </p>
-            <footer>
-              <div className="font-bold text-[13px]">{q.name}</div>
-              <div className="text-[10px] uppercase tracking-widest opacity-60 mt-1">{q.role}</div>
-            </footer>
-          </blockquote>
-        ))}
+
+      <div className="grid grid-cols-12 gap-y-10 lg:gap-x-12 xl:gap-x-16">
+        <div
+          className="relative col-span-12 aspect-[4/5] overflow-hidden bg-foreground sm:aspect-[16/11] lg:col-span-7 lg:aspect-auto lg:min-h-[720px]"
+          onPointerMove={handlePortraitMove}
+          onPointerLeave={resetPortrait}
+        >
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.img
+              key={activeLeader.id}
+              src={activeLeader.image}
+              alt={activeLeader.imageAlt}
+              initial={prefersReducedMotion ? false : { opacity: 0, scale: 1.04 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={prefersReducedMotion ? undefined : { opacity: 0, scale: 0.985 }}
+              transition={{ duration: prefersReducedMotion ? 0 : 0.65, ease: [0.16, 1, 0.3, 1] }}
+              style={{
+                objectPosition: activeLeader.objectPosition,
+                x: prefersReducedMotion ? 0 : smoothPortraitX,
+                y: prefersReducedMotion ? 0 : smoothPortraitY,
+              }}
+              className="absolute -inset-3 h-[calc(100%+1.5rem)] w-[calc(100%+1.5rem)] max-w-none object-cover"
+            />
+          </AnimatePresence>
+          <div className="absolute left-5 top-5 z-10 bg-background px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-foreground lg:left-7 lg:top-7">
+            {String(activeLeaderIndex + 1).padStart(2, "0")} /{" "}
+            {String(corporateLeaders.length).padStart(2, "0")}
+          </div>
+        </div>
+
+        <div className="col-span-12 flex min-w-0 flex-col lg:col-span-5">
+          <div
+            id="leader-panel"
+            role="tabpanel"
+            aria-labelledby={`leader-tab-${activeLeader.id}`}
+            tabIndex={0}
+            className="outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4 focus-visible:ring-offset-background"
+          >
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={activeLeader.id}
+                initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={prefersReducedMotion ? undefined : { opacity: 0, y: -12 }}
+                transition={{ duration: prefersReducedMotion ? 0 : 0.45, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <div className="mb-9 flex items-center gap-4 text-[10px] font-bold uppercase tracking-[0.3em] text-primary">
+                  Executive perspective
+                  <span className="h-px flex-1 bg-border" aria-hidden="true" />
+                </div>
+                <blockquote>
+                  <p className="text-balance font-display text-3xl font-semibold leading-[1.03] tracking-tight sm:text-4xl xl:text-5xl">
+                    “{activeLeader.body}”
+                  </p>
+                </blockquote>
+                <div className="mt-10 border-t border-border pt-7">
+                  <h3 className="font-display text-3xl font-bold leading-none tracking-tight lg:text-4xl">
+                    {activeLeader.name}
+                  </h3>
+                  <p className="mt-3 text-[10px] font-bold uppercase tracking-widest text-primary">
+                    {activeLeader.role}
+                  </p>
+                  <p className="mt-7 max-w-lg text-sm leading-relaxed opacity-70">
+                    {activeLeader.bio}
+                  </p>
+                  <a
+                    href="/about"
+                    className="mt-8 inline-flex items-center gap-2 border-b border-foreground pb-1 text-[10px] font-bold uppercase tracking-widest transition-colors hover:border-primary hover:text-primary"
+                  >
+                    Meet our leadership
+                    <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+                  </a>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          <div
+            role="tablist"
+            aria-label="Corporate leaders"
+            aria-orientation="horizontal"
+            className="mt-12 flex min-w-0 gap-2 overflow-x-auto border-t border-border pt-5 lg:mt-auto lg:block lg:overflow-visible lg:pt-0"
+          >
+            {corporateLeaders.map((leader, index) => {
+              const isActive = index === activeLeaderIndex;
+
+              return (
+                <button
+                  key={leader.id}
+                  id={`leader-tab-${leader.id}`}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  aria-controls="leader-panel"
+                  tabIndex={isActive ? 0 : -1}
+                  onClick={() => activateLeader(index)}
+                  onMouseEnter={() => activateLeader(index)}
+                  onFocus={() => activateLeader(index)}
+                  onKeyDown={(event) => handleLeaderKeyDown(event, index)}
+                  className={`relative min-w-[220px] shrink-0 border-t px-1 py-5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary lg:block lg:w-full lg:min-w-0 lg:border-t-0 lg:border-b ${
+                    isActive
+                      ? "border-primary text-foreground"
+                      : "border-border text-foreground/45 hover:text-foreground"
+                  }`}
+                >
+                  <span className="flex items-center justify-between gap-5">
+                    <span>
+                      <span className="block font-display text-xl font-bold leading-none tracking-tight">
+                        {leader.name}
+                      </span>
+                      <span className="mt-2 block text-[9px] font-bold uppercase tracking-widest">
+                        {leader.role}
+                      </span>
+                    </span>
+                    <span className="text-[10px] font-bold tracking-widest">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                  </span>
+                  <span className="absolute bottom-0 left-0 h-px w-full overflow-hidden bg-border">
+                    <motion.span
+                      className="block h-full bg-primary"
+                      initial={false}
+                      animate={{ scaleX: isActive ? 1 : 0 }}
+                      transition={{ duration: prefersReducedMotion ? 0 : 0.45 }}
+                      style={{ transformOrigin: "left" }}
+                    />
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </section>
   );
 }
 
 function Closing() {
+  const [activePathIndex, setActivePathIndex] = useState(0);
+  const prefersReducedMotion = useReducedMotion();
+  const activePath = closingPaths[activePathIndex];
+
   return (
-    <section id="contact" className="px-8 lg:px-16 xl:px-20 py-32 lg:py-40 text-center relative">
-      <div className="max-w-4xl mx-auto space-y-10">
-        <span className="text-accent font-bold uppercase tracking-[0.4em] text-[11px]">
-          09 / Securing the future
-        </span>
-        <h2 className="font-display text-5xl lg:text-7xl xl:text-8xl font-extrabold tracking-tighter leading-[0.9] text-balance">
-          Partnering for global security.
-        </h2>
-        <p className="max-w-xl mx-auto opacity-75 leading-relaxed text-base">
-          Our technology ensures that allied forces can operate with absolute impunity anywhere on
-          earth. When the mission cannot fail, defense ministries worldwide turn to AeroDefense.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
-          <a
-            href="#"
-            className="px-10 py-4 bg-foreground text-background font-bold uppercase tracking-widest text-[11px] hover:bg-accent transition-colors duration-300 w-full sm:w-auto"
-          >
-            Partner with AeroDefense
-          </a>
-          <a
-            href="#"
-            className="px-10 py-4 border border-foreground/30 hover:border-foreground font-bold uppercase tracking-widest text-[11px] transition-colors w-full sm:w-auto"
-          >
-            Explore Contracting
-          </a>
+    <section
+      id="contact"
+      className="brand-dark overflow-hidden bg-foreground text-background lg:min-h-screen"
+    >
+      <div className="grid min-h-[900px] lg:min-h-screen lg:grid-cols-[1.08fr_0.92fr]">
+        <div className="relative min-h-[620px] overflow-hidden lg:min-h-screen">
+          <AnimatePresence mode="sync" initial={false}>
+            <motion.img
+              key={activePath.image}
+              src={activePath.image}
+              alt=""
+              initial={prefersReducedMotion ? false : { opacity: 0, scale: 1.04 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={prefersReducedMotion ? undefined : { opacity: 0 }}
+              transition={{ duration: prefersReducedMotion ? 0 : 0.8, ease: [0.16, 1, 0.3, 1] }}
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+          </AnimatePresence>
+          <div className="absolute inset-0 bg-foreground/38" aria-hidden="true" />
+
+          <div className="relative z-10 flex h-full min-h-[620px] flex-col px-8 py-20 lg:min-h-screen lg:px-16 lg:py-24 xl:px-20">
+            <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary">
+              09 / Building the future
+            </span>
+            <div className="mt-28 max-w-4xl border-t border-white/40 pt-7 lg:mt-40">
+              <span className="text-[10px] font-bold uppercase tracking-[0.35em] text-primary">
+                {activePath.eyebrow}
+              </span>
+              <h2 className="mt-6 font-display text-6xl font-extrabold leading-[0.88] tracking-normal text-balance sm:text-7xl lg:text-8xl">
+                Build what moves next.
+              </h2>
+              <p className="mt-7 max-w-xl text-sm leading-relaxed text-white/80 lg:text-base">
+                Choose where to begin with Stratos. Explore a product, engage a specialist service,
+                or bring us into the next program.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col justify-center border-l border-white/15 px-8 py-20 lg:px-12 lg:py-24 xl:px-16">
+          <div className="mb-10 flex items-end justify-between border-b border-white/15 pb-6">
+            <div>
+              <span className="text-[9px] font-bold uppercase tracking-[0.35em] text-primary">
+                Choose a path
+              </span>
+              <p className="mt-3 max-w-sm text-xs leading-relaxed text-background/55">
+                Each route leads directly into the next useful step.
+              </p>
+            </div>
+            <span className="text-[10px] font-bold tracking-widest text-background/45">
+              {String(activePathIndex + 1).padStart(2, "0")} / 03
+            </span>
+          </div>
+
+          <div className="border-t border-white/15">
+            {closingPaths.map((path, index) => {
+              const isActive = index === activePathIndex;
+
+              return (
+                <a
+                  key={path.title}
+                  href={path.href}
+                  onMouseEnter={() => setActivePathIndex(index)}
+                  onFocus={() => setActivePathIndex(index)}
+                  className={`group block border-b border-white/15 py-8 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary lg:py-10 ${
+                    isActive ? "text-white" : "text-background/45 hover:text-background"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-8">
+                    <div>
+                      <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-primary">
+                        {path.number} / {path.eyebrow}
+                      </span>
+                      <h3 className="mt-4 max-w-lg font-display text-3xl font-bold leading-[0.96] tracking-normal sm:text-4xl">
+                        {path.title}
+                      </h3>
+                      <p
+                        className={`mt-5 max-w-lg text-xs leading-relaxed transition-colors lg:text-sm ${
+                          isActive ? "text-background/70" : "text-background/40"
+                        }`}
+                      >
+                        {path.body}
+                      </p>
+                    </div>
+                    <ArrowUpRight
+                      className={`mt-1 h-5 w-5 shrink-0 transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1 ${
+                        isActive ? "text-primary" : "text-background/35"
+                      }`}
+                      aria-hidden="true"
+                    />
+                  </div>
+                  <span
+                    className={`mt-7 inline-block text-[9px] font-bold uppercase tracking-widest transition-opacity ${
+                      isActive ? "opacity-100" : "opacity-0"
+                    }`}
+                  >
+                    {path.cta}
+                  </span>
+                </a>
+              );
+            })}
+          </div>
         </div>
       </div>
     </section>
-  );
-}
-
-function Footer() {
-  return (
-    <footer className="border-t border-border bg-muted/40 px-8 lg:px-16 xl:px-20 py-16">
-      <div className="grid grid-cols-12 gap-y-8 lg:gap-8 mb-16">
-        <div className="col-span-12 lg:col-span-5">
-          <div className="flex items-center gap-3 mb-6">
-            <span className="font-display font-extrabold text-2xl tracking-tighter">
-              AERODEFENSE
-            </span>
-            <span className="text-[9px] border border-foreground/25 px-1.5 py-0.5 uppercase tracking-widest">
-              Corp.
-            </span>
-          </div>
-          <p className="max-w-sm opacity-70 text-[12px] leading-relaxed">
-            A prime defense contractor delivering next-generation aerospace systems, autonomous
-            flight technologies, and multi-domain superiority.
-          </p>
-        </div>
-        <div className="col-span-6 lg:col-span-2">
-          <h5 className="text-[10px] uppercase tracking-widest opacity-50 mb-5">Capabilities</h5>
-          <ul className="space-y-3 text-[12px] font-medium">
-            <li>
-              <a href="#" className="hover:text-accent transition-colors">
-                Advanced Propulsion
-              </a>
-            </li>
-            <li>
-              <a href="#" className="hover:text-accent transition-colors">
-                Autonomous ISR
-              </a>
-            </li>
-            <li>
-              <a href="#" className="hover:text-accent transition-colors">
-                Stealth Technology
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div className="col-span-6 lg:col-span-2">
-          <h5 className="text-[10px] uppercase tracking-widest opacity-50 mb-5">Divisions</h5>
-          <ul className="space-y-3 text-[12px] font-medium">
-            <li>
-              <a href="#" className="hover:text-accent transition-colors">
-                Aeronautics
-              </a>
-            </li>
-            <li>
-              <a href="#" className="hover:text-accent transition-colors">
-                Defense Systems
-              </a>
-            </li>
-            <li>
-              <a href="#" className="hover:text-accent transition-colors">
-                Space Exploration
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div className="col-span-12 lg:col-span-3">
-          <h5 className="text-[10px] uppercase tracking-widest opacity-50 mb-5">Headquarters</h5>
-          <p className="text-[12px] opacity-70 leading-relaxed">
-            1 Aerospace Blvd.
-            <br />
-            Washington, D.C. 20001
-          </p>
-        </div>
-      </div>
-      <div className="pt-6 border-t border-border flex flex-col md:flex-row justify-between gap-4 text-[10px] uppercase tracking-widest opacity-60">
-        <div className="flex gap-6">
-          <span>© 2026 AeroDefense Corp.</span>
-          <span className="hidden sm:inline">DC / LDN / TYO</span>
-        </div>
-        <div className="flex gap-8">
-          <a href="#" className="hover:text-accent transition-colors">
-            Governance
-          </a>
-          <a href="#" className="hover:text-accent transition-colors">
-            Legal Notice
-          </a>
-          <a href="#" className="hover:text-accent transition-colors">
-            Privacy
-          </a>
-        </div>
-      </div>
-    </footer>
   );
 }

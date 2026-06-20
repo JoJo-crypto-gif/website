@@ -58,7 +58,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
           </button>
           <a
             href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
           >
             Go home
           </a>
@@ -73,22 +73,22 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "AeroDefense Corp. | Advanced Aerospace & Security" },
+      { title: "Stratos Group | Aviation-Led Corporate Group" },
       {
         name: "description",
         content:
-          "Pioneering the future of aerospace and defense. AeroDefense Corp. delivers next-generation autonomous systems and advanced manufacturing for global security.",
+          "Stratos Group operates across aviation, drones, consulting, research, and responsible resource operations.",
       },
-      { name: "author", content: "AeroDefense Corp." },
-      { property: "og:title", content: "AeroDefense Corp." },
+      { name: "author", content: "Stratos Group" },
+      { property: "og:title", content: "Stratos Group" },
       {
         property: "og:description",
         content:
-          "Pioneering the future of aerospace and defense. AeroDefense Corp. delivers next-generation autonomous systems and advanced manufacturing for global security.",
+          "Stratos Group operates across aviation, drones, consulting, research, and responsible resource operations.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@AeroDefense" },
+      { name: "twitter:site", content: "@StratosGroup" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },

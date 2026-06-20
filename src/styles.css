@@ -3,37 +3,63 @@
 @import "tw-animate-css";
 
 @theme {
-  --color-background: hsl(40 8% 90%);
-  --color-foreground: hsl(210 10% 12%);
-  --color-accent: hsl(22 60% 35%);
-  --color-accent-foreground: hsl(40 8% 96%);
-  --color-border: hsl(210 10% 12% / 0.15);
-  --color-muted: hsl(40 6% 82%);
-  --color-muted-foreground: hsl(210 10% 35%);
+  --color-background: #f7f9fc;
+  --color-surface: #ffffff;
+  --color-foreground: #071d34;
+  --color-primary: #0b4f8a;
+  --color-primary-foreground: #ffffff;
+  --color-accent: #f4c430;
+  --color-accent-foreground: #071d34;
+  --color-border: rgb(7 29 52 / 0.15);
+  --color-muted: #e7eef5;
+  --color-muted-foreground: #40546a;
   --font-display: "Inter Tight", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
   --ease-signature: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes mask-reveal {
-  from { clip-path: inset(0 100% 0 0); }
-  to { clip-path: inset(0 0 0 0); }
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
 }
 @keyframes slide-up-fade {
-  from { opacity: 0; transform: translateY(40px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 @keyframes line-grow {
-  from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
 }
 
-@utility animate-mask { animation: mask-reveal 1.2s var(--ease-signature) both; }
-@utility animate-reveal { animation: slide-up-fade 1s var(--ease-signature) both; }
-@utility animate-line { animation: line-grow 1.4s var(--ease-signature) both; transform-origin: left; }
+@utility animate-mask {
+  animation: mask-reveal 1.2s var(--ease-signature) both;
+}
+@utility animate-reveal {
+  animation: slide-up-fade 1s var(--ease-signature) both;
+}
+@utility animate-line {
+  animation: line-grow 1.4s var(--ease-signature) both;
+  transform-origin: left;
+}
 
 @layer base {
-  * { border-color: var(--color-border); }
+  * {
+    border-color: var(--color-border);
+  }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
@@ -45,5 +71,15 @@
   ::selection {
     background-color: var(--color-accent);
     color: var(--color-accent-foreground);
+  }
+}
+
+@layer utilities {
+  /* Dark brand surfaces use yellow for the same semantic highlight roles. */
+  .bg-foreground.text-background,
+  .bg-foreground.text-white,
+  .brand-dark {
+    --color-primary: var(--color-accent);
+    --color-primary-foreground: var(--color-accent-foreground);
   }
 }
