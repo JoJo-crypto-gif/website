@@ -1,21 +1,49 @@
-import { ArrowUpRight, Mail, MapPin, Menu, Phone, X } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { ArrowUpRight, ChevronDown, Mail, MapPin, Menu, Phone, X } from "lucide-react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { businessUnits, corporateNav } from "@/lib/corporate-data";
 
 export function CorporateNav({ overlay = false }: { overlay?: boolean }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeServiceIndex, setActiveServiceIndex] = useState(0);
+  const [servicesMenuOpen, setServicesMenuOpen] = useState(false);
+  const servicesCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const activeService = businessUnits[activeServiceIndex];
   const navTone = overlay
     ? "border-white/10 bg-foreground/35 text-white"
     : "border-border bg-background/92 text-foreground";
   const panelTone = overlay
     ? "border-white/10 bg-foreground text-background shadow-2xl"
     : "border-border bg-surface text-foreground shadow-2xl";
+  const megaPanelTone = "brand-light border-border bg-background text-foreground shadow-2xl";
   const secondaryNav = [
     { label: "Innovation", href: "/innovation" },
     { label: "Sustainability", href: "/sustainability" },
     { label: "Careers", href: "/careers" },
   ];
+
+  const openServicesMenu = () => {
+    if (servicesCloseTimer.current) {
+      clearTimeout(servicesCloseTimer.current);
+      servicesCloseTimer.current = null;
+    }
+    setServicesMenuOpen(true);
+  };
+
+  const scheduleServicesMenuClose = () => {
+    if (servicesCloseTimer.current) clearTimeout(servicesCloseTimer.current);
+    servicesCloseTimer.current = setTimeout(() => {
+      setServicesMenuOpen(false);
+      servicesCloseTimer.current = null;
+    }, 180);
+  };
+
+  useEffect(
+    () => () => {
+      if (servicesCloseTimer.current) clearTimeout(servicesCloseTimer.current);
+    },
+    [],
+  );
 
   return (
     <nav
@@ -38,31 +66,136 @@ export function CorporateNav({ overlay = false }: { overlay?: boolean }) {
             .filter((item) => item.href !== "/contact")
             .map((item) =>
               item.href === "/services" ? (
-                <div key={item.href} className="group">
-                  <a href={item.href} className="transition-colors hover:text-primary">
+                <div
+                  key={item.href}
+                  className="group"
+                  onMouseEnter={openServicesMenu}
+                  onMouseLeave={scheduleServicesMenuClose}
+                >
+                  <a
+                    href={item.href}
+                    aria-expanded={servicesMenuOpen}
+                    className="inline-flex items-center gap-1.5 transition-colors hover:text-primary"
+                  >
                     {item.label}
+                    <ChevronDown
+                      className="h-3 w-3 transition-transform duration-300 group-hover:rotate-180 group-focus-within:rotate-180"
+                      aria-hidden="true"
+                    />
                   </a>
                   <div
-                    className={`pointer-events-none fixed left-1/2 top-[65px] w-[min(64rem,calc(100vw-5rem))] -translate-x-1/2 border opacity-0 transition duration-300 group-focus-within:pointer-events-auto group-focus-within:opacity-100 group-hover:pointer-events-auto group-hover:opacity-100 ${panelTone}`}
+                    onMouseEnter={openServicesMenu}
+                    onMouseLeave={scheduleServicesMenuClose}
+                    className={`fixed left-1/2 top-[65px] w-[min(76rem,calc(100vw-4rem))] -translate-x-1/2 border transition duration-300 group-focus-within:pointer-events-auto group-focus-within:translate-y-0 group-focus-within:opacity-100 ${
+                      servicesMenuOpen
+                        ? "pointer-events-auto translate-y-0 opacity-100"
+                        : "pointer-events-none translate-y-2 opacity-0"
+                    } ${megaPanelTone}`}
                   >
-                    <div className="grid grid-cols-5 gap-px bg-border/50">
-                      {businessUnits.map((unit) => (
+                    <div className="h-1 bg-accent" aria-hidden="true" />
+                    <div className="grid min-h-[390px] grid-cols-[14rem_minmax(0,1fr)_minmax(20rem,26rem)]">
+                      <div className="flex flex-col justify-between border-r border-border p-7">
+                        <div>
+                          <span className="text-[9px] font-bold uppercase tracking-[0.35em] text-primary">
+                            Service portfolio
+                          </span>
+                          <h2 className="mt-5 font-display text-3xl font-extrabold leading-none tracking-normal">
+                            Expertise for complex operations.
+                          </h2>
+                          <p className="mt-5 text-[11px] font-normal normal-case leading-relaxed tracking-normal text-muted-foreground">
+                            Explore specialist teams across aviation, autonomous systems, advisory,
+                            research, and resource operations.
+                          </p>
+                        </div>
                         <a
-                          key={unit.slug}
-                          href={unit.href}
-                          className="group/item bg-surface p-5 text-foreground transition-colors hover:bg-muted"
+                          href="/services"
+                          className="inline-flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest text-primary transition-colors hover:text-foreground"
                         >
-                          <span className="mb-4 block text-[9px] font-bold uppercase tracking-[0.3em] text-primary">
-                            {unit.eyebrow}
-                          </span>
-                          <span className="mb-3 block font-display text-xl font-bold leading-none tracking-tight">
-                            {unit.name}
-                          </span>
-                          <span className="block text-[11px] font-normal normal-case leading-relaxed tracking-normal opacity-65">
-                            {unit.summary}
-                          </span>
+                          View all services
+                          <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
                         </a>
-                      ))}
+                      </div>
+
+                      <div className="px-5 py-4">
+                        {businessUnits.map((unit, index) => {
+                          const isActive = index === activeServiceIndex;
+
+                          return (
+                            <a
+                              key={unit.slug}
+                              href={unit.href}
+                              onMouseEnter={() => setActiveServiceIndex(index)}
+                              onFocus={() => setActiveServiceIndex(index)}
+                              className={`group/item grid min-h-[70px] grid-cols-[2.5rem_1fr_auto] items-center border-b border-border px-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary ${
+                                isActive ? "bg-muted" : "hover:bg-muted/60"
+                              }`}
+                            >
+                              <span className="text-[9px] font-bold tracking-widest text-primary">
+                                {String(index + 1).padStart(2, "0")}
+                              </span>
+                              <span>
+                                <span className="block text-[8px] font-bold uppercase tracking-[0.25em] text-muted-foreground">
+                                  {unit.eyebrow}
+                                </span>
+                                <span className="mt-1.5 block font-display text-xl font-bold leading-none tracking-normal">
+                                  {unit.name}
+                                </span>
+                              </span>
+                              <ArrowUpRight
+                                className={`h-4 w-4 transition-all duration-300 ${
+                                  isActive
+                                    ? "translate-x-0 opacity-100"
+                                    : "-translate-x-1 opacity-20 group-hover/item:translate-x-0 group-hover/item:opacity-100"
+                                }`}
+                                aria-hidden="true"
+                              />
+                            </a>
+                          );
+                        })}
+                      </div>
+
+                      <div className="relative overflow-hidden bg-foreground text-white">
+                        <AnimatePresence mode="wait" initial={false}>
+                          <motion.img
+                            key={activeService.slug}
+                            src={activeService.image}
+                            alt={activeService.name}
+                            initial={{ opacity: 0, scale: 1.025 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.4 }}
+                            className="absolute inset-0 h-full w-full object-cover"
+                          />
+                        </AnimatePresence>
+                        <div className="absolute inset-0 bg-foreground/30" aria-hidden="true" />
+                        <AnimatePresence mode="wait" initial={false}>
+                          <motion.div
+                            key={`${activeService.slug}-copy`}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -8 }}
+                            transition={{ duration: 0.3 }}
+                            className="absolute inset-x-0 bottom-0 border-t border-white/25 bg-foreground/55 p-6 backdrop-blur-sm"
+                          >
+                            <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-accent">
+                              {activeService.eyebrow}
+                            </span>
+                            <p className="mt-3 text-[11px] font-normal normal-case leading-relaxed tracking-normal text-white/80">
+                              {activeService.summary}
+                            </p>
+                            <div className="mt-4 flex flex-wrap gap-2">
+                              {activeService.stats.map((stat) => (
+                                <span
+                                  key={stat}
+                                  className="border border-white/25 px-2 py-1 text-[8px] font-bold uppercase tracking-widest text-white/75"
+                                >
+                                  {stat}
+                                </span>
+                              ))}
+                            </div>
+                          </motion.div>
+                        </AnimatePresence>
+                      </div>
                     </div>
                   </div>
                 </div>

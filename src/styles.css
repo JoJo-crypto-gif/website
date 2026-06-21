@@ -82,4 +82,9 @@
     --color-primary: var(--color-accent);
     --color-primary-foreground: var(--color-accent-foreground);
   }
+
+  .brand-light {
+    --color-primary: #0b4f8a;
+    --color-primary-foreground: #ffffff;
+  }
 }
