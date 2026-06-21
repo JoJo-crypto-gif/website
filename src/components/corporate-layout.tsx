@@ -139,48 +139,48 @@ export function CorporateNav({ overlay = false }: { overlay?: boolean }) {
           >
             <div className="px-6 py-7">
               <div className="grid gap-3">
-            {corporateNav.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className="flex items-center justify-between border-b border-current/10 py-3 text-[12px] font-bold uppercase tracking-widest"
-              >
-                {item.label}
-                <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
-              </a>
-            ))}
-          </div>
-          <div className="mt-7 grid gap-3 border-t border-current/10 pt-6">
-            <span className="text-[10px] font-bold uppercase tracking-[0.35em] text-primary">
-              Service areas
-            </span>
-            <div className="grid gap-2">
-              {businessUnits.map((unit) => (
-                <a
-                  key={unit.slug}
-                  href={unit.href}
-                  className="text-sm font-medium leading-tight opacity-80 transition-colors hover:text-primary hover:opacity-100"
-                >
-                  {unit.name}
-                </a>
-              ))}
-            </div>
-          </div>
-          <div className="mt-7 grid gap-3 border-t border-current/10 pt-6">
-            <span className="text-[10px] font-bold uppercase tracking-[0.35em] text-primary">
-              More from the group
-            </span>
-            <div className="grid gap-2">
-              {secondaryNav.map((item) => (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  className="text-sm font-medium leading-tight opacity-80 transition-colors hover:text-primary hover:opacity-100"
-                >
-                  {item.label}
-                </a>
-              ))}
-            </div>
+                {corporateNav.map((item) => (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    className="flex items-center justify-between border-b border-current/10 py-3 text-[12px] font-bold uppercase tracking-widest"
+                  >
+                    {item.label}
+                    <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+                  </a>
+                ))}
+              </div>
+              <div className="mt-7 grid gap-3 border-t border-current/10 pt-6">
+                <span className="text-[10px] font-bold uppercase tracking-[0.35em] text-primary">
+                  Service areas
+                </span>
+                <div className="grid gap-2">
+                  {businessUnits.map((unit) => (
+                    <a
+                      key={unit.slug}
+                      href={unit.href}
+                      className="text-sm font-medium leading-tight opacity-80 transition-colors hover:text-primary hover:opacity-100"
+                    >
+                      {unit.name}
+                    </a>
+                  ))}
+                </div>
+              </div>
+              <div className="mt-7 grid gap-3 border-t border-current/10 pt-6">
+                <span className="text-[10px] font-bold uppercase tracking-[0.35em] text-primary">
+                  More from the group
+                </span>
+                <div className="grid gap-2">
+                  {secondaryNav.map((item) => (
+                    <a
+                      key={item.href}
+                      href={item.href}
+                      className="text-sm font-medium leading-tight opacity-80 transition-colors hover:text-primary hover:opacity-100"
+                    >
+                      {item.label}
+                    </a>
+                  ))}
+                </div>
               </div>
             </div>
           </motion.div>
@@ -426,11 +426,19 @@ export function SectionIntro({
   );
 }
 
-export function LinkArrow({ href, children }: { href: string; children: ReactNode }) {
+export function LinkArrow({
+  href,
+  children,
+  className = "",
+}: {
+  href: string;
+  children: ReactNode;
+  className?: string;
+}) {
   return (
     <a
       href={href}
-      className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-colors hover:text-primary"
+      className={`inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-colors hover:text-primary ${className}`}
     >
       {children}
       <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />

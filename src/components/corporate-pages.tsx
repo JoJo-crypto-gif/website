@@ -30,6 +30,7 @@ import {
   PackageCheck,
   Phone,
   RotateCcw,
+  Search,
   Send,
   ShieldCheck,
   UsersRound,
@@ -608,54 +609,471 @@ export function NewsDetailPage({ slug }: { slug: string }) {
 }
 
 export function ProductsOverviewPage() {
+  const [activeProductIndex, setActiveProductIndex] = useState(0);
+  const [activeCategory, setActiveCategory] = useState("All products");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activePathIndex, setActivePathIndex] = useState(0);
+  const prefersReducedMotion = useReducedMotion();
+  const activeProduct = featuredProducts[activeProductIndex];
+
+  const categories = ["All products", ...featuredProducts.map((product) => product.category)];
+  const uniqueCategories = categories.filter(
+    (category, index) => categories.indexOf(category) === index,
+  );
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const filteredProducts = featuredProducts.filter((product) => {
+    const matchesCategory =
+      activeCategory === "All products" || product.category === activeCategory;
+    const searchable =
+      `${product.name} ${product.category} ${product.service} ${product.summary}`.toLowerCase();
+    return matchesCategory && (!normalizedQuery || searchable.includes(normalizedQuery));
+  });
+
+  const productPaths = [
+    {
+      id: "mobility",
+      label: "Move people and fleets",
+      eyebrow: "Fleet & mobility",
+      title: "Plan the aircraft and the operating system around it.",
+      body: "Connect aircraft strategy, lifecycle support, maintenance intelligence, and group-wide operational visibility.",
+      productSlugs: ["aeroline-a-90", "aerodigital-network"],
+    },
+    {
+      id: "intelligence",
+      label: "Inspect and understand assets",
+      eyebrow: "Field intelligence",
+      title: "See remote assets, terrain, and change more clearly.",
+      body: "Combine autonomous inspection, aerial mapping, site intelligence, and governed field data for faster operational decisions.",
+      productSlugs: ["skygrid-uas", "terrasight"],
+    },
+    {
+      id: "transformation",
+      label: "Transform complex operations",
+      eyebrow: "Research & transformation",
+      title: "Move from an operating challenge to tested capability.",
+      body: "Bring advisory, applied research, prototypes, governance, and implementation planning into one practical modernization pathway.",
+      productSlugs: ["fleetops-advisory", "research-campus-04"],
+    },
+  ];
+
+  const activePath = productPaths[activePathIndex];
+  const pathProducts = activePath.productSlugs
+    .map((slug) => featuredProducts.find((product) => product.slug === slug))
+    .filter((product): product is (typeof featuredProducts)[number] => Boolean(product));
+  const pathLeadProduct = pathProducts[0];
+
+  const handleProductKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
+    let nextIndex = index;
+
+    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+      nextIndex = (index + 1) % featuredProducts.length;
+    } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+      nextIndex = (index - 1 + featuredProducts.length) % featuredProducts.length;
+    } else if (event.key === "Home") {
+      nextIndex = 0;
+    } else if (event.key === "End") {
+      nextIndex = featuredProducts.length - 1;
+    } else {
+      return;
+    }
+
+    event.preventDefault();
+    setActiveProductIndex(nextIndex);
+    document.getElementById(`product-stage-tab-${featuredProducts[nextIndex].slug}`)?.focus();
+  };
+
   return (
-    <CorporatePageShell
-      eyebrow="Featured Products"
-      title="Products built across the group."
-      intro="A portfolio of aviation, drones, consulting, research, mining, and connected-operations programs built to demonstrate practical value across the company."
-    >
-      <section className="px-8 py-24 lg:px-16 lg:py-32 xl:px-20">
-        <SectionIntro
-          eyebrow="Product portfolio"
-          title="Aviation-led work, expanded across industry."
-          body="Each featured product has a dedicated page for its context, specifications, media, capabilities, and related business links."
-        />
-        <div className="grid grid-cols-12 gap-5 lg:gap-6">
-          {featuredProducts.map((product) => (
-            <a
-              key={product.slug}
-              href={product.href}
-              className={`group col-span-12 block overflow-hidden border border-border bg-surface transition-colors hover:border-primary/60 ${product.span}`}
-            >
-              <div className="overflow-hidden bg-muted">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  loading="lazy"
-                  className="h-[340px] w-full object-cover transition duration-[1200ms] group-hover:scale-[1.04] sm:h-[420px] lg:h-[520px]"
-                />
-              </div>
-              <div className="p-6 lg:p-8">
-                <div className="mb-5 flex flex-wrap gap-3 text-[10px] font-bold uppercase tracking-widest">
-                  <span className="text-primary">{product.category}</span>
-                  <span className="opacity-45">{product.service}</span>
-                </div>
-                <h2 className="font-display text-3xl font-bold leading-none tracking-tight lg:text-5xl">
-                  {product.name}
-                </h2>
-                <p className="mt-5 max-w-2xl text-sm leading-relaxed opacity-70">
-                  {product.summary}
-                </p>
-                <span className="mt-8 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-colors group-hover:text-primary">
-                  View product
-                  <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+    <main className="min-h-screen overflow-x-clip bg-background font-mono text-foreground">
+      <CorporateNav overlay />
+
+      <header className="relative flex min-h-[90svh] flex-col justify-end overflow-hidden bg-foreground text-white">
+        <AnimatePresence mode="sync" initial={false}>
+          <motion.img
+            key={activeProduct.slug}
+            src={activeProduct.image}
+            alt=""
+            aria-hidden="true"
+            loading={activeProductIndex === 0 ? "eager" : "lazy"}
+            initial={prefersReducedMotion ? false : { opacity: 0, scale: 1.025 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={prefersReducedMotion ? undefined : { opacity: 0 }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.65 }}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        </AnimatePresence>
+        <div className="absolute inset-0 bg-foreground/55" aria-hidden="true" />
+
+        <div className="relative z-10 px-8 pb-8 pt-36 lg:px-16 lg:pb-10 xl:px-20">
+          <div className="grid grid-cols-12 items-end gap-y-8">
+            <div className="col-span-12 lg:col-span-8">
+              <span className="mb-5 block text-[10px] font-bold uppercase tracking-[0.4em] text-accent">
+                Products / Engineered systems
+              </span>
+              <h1 className="max-w-5xl font-display text-6xl font-extrabold leading-[0.9] sm:text-7xl lg:text-8xl xl:text-9xl">
+                Stratos products.
+              </h1>
+            </div>
+            <div className="col-span-12 lg:col-span-4 lg:pl-8">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={activeProduct.slug}
+                  initial={prefersReducedMotion ? false : { opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={prefersReducedMotion ? undefined : { opacity: 0, y: -8 }}
+                  transition={{ duration: prefersReducedMotion ? 0 : 0.4 }}
+                  className="border-l border-white/35 bg-foreground/25 py-2 pl-6 backdrop-blur-sm"
+                >
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-accent">
+                    {activeProduct.category} / {activeProduct.service}
+                  </span>
+                  <h2 className="mt-3 font-display text-3xl font-bold leading-none lg:text-4xl">
+                    {activeProduct.name}
+                  </h2>
+                  <p className="mt-4 max-w-md text-xs leading-relaxed text-white/75 lg:text-sm">
+                    {activeProduct.summary}
+                  </p>
+                  <LinkArrow
+                    href={activeProduct.href}
+                    className="mt-6 text-white hover:text-accent"
+                  >
+                    Explore product
+                  </LinkArrow>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </div>
+        </div>
+
+        <div
+          role="tablist"
+          aria-label="Featured product stage"
+          className="relative z-10 flex w-full snap-x overflow-x-auto border-t border-white/25 bg-foreground/35 backdrop-blur-sm lg:grid lg:grid-cols-6"
+        >
+          {featuredProducts.map((product, index) => {
+            const isActive = index === activeProductIndex;
+
+            return (
+              <button
+                key={product.slug}
+                id={`product-stage-tab-${product.slug}`}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                tabIndex={isActive ? 0 : -1}
+                onClick={() => setActiveProductIndex(index)}
+                onFocus={() => setActiveProductIndex(index)}
+                onMouseEnter={() => setActiveProductIndex(index)}
+                onKeyDown={(event) => handleProductKeyDown(event, index)}
+                className={`min-h-24 w-40 shrink-0 snap-start border-r border-white/20 px-5 py-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent lg:w-auto ${
+                  isActive
+                    ? "bg-accent text-accent-foreground"
+                    : "text-white/60 hover:bg-white/10 hover:text-white"
+                }`}
+              >
+                <span className="block text-[9px] font-bold tracking-widest opacity-55">
+                  {String(index + 1).padStart(2, "0")}
                 </span>
-              </div>
-            </a>
-          ))}
+                <span className="mt-3 block font-display text-lg font-bold leading-none">
+                  {product.name}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </header>
+
+      <section className="border-b border-border px-8 py-20 lg:px-16 lg:py-28 xl:px-20">
+        <div className="grid grid-cols-12 gap-y-12">
+          <div className="col-span-12 lg:col-span-4">
+            <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary">
+              One portfolio
+            </span>
+            <h2 className="mt-5 max-w-sm font-display text-4xl font-extrabold leading-none sm:text-5xl">
+              Products connected to real operations.
+            </h2>
+          </div>
+          <div className="col-span-12 lg:col-span-7 lg:col-start-6">
+            <p className="max-w-3xl font-display text-2xl font-medium leading-tight lg:text-4xl">
+              Aircraft, autonomous systems, advisory programs, research environments, and digital
+              platforms are developed around the work customers need to perform.
+            </p>
+            <div className="mt-12 grid gap-8 border-t border-border pt-8 sm:grid-cols-3">
+              {[
+                ["06", "Featured product systems"],
+                ["05", "Connected business units"],
+                ["01", "Integrated operating model"],
+              ].map(([value, label]) => (
+                <div key={label}>
+                  <span className="font-display text-4xl font-bold text-primary">{value}</span>
+                  <p className="mt-2 text-[10px] font-bold uppercase tracking-widest opacity-55">
+                    {label}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
-    </CorporatePageShell>
+
+      <section
+        id="product-portfolio"
+        className="scroll-mt-20 px-8 py-24 lg:px-16 lg:py-36 xl:px-20"
+      >
+        <SectionIntro
+          eyebrow="Explore the portfolio"
+          title="Find the product that fits the mission."
+          body="Filter by business or search by product, capability, and operating need. Every product opens into a dedicated specifications and media page."
+        />
+
+        <div className="mb-12 flex flex-col gap-6 border-y border-border py-6 lg:flex-row lg:items-center lg:justify-between">
+          <div
+            role="tablist"
+            aria-label="Filter products by category"
+            className="flex snap-x gap-2 overflow-x-auto pb-1 lg:flex-wrap lg:overflow-visible lg:pb-0"
+          >
+            {uniqueCategories.map((category) => {
+              const isActive = activeCategory === category;
+              return (
+                <button
+                  key={category}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  onClick={() => setActiveCategory(category)}
+                  className={`h-10 shrink-0 snap-start border px-4 text-[9px] font-bold uppercase tracking-widest transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                    isActive
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border hover:border-primary hover:text-primary"
+                  }`}
+                >
+                  {category}
+                </button>
+              );
+            })}
+          </div>
+          <label className="relative block w-full lg:w-80">
+            <span className="sr-only">Search products</span>
+            <Search
+              className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 opacity-45"
+              aria-hidden="true"
+            />
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Search products"
+              className="h-12 w-full border border-border bg-surface pl-11 pr-4 text-sm outline-none transition-colors placeholder:text-foreground/40 focus:border-primary focus:ring-1 focus:ring-primary"
+            />
+          </label>
+        </div>
+
+        <div className="mb-6 flex items-center justify-between text-[10px] font-bold uppercase tracking-widest">
+          <span aria-live="polite">
+            {filteredProducts.length} {filteredProducts.length === 1 ? "product" : "products"}
+          </span>
+          <span className="hidden opacity-45 sm:block">Select a product for full details</span>
+        </div>
+
+        {filteredProducts.length > 0 ? (
+          <div className="grid gap-x-6 gap-y-14 md:grid-cols-2 xl:grid-cols-3">
+            {filteredProducts.map((product, index) => (
+              <a key={product.slug} href={product.href} className="group block">
+                <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    loading="lazy"
+                    className="h-full w-full object-cover transition duration-[1200ms] group-hover:scale-[1.04]"
+                  />
+                  <span className="absolute left-0 top-0 bg-background px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-primary">
+                    {String(index + 1).padStart(2, "0")} / {product.category}
+                  </span>
+                  <span className="absolute bottom-4 right-4 inline-flex h-11 w-11 items-center justify-center bg-accent text-accent-foreground transition-transform group-hover:-translate-y-1 group-hover:translate-x-1">
+                    <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+                  </span>
+                </div>
+                <div className="mt-5 border-t border-border pt-5">
+                  <span className="text-[9px] font-bold uppercase tracking-widest text-primary">
+                    {product.service}
+                  </span>
+                  <h3 className="mt-3 font-display text-3xl font-bold leading-none lg:text-4xl">
+                    {product.name}
+                  </h3>
+                  <p className="mt-4 text-sm leading-relaxed opacity-70">{product.summary}</p>
+                </div>
+              </a>
+            ))}
+          </div>
+        ) : (
+          <div className="border-y border-border py-20 text-center">
+            <p className="font-display text-3xl font-bold">No products match this search.</p>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveCategory("All products");
+                setSearchQuery("");
+              }}
+              className="mt-6 text-[10px] font-bold uppercase tracking-widest text-primary hover:underline"
+            >
+              Reset product filters
+            </button>
+          </div>
+        )}
+      </section>
+
+      <section className="bg-foreground px-8 py-24 text-background lg:px-16 lg:py-36 xl:px-20">
+        <SectionIntro
+          eyebrow="Product pathways"
+          title="Start with the outcome, not the label."
+          body="Choose the operating need closest to your program. We will connect the relevant product systems and specialist teams."
+        />
+
+        <div className="grid grid-cols-12 gap-y-12">
+          <div
+            role="tablist"
+            aria-label="Product pathways"
+            className="col-span-12 border-t border-white/15 lg:col-span-4"
+          >
+            {productPaths.map((path, index) => {
+              const isActive = index === activePathIndex;
+              return (
+                <button
+                  key={path.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  onClick={() => setActivePathIndex(index)}
+                  className={`flex min-h-24 w-full items-center justify-between border-b border-white/15 px-5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent lg:min-h-32 lg:px-7 ${
+                    isActive
+                      ? "bg-accent text-accent-foreground"
+                      : "text-background/55 hover:text-background"
+                  }`}
+                >
+                  <span className="font-display text-xl font-bold leading-tight lg:text-2xl">
+                    {path.label}
+                  </span>
+                  <span className="text-[10px] font-bold tracking-widest">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="col-span-12 lg:col-span-7 lg:col-start-6">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={activePath.id}
+                initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={prefersReducedMotion ? undefined : { opacity: 0, y: -10 }}
+                transition={{ duration: prefersReducedMotion ? 0 : 0.45 }}
+              >
+                {pathLeadProduct && (
+                  <div className="aspect-[16/9] overflow-hidden bg-black">
+                    <img
+                      src={pathLeadProduct.image}
+                      alt={pathLeadProduct.name}
+                      loading="lazy"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                )}
+                <span className="mt-8 block text-[10px] font-bold uppercase tracking-[0.4em] text-accent">
+                  {activePath.eyebrow}
+                </span>
+                <h2 className="mt-5 max-w-3xl font-display text-4xl font-extrabold leading-none sm:text-5xl lg:text-6xl">
+                  {activePath.title}
+                </h2>
+                <p className="mt-6 max-w-2xl text-sm leading-relaxed text-background/70">
+                  {activePath.body}
+                </p>
+                <div className="mt-8 flex flex-wrap gap-x-8 gap-y-4 border-t border-white/15 pt-6">
+                  {pathProducts.map((product) => (
+                    <LinkArrow key={product.slug} href={product.href} className="text-background">
+                      {product.name}
+                    </LinkArrow>
+                  ))}
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-b border-border px-8 py-24 lg:px-16 lg:py-36 xl:px-20">
+        <SectionIntro
+          eyebrow="From interest to operation"
+          title="A clear route into every product."
+          body="Product conversations begin with the mission, mature through evidence, and continue into deployment and lifecycle support."
+        />
+        <div className="grid border-t border-border md:grid-cols-3">
+          {[
+            {
+              icon: Compass,
+              number: "01",
+              title: "Define the mission",
+              body: "Share the operating need, environment, timing, stakeholders, and measures of success.",
+            },
+            {
+              icon: PackageCheck,
+              number: "02",
+              title: "Configure the product",
+              body: "Align the platform, service model, integrations, partners, and readiness pathway.",
+            },
+            {
+              icon: Workflow,
+              number: "03",
+              title: "Operate and improve",
+              body: "Deploy with clear ownership, support, performance visibility, and lifecycle learning.",
+            },
+          ].map((step) => {
+            const Icon = step.icon;
+            return (
+              <article
+                key={step.number}
+                className="border-b border-border py-8 md:min-h-[360px] md:border-r md:px-8 md:first:pl-0 md:last:border-r-0 md:last:pr-0"
+              >
+                <div className="flex items-center justify-between text-primary">
+                  <Icon className="h-5 w-5" aria-hidden="true" />
+                  <span className="text-[10px] font-bold tracking-widest">{step.number}</span>
+                </div>
+                <div className="mt-24">
+                  <h3 className="font-display text-3xl font-bold leading-none lg:text-4xl">
+                    {step.title}
+                  </h3>
+                  <p className="mt-5 max-w-sm text-sm leading-relaxed opacity-70">{step.body}</p>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="bg-accent px-8 py-20 text-accent-foreground lg:px-16 lg:py-28 xl:px-20">
+        <div className="grid grid-cols-12 items-end gap-y-10">
+          <div className="col-span-12 lg:col-span-8">
+            <span className="text-[10px] font-bold uppercase tracking-[0.4em]">
+              Product inquiry
+            </span>
+            <h2 className="mt-5 max-w-4xl font-display text-5xl font-extrabold leading-none lg:text-7xl">
+              Bring us the mission. We will shape the right product conversation.
+            </h2>
+          </div>
+          <div className="col-span-12 lg:col-span-3 lg:col-start-10">
+            <a
+              href="/contact?service=products#contact-desk"
+              className="inline-flex w-full items-center justify-between bg-foreground px-6 py-5 text-[10px] font-bold uppercase tracking-widest text-background transition-colors hover:bg-primary hover:text-primary-foreground"
+            >
+              Request product information
+              <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <CorporateFooter />
+    </main>
   );
 }
 

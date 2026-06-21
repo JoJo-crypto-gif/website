@@ -891,7 +891,7 @@ function BusinessGroups() {
                 className="absolute inset-0 h-full w-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-foreground/95 via-foreground/60 to-transparent" />
-              
+
               <div className="absolute inset-0 flex flex-col justify-end px-8 pb-20 pt-24 sm:px-12">
                 <div className="max-w-md">
                   <span className="mb-4 block text-[10px] font-bold uppercase tracking-[0.35em] text-primary drop-shadow-md">
@@ -900,9 +900,7 @@ function BusinessGroups() {
                   <h3 className="mb-4 font-display text-3xl font-extrabold leading-tight tracking-tighter sm:text-4xl">
                     {division.name}
                   </h3>
-                  <p className="mb-8 text-sm leading-relaxed text-background/80">
-                    {division.body}
-                  </p>
+                  <p className="mb-8 text-sm leading-relaxed text-background/80">{division.body}</p>
                   <a
                     href={division.href}
                     className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-background transition-colors hover:text-primary"
@@ -944,7 +942,7 @@ function Portfolio() {
       id="platforms"
       className="px-8 lg:px-16 xl:px-20 py-28 lg:py-40 border-b border-border"
     >
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}

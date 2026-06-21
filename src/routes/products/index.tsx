@@ -4,7 +4,7 @@ import { ProductsOverviewPage } from "@/components/corporate-pages";
 export const Route = createFileRoute("/products/")({
   head: () => ({
     meta: [
-      { title: "Featured Products | Stratos Group" },
+      { title: "Products | Stratos Group" },
       {
         name: "description",
         content:
