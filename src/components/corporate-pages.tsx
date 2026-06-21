@@ -12,13 +12,22 @@ import {
   LinkArrow,
   SectionIntro,
 } from "@/components/corporate-layout";
-import { useState, type FormEvent, type KeyboardEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type KeyboardEvent,
+} from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   ArrowDown,
   ArrowUpRight,
   BriefcaseBusiness,
   Check,
+  ChevronLeft,
+  ChevronRight,
   CircleCheckBig,
   Clock3,
   Compass,
@@ -39,12 +48,81 @@ import {
 
 export function BusinessesOverviewPage() {
   const [activeBusinessIndex, setActiveBusinessIndex] = useState(0);
+  const [mobileBusinessIndex, setMobileBusinessIndex] = useState(0);
   const prefersReducedMotion = useReducedMotion();
-  const activeBusiness = businessUnits[activeBusinessIndex];
+  const businessHoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mobileRailRef = useRef<HTMLDivElement | null>(null);
+  const mobileCardRefs = useRef<Array<HTMLElement | null>>([]);
+  const mobileScrollFrame = useRef<number | null>(null);
 
   const activateBusiness = (index: number) => {
+    if (businessHoverTimer.current) {
+      clearTimeout(businessHoverTimer.current);
+      businessHoverTimer.current = null;
+    }
     setActiveBusinessIndex(index);
   };
+
+  const scheduleBusinessActivation = (index: number) => {
+    if (businessHoverTimer.current) clearTimeout(businessHoverTimer.current);
+    businessHoverTimer.current = setTimeout(() => activateBusiness(index), 90);
+  };
+
+  const cancelBusinessActivation = () => {
+    if (!businessHoverTimer.current) return;
+    clearTimeout(businessHoverTimer.current);
+    businessHoverTimer.current = null;
+  };
+
+  const scrollToMobileBusiness = (index: number) => {
+    const nextIndex = Math.max(0, Math.min(index, businessUnits.length - 1));
+    const rail = mobileRailRef.current;
+    const card = mobileCardRefs.current[nextIndex];
+
+    setMobileBusinessIndex(nextIndex);
+    if (!rail || !card) return;
+
+    rail.scrollTo({
+      left: card.offsetLeft - (rail.clientWidth - card.offsetWidth) / 2,
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+    });
+  };
+
+  const syncMobileBusinessIndex = useCallback(() => {
+    const rail = mobileRailRef.current;
+    if (!rail) return;
+
+    const railCenter = rail.scrollLeft + rail.clientWidth / 2;
+    let nearestIndex = 0;
+    let nearestDistance = Number.POSITIVE_INFINITY;
+
+    mobileCardRefs.current.forEach((card, index) => {
+      if (!card) return;
+      const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+      const distance = Math.abs(cardCenter - railCenter);
+      if (distance < nearestDistance) {
+        nearestDistance = distance;
+        nearestIndex = index;
+      }
+    });
+
+    setMobileBusinessIndex(nearestIndex);
+    mobileScrollFrame.current = null;
+  }, []);
+
+  const handleMobileRailScroll = () => {
+    if (mobileScrollFrame.current) cancelAnimationFrame(mobileScrollFrame.current);
+    mobileScrollFrame.current = requestAnimationFrame(syncMobileBusinessIndex);
+  };
+
+  useEffect(() => {
+    mobileScrollFrame.current = requestAnimationFrame(syncMobileBusinessIndex);
+
+    return () => {
+      if (businessHoverTimer.current) clearTimeout(businessHoverTimer.current);
+      if (mobileScrollFrame.current) cancelAnimationFrame(mobileScrollFrame.current);
+    };
+  }, [syncMobileBusinessIndex]);
 
   const handleBusinessKeyDown = (
     event: KeyboardEvent<HTMLButtonElement>,
@@ -156,9 +234,14 @@ export function BusinessesOverviewPage() {
             return (
               <motion.article
                 key={unit.slug}
-                animate={{ flexGrow: isActive ? 3.8 : 1 }}
-                transition={{ duration: prefersReducedMotion ? 0 : 0.65, ease: [0.16, 1, 0.3, 1] }}
-                onMouseEnter={() => activateBusiness(index)}
+                animate={{ flexGrow: isActive ? 3.6 : 1 }}
+                transition={
+                  prefersReducedMotion
+                    ? { duration: 0 }
+                    : { type: "spring", stiffness: 165, damping: 24, mass: 0.82 }
+                }
+                onMouseEnter={() => scheduleBusinessActivation(index)}
+                onMouseLeave={cancelBusinessActivation}
                 className="group relative min-w-0 basis-0 overflow-hidden bg-black"
               >
                 <motion.img
@@ -196,49 +279,63 @@ export function BusinessesOverviewPage() {
                   aria-hidden={!isActive}
                   className="pointer-events-none absolute inset-x-0 bottom-0 z-20 p-6 lg:p-8"
                 >
-                  <div className="mb-5 flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-white/75">
-                    <span className="text-primary">{String(index + 1).padStart(2, "0")}</span>
-                    <span>{unit.eyebrow}</span>
-                  </div>
-                  <h3
-                    className={`font-display font-bold leading-[0.92] tracking-tighter text-white transition-[font-size] duration-500 ${
-                      isActive ? "text-5xl xl:text-6xl" : "text-2xl xl:text-3xl"
-                    }`}
-                  >
-                    {unit.name}
-                  </h3>
-
-                  <AnimatePresence initial={false}>
+                  <AnimatePresence mode="wait" initial={false}>
                     {isActive ? (
                       <motion.div
-                        initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={prefersReducedMotion ? undefined : { opacity: 0, y: 12 }}
-                        transition={{ duration: prefersReducedMotion ? 0 : 0.4, delay: 0.12 }}
-                        className="mt-7 max-w-xl border-t border-white/30 pt-6"
+                        key="active"
+                        initial={prefersReducedMotion ? false : { opacity: 0, x: 22 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={prefersReducedMotion ? undefined : { opacity: 0, x: -12 }}
+                        transition={{ duration: prefersReducedMotion ? 0 : 0.34, delay: 0.14 }}
+                        className="w-[22rem] xl:w-[30rem]"
                       >
-                        <p className="max-w-lg text-sm leading-relaxed text-white/85">
-                          {unit.description}
-                        </p>
-                        <ul className="mt-6 flex flex-wrap gap-2">
-                          {unit.stats.map((stat) => (
-                            <li
-                              key={stat}
-                              className="border border-white/30 bg-foreground/20 px-3 py-2 text-[9px] font-bold uppercase tracking-widest text-white backdrop-blur-sm"
-                            >
-                              {stat}
-                            </li>
-                          ))}
-                        </ul>
-                        <a
-                          href={unit.href}
-                          className="pointer-events-auto relative z-30 mt-7 inline-flex items-center gap-2 border-b border-white pb-1 text-[10px] font-bold uppercase tracking-widest text-white transition-colors hover:border-primary hover:text-primary"
-                        >
-                          Explore service
-                          <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
-                        </a>
+                        <div className="mb-5 flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-white/75">
+                          <span className="text-primary">{String(index + 1).padStart(2, "0")}</span>
+                          <span>{unit.eyebrow}</span>
+                        </div>
+                        <h3 className="font-display text-5xl font-bold leading-[0.92] tracking-normal text-white xl:text-6xl">
+                          {unit.name}
+                        </h3>
+                        <div className="mt-7 border-t border-white/30 pt-6">
+                          <p className="text-sm leading-relaxed text-white/85">
+                            {unit.description}
+                          </p>
+                          <ul className="mt-6 flex flex-wrap gap-2">
+                            {unit.stats.map((stat) => (
+                              <li
+                                key={stat}
+                                className="border border-white/30 bg-foreground/20 px-3 py-2 text-[9px] font-bold uppercase tracking-widest text-white backdrop-blur-sm"
+                              >
+                                {stat}
+                              </li>
+                            ))}
+                          </ul>
+                          <a
+                            href={unit.href}
+                            className="pointer-events-auto relative z-30 mt-7 inline-flex items-center gap-2 border-b border-white pb-1 text-[10px] font-bold uppercase tracking-widest text-white transition-colors hover:border-primary hover:text-primary"
+                          >
+                            Explore service
+                            <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+                          </a>
+                        </div>
                       </motion.div>
-                    ) : null}
+                    ) : (
+                      <motion.div
+                        key="compact"
+                        initial={prefersReducedMotion ? false : { opacity: 0, y: 14 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={prefersReducedMotion ? undefined : { opacity: 0, y: 8 }}
+                        transition={{ duration: prefersReducedMotion ? 0 : 0.26, delay: 0.12 }}
+                        className="w-full px-1"
+                      >
+                        <span className="block text-[10px] font-bold uppercase tracking-widest text-primary">
+                          {String(index + 1).padStart(2, "0")}
+                        </span>
+                        <h3 className="mt-4 max-w-full font-display text-base font-bold leading-[1.02] tracking-normal text-white xl:text-2xl">
+                          {unit.name}
+                        </h3>
+                      </motion.div>
+                    )}
                   </AnimatePresence>
                 </div>
               </motion.article>
@@ -247,88 +344,101 @@ export function BusinessesOverviewPage() {
         </div>
 
         <div className="lg:hidden">
-          <div
-            role="tablist"
-            aria-label="Stratos service areas"
-            className="-mx-8 flex gap-2 overflow-x-auto px-8 pb-5"
-          >
-            {businessUnits.map((unit, index) => {
-              const isActive = index === activeBusinessIndex;
-
-              return (
-                <button
-                  key={unit.slug}
-                  id={`mobile-business-tab-${unit.slug}`}
-                  type="button"
-                  role="tab"
-                  aria-selected={isActive}
-                  aria-controls="mobile-business-panel"
-                  tabIndex={isActive ? 0 : -1}
-                  onClick={() => activateBusiness(index)}
-                  onFocus={() => activateBusiness(index)}
-                  onKeyDown={(event) => handleBusinessKeyDown(event, index, "mobile")}
-                  className={`min-w-[180px] shrink-0 border px-4 py-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
-                    isActive
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-white/20 text-background/65"
-                  }`}
-                >
-                  <span className="block text-[9px] font-bold uppercase tracking-widest">
-                    {String(index + 1).padStart(2, "0")} / {unit.eyebrow}
-                  </span>
-                  <span className="mt-3 block font-display text-xl font-bold leading-none tracking-tight">
-                    {unit.name}
-                  </span>
-                </button>
-              );
-            })}
+          <div className="mb-6 flex items-center justify-between border-y border-white/15 py-4">
+            <div aria-live="polite">
+              <span className="block text-[9px] font-bold uppercase tracking-[0.3em] text-primary">
+                Current service
+              </span>
+              <span className="mt-1 block font-display text-lg font-bold leading-none">
+                {String(mobileBusinessIndex + 1).padStart(2, "0")} /{" "}
+                {String(businessUnits.length).padStart(2, "0")}
+              </span>
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => scrollToMobileBusiness(mobileBusinessIndex - 1)}
+                disabled={mobileBusinessIndex === 0}
+                className="inline-flex h-11 w-11 items-center justify-center border border-white/25 transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-30"
+              >
+                <span className="sr-only">Previous service</span>
+                <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollToMobileBusiness(mobileBusinessIndex + 1)}
+                disabled={mobileBusinessIndex === businessUnits.length - 1}
+                className="inline-flex h-11 w-11 items-center justify-center border border-white/25 transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-30"
+              >
+                <span className="sr-only">Next service</span>
+                <ChevronRight className="h-4 w-4" aria-hidden="true" />
+              </button>
+            </div>
           </div>
 
           <div
-            id="mobile-business-panel"
-            role="tabpanel"
-            aria-labelledby={`mobile-business-tab-${activeBusiness.slug}`}
-            className="mt-3"
+            ref={mobileRailRef}
+            onScroll={handleMobileRailScroll}
+            aria-label="Stratos service cards"
+            className="-mx-8 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain px-8 pb-6"
           >
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={activeBusiness.slug}
-                initial={prefersReducedMotion ? false : { opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={prefersReducedMotion ? undefined : { opacity: 0, y: -10 }}
-                transition={{ duration: prefersReducedMotion ? 0 : 0.4 }}
-              >
-                <div className="relative aspect-[4/5] overflow-hidden bg-black">
-                  <img
-                    src={activeBusiness.image}
-                    alt={activeBusiness.name}
-                    className="h-full w-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-foreground/25" aria-hidden="true" />
-                </div>
-                <div className="border-x border-b border-white/15 p-6">
-                  <h3 className="font-display text-4xl font-bold leading-none tracking-tighter">
-                    {activeBusiness.name}
-                  </h3>
-                  <p className="mt-5 text-sm leading-relaxed text-background/70">
-                    {activeBusiness.description}
-                  </p>
-                  <ul className="mt-6 flex flex-wrap gap-2">
-                    {activeBusiness.stats.map((stat) => (
-                      <li
-                        key={stat}
-                        className="border border-white/20 px-3 py-2 text-[9px] font-bold uppercase tracking-widest"
-                      >
-                        {stat}
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="mt-7">
-                    <LinkArrow href={activeBusiness.href}>Explore service</LinkArrow>
+            {businessUnits.map((unit, index) => {
+              const isActive = index === mobileBusinessIndex;
+
+              return (
+                <article
+                  key={unit.slug}
+                  ref={(card) => {
+                    mobileCardRefs.current[index] = card;
+                  }}
+                  aria-current={isActive ? "true" : undefined}
+                  className={`w-[calc(100vw-4rem)] min-w-[256px] max-w-[360px] shrink-0 snap-center overflow-hidden border bg-foreground transition-colors ${
+                    isActive ? "border-primary" : "border-white/15"
+                  }`}
+                >
+                  <div className="relative aspect-[4/3] overflow-hidden bg-black">
+                    <img
+                      src={unit.image}
+                      alt={unit.name}
+                      loading={index === 0 ? "eager" : "lazy"}
+                      className="h-full w-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-foreground/25" aria-hidden="true" />
+                    <span className="absolute left-4 top-4 bg-accent px-3 py-2 text-[9px] font-bold uppercase tracking-widest text-accent-foreground">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
                   </div>
-                </div>
-              </motion.div>
-            </AnimatePresence>
+                  <div className="flex min-h-[350px] flex-col p-6">
+                    <span className="text-[9px] font-bold uppercase tracking-[0.25em] text-primary">
+                      {unit.eyebrow}
+                    </span>
+                    <h3 className="mt-4 font-display text-3xl font-bold leading-none tracking-normal text-white">
+                      {unit.name}
+                    </h3>
+                    <p className="mt-5 text-sm leading-relaxed text-background/70">
+                      {unit.summary}
+                    </p>
+                    <ul className="mt-6 flex flex-wrap gap-2">
+                      {unit.stats.map((stat) => (
+                        <li
+                          key={stat}
+                          className="border border-white/20 px-3 py-2 text-[9px] font-bold uppercase tracking-widest text-background/80"
+                        >
+                          {stat}
+                        </li>
+                      ))}
+                    </ul>
+                    <a
+                      href={unit.href}
+                      className="mt-auto inline-flex items-center justify-between border-t border-white/20 pt-6 text-[10px] font-bold uppercase tracking-widest text-white transition-colors hover:text-primary"
+                    >
+                      Explore service
+                      <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+                    </a>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </div>
       </section>
