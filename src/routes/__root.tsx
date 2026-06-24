@@ -8,6 +8,7 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { type ReactNode } from "react";
+import { brandIdentity } from "@/lib/brand-data";
 
 import appCss from "../styles.css?url";
 
@@ -73,22 +74,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Stratos Group | Aviation-Led Corporate Group" },
+      { title: `${brandIdentity.publicName} | Aviation and Aerospace Technologies` },
       {
         name: "description",
-        content:
-          "Stratos Group operates across aviation, drones, consulting, research, and responsible resource operations.",
+        content: `${brandIdentity.publicName}, ${brandIdentity.relationship.toLowerCase()}, operates across aviation, drones, consulting, research, and responsible resource operations.`,
       },
-      { name: "author", content: "Stratos Group" },
-      { property: "og:title", content: "Stratos Group" },
+      { name: "author", content: brandIdentity.legalName },
+      { property: "og:title", content: brandIdentity.publicName },
       {
         property: "og:description",
-        content:
-          "Stratos Group operates across aviation, drones, consulting, research, and responsible resource operations.",
+        content: `${brandIdentity.publicName}, ${brandIdentity.relationship.toLowerCase()}, operates across aviation, drones, consulting, research, and responsible resource operations.`,
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@StratosGroup" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },

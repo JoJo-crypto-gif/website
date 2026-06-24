@@ -728,8 +728,8 @@ export function CareerApplicationPage({ slug }: { slug: string }) {
                     name="privacyConsent"
                     className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
                   />
-                  I agree that Stratos may process my information to assess this application and
-                  contact me about the hiring process.
+                  I agree that Lucid Aviation may process my information to assess this application
+                  and contact me about the hiring process.
                 </label>
               </div>
 

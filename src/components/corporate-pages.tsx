@@ -20,7 +20,7 @@ import {
   type FormEvent,
   type KeyboardEvent,
 } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion";
 import {
   ArrowDown,
   ArrowUpRight,
@@ -173,7 +173,7 @@ export function BusinessesOverviewPage() {
       <header className="relative flex min-h-[88svh] items-end overflow-hidden bg-foreground text-white">
         <motion.img
           src={businessUnits[0].image}
-          alt="Stratos aviation operations"
+          alt="Lucid Aviation aviation operations"
           loading="eager"
           initial={prefersReducedMotion ? false : { scale: 1.04 }}
           animate={{ scale: 1 }}
@@ -183,7 +183,7 @@ export function BusinessesOverviewPage() {
         <div className="absolute inset-0 bg-foreground/40" aria-hidden="true" />
         <div className="relative z-10 w-full px-8 pb-14 pt-40 lg:px-16 lg:pb-20 xl:px-20">
           <span className="mb-6 block text-[10px] font-bold uppercase tracking-[0.4em] text-primary">
-            Stratos Group / Services
+            Lucid Aviation / Services
           </span>
           <h1 className="max-w-6xl font-display text-6xl font-extrabold leading-[0.86] tracking-tighter text-balance sm:text-7xl lg:text-[clamp(6rem,11vw,10rem)]">
             Services built around operations.
@@ -225,7 +225,7 @@ export function BusinessesOverviewPage() {
 
         <div
           role="tablist"
-          aria-label="Stratos service areas"
+          aria-label="Lucid Aviation service areas"
           className="hidden h-[min(74vh,760px)] min-h-[620px] gap-1 lg:flex"
         >
           {businessUnits.map((unit, index) => {
@@ -379,7 +379,7 @@ export function BusinessesOverviewPage() {
           <div
             ref={mobileRailRef}
             onScroll={handleMobileRailScroll}
-            aria-label="Stratos service cards"
+            aria-label="Lucid Aviation service cards"
             className="-mx-8 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain px-8 pb-6"
           >
             {businessUnits.map((unit, index) => {
@@ -624,7 +624,7 @@ export function NewsListPage() {
     <CorporatePageShell
       eyebrow="News"
       title="Latest blog and corporate briefings."
-      intro="Updates from Stratos businesses, aviation programs, research teams, advisory work, and industrial operations."
+      intro="Updates from Lucid Aviation businesses, aviation programs, research teams, advisory work, and industrial operations."
     >
       <section className="px-8 py-24 lg:px-16 lg:py-32 xl:px-20">
         <div className="grid gap-6 md:grid-cols-2">
@@ -675,7 +675,7 @@ export function NewsDetailPage({ slug }: { slug: string }) {
       <CorporatePageShell
         eyebrow="News"
         title="Blog post not found."
-        intro="The story may have moved. Return to the newsroom to continue browsing Stratos updates."
+        intro="The story may have moved. Return to the newsroom to continue browsing Lucid Aviation updates."
       >
         <section className="px-8 py-24 lg:px-16 xl:px-20">
           <LinkArrow href="/news">Back to news</LinkArrow>
@@ -820,7 +820,7 @@ export function ProductsOverviewPage() {
                 Products / Engineered systems
               </span>
               <h1 className="max-w-5xl font-display text-6xl font-extrabold leading-[0.9] sm:text-7xl lg:text-8xl xl:text-9xl">
-                Stratos products.
+                Lucid Aviation products.
               </h1>
             </div>
             <div className="col-span-12 lg:col-span-4 lg:pl-8">
@@ -1471,7 +1471,17 @@ export function ProductDetailPage({ slug }: { slug: string }) {
 
 export function CompanyPage() {
   const [activeStageIndex, setActiveStageIndex] = useState(0);
+  const [mobileStageIndex, setMobileStageIndex] = useState(0);
+  const [desktopEvolutionHovered, setDesktopEvolutionHovered] = useState(false);
+  const [desktopEvolutionFocused, setDesktopEvolutionFocused] = useState(false);
+  const [desktopEvolutionCycle, setDesktopEvolutionCycle] = useState(0);
   const prefersReducedMotion = useReducedMotion();
+  const mobileEvolutionRailRef = useRef<HTMLDivElement | null>(null);
+  const mobileEvolutionCardRefs = useRef<Array<HTMLElement | null>>([]);
+  const mobileEvolutionFrame = useRef<number | null>(null);
+  const desktopEvolutionRef = useRef<HTMLDivElement | null>(null);
+  const desktopEvolutionInView = useInView(desktopEvolutionRef, { amount: 0.35 });
+  const desktopEvolutionPaused = desktopEvolutionHovered || desktopEvolutionFocused;
 
   const evolutionStages = [
     {
@@ -1479,7 +1489,7 @@ export function CompanyPage() {
       step: "01",
       label: "Aviation foundation",
       title: "The discipline of flight came first.",
-      body: "Stratos began with the standards that dependable aviation demands: safety, engineering rigor, operational readiness, and long-term support.",
+      body: "Lucid Aviation began with the standards that dependable aviation demands: safety, engineering rigor, operational readiness, and long-term support.",
       image: businessUnits[0].image,
     },
     {
@@ -1509,6 +1519,91 @@ export function CompanyPage() {
   ];
 
   const activeStage = evolutionStages[activeStageIndex];
+
+  const syncMobileEvolutionIndex = useCallback(() => {
+    const rail = mobileEvolutionRailRef.current;
+    if (!rail) return;
+
+    const railCenter = rail.scrollLeft + rail.clientWidth / 2;
+    let nearestIndex = 0;
+    let nearestDistance = Number.POSITIVE_INFINITY;
+
+    mobileEvolutionCardRefs.current.forEach((card, index) => {
+      if (!card) return;
+      const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+      const distance = Math.abs(cardCenter - railCenter);
+
+      if (distance < nearestDistance) {
+        nearestDistance = distance;
+        nearestIndex = index;
+      }
+    });
+
+    setMobileStageIndex(nearestIndex);
+    mobileEvolutionFrame.current = null;
+  }, []);
+
+  const handleMobileEvolutionScroll = () => {
+    if (mobileEvolutionFrame.current) cancelAnimationFrame(mobileEvolutionFrame.current);
+    mobileEvolutionFrame.current = requestAnimationFrame(syncMobileEvolutionIndex);
+  };
+
+  const scrollToMobileEvolutionStage = (index: number) => {
+    const nextIndex = Math.max(0, Math.min(index, evolutionStages.length - 1));
+    const rail = mobileEvolutionRailRef.current;
+    const card = mobileEvolutionCardRefs.current[nextIndex];
+
+    setMobileStageIndex(nextIndex);
+    if (!rail || !card) return;
+
+    rail.scrollTo({
+      left: card.offsetLeft - (rail.clientWidth - card.offsetWidth) / 2,
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+    });
+  };
+
+  useEffect(() => {
+    mobileEvolutionFrame.current = requestAnimationFrame(syncMobileEvolutionIndex);
+
+    return () => {
+      if (mobileEvolutionFrame.current) cancelAnimationFrame(mobileEvolutionFrame.current);
+    };
+  }, [syncMobileEvolutionIndex]);
+
+  useEffect(() => {
+    if (desktopEvolutionInView) setDesktopEvolutionCycle((cycle) => cycle + 1);
+  }, [desktopEvolutionInView]);
+
+  useEffect(() => {
+    if (prefersReducedMotion || desktopEvolutionPaused || !desktopEvolutionInView) return;
+
+    const desktopQuery = window.matchMedia("(min-width: 1024px)");
+    let rotationTimer: ReturnType<typeof setInterval> | undefined;
+
+    const updateRotation = () => {
+      if (rotationTimer) clearInterval(rotationTimer);
+      rotationTimer = undefined;
+
+      if (desktopQuery.matches) {
+        rotationTimer = setInterval(() => {
+          setActiveStageIndex((currentIndex) => (currentIndex + 1) % evolutionStages.length);
+        }, 5000);
+      }
+    };
+
+    updateRotation();
+    desktopQuery.addEventListener("change", updateRotation);
+
+    return () => {
+      if (rotationTimer) clearInterval(rotationTimer);
+      desktopQuery.removeEventListener("change", updateRotation);
+    };
+  }, [
+    desktopEvolutionInView,
+    desktopEvolutionPaused,
+    prefersReducedMotion,
+    evolutionStages.length,
+  ]);
 
   const handleStageKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
     let nextIndex = index;
@@ -1585,7 +1680,7 @@ export function CompanyPage() {
       <header className="relative flex min-h-[88svh] items-end overflow-hidden bg-foreground text-white">
         <motion.img
           src={businessUnits[3].image}
-          alt="Stratos aircraft above a connected operating landscape"
+          alt="Lucid Aviation aircraft above a connected operating landscape"
           loading="eager"
           initial={prefersReducedMotion ? false : { scale: 1.04 }}
           animate={{ scale: 1 }}
@@ -1595,15 +1690,16 @@ export function CompanyPage() {
         <div className="absolute inset-0 bg-foreground/40" aria-hidden="true" />
         <div className="relative z-10 w-full px-8 pb-14 pt-40 lg:px-16 lg:pb-20 xl:px-20">
           <span className="mb-6 block text-[10px] font-bold uppercase tracking-[0.4em] text-primary">
-            Stratos Group / About us
+            Lucid Aviation / About us
           </span>
           <h1 className="max-w-6xl font-display text-6xl font-extrabold leading-[0.86] tracking-tighter text-balance sm:text-7xl lg:text-[clamp(5.5rem,10vw,9.5rem)]">
             Built to connect aviation and industry.
           </h1>
           <div className="mt-9 flex flex-col gap-8 border-t border-white/35 pt-7 lg:flex-row lg:items-end lg:justify-between">
             <p className="max-w-2xl text-sm leading-relaxed text-white/90 lg:text-base">
-              Stratos is an aviation-led corporate group bringing flight discipline, autonomous
-              intelligence, research, advisory expertise, and industrial operations together.
+              Lucid Aviation is an aviation-led corporate group bringing flight discipline,
+              autonomous intelligence, research, advisory expertise, and industrial operations
+              together.
             </p>
             <a
               href="#company-story"
@@ -1638,7 +1734,7 @@ export function CompanyPage() {
               <p className="text-sm leading-relaxed opacity-70">
                 The group is anchored in aviation, where every decision must account for people,
                 engineering, operations, regulation, and lifecycle support. That discipline shapes
-                how every Stratos business approaches complex work.
+                how every Lucid Aviation business approaches complex work.
               </p>
               <p className="text-sm leading-relaxed opacity-70">
                 By connecting autonomous systems, consulting, applied research, and responsible
@@ -1649,7 +1745,7 @@ export function CompanyPage() {
             <div className="mt-12 overflow-hidden bg-muted">
               <img
                 src={businessUnits[1].image}
-                alt="Stratos autonomous aviation operations"
+                alt="Lucid Aviation autonomous aviation operations"
                 loading="lazy"
                 className="aspect-[16/9] w-full object-cover"
               />
@@ -1658,134 +1754,265 @@ export function CompanyPage() {
         </div>
       </section>
 
-      <section className="bg-foreground px-8 py-24 text-background lg:px-16 lg:py-36 xl:px-20">
-        <div className="mb-14 grid grid-cols-12 gap-y-8 lg:mb-20">
-          <div className="col-span-12 lg:col-span-7">
-            <span className="mb-5 block text-[10px] font-bold uppercase tracking-[0.4em] text-primary">
-              Our evolution
-            </span>
-            <h2 className="font-display text-5xl font-extrabold leading-[0.92] tracking-tighter text-balance lg:text-7xl">
-              From flight discipline to a connected group.
-            </h2>
+      <div className="relative isolate lg:bg-foreground">
+        <section className="relative bg-foreground px-8 py-24 text-background lg:sticky lg:top-0 lg:z-0 lg:flex lg:h-svh lg:min-h-[680px] lg:flex-col lg:overflow-hidden lg:px-16 lg:pb-7 lg:pt-20 xl:px-20">
+          <div className="mb-14 grid grid-cols-12 gap-y-8 lg:mb-6 lg:shrink-0 lg:items-end">
+            <div className="col-span-12 lg:col-span-7">
+              <span className="mb-5 block text-[10px] font-bold uppercase tracking-[0.4em] text-primary lg:mb-3">
+                Our evolution
+              </span>
+              <h2 className="font-display text-5xl font-extrabold leading-[0.92] tracking-tighter text-balance lg:max-w-3xl lg:text-5xl xl:text-6xl">
+                From flight discipline to a connected group.
+              </h2>
+            </div>
+            <p className="col-span-12 max-w-md text-sm leading-relaxed text-background/65 lg:col-span-4 lg:col-start-9 lg:self-end lg:text-xs xl:text-sm">
+              Explore the operating stages that shaped Lucid Aviation into a broader aviation-led
+              industrial company.
+            </p>
           </div>
-          <p className="col-span-12 max-w-md text-sm leading-relaxed text-background/65 lg:col-span-4 lg:col-start-9 lg:self-end">
-            Explore the operating stages that shaped Stratos into a broader aviation-led industrial
-            company.
-          </p>
-        </div>
 
-        <div className="grid grid-cols-12 gap-y-10 lg:min-h-[700px]">
           <div
-            role="tablist"
-            aria-label="Company evolution stages"
-            className="col-span-12 flex gap-2 overflow-x-auto lg:col-span-4 lg:block lg:overflow-visible lg:border-t lg:border-white/15"
+            ref={desktopEvolutionRef}
+            className="hidden min-h-0 flex-1 grid-cols-12 gap-y-10 lg:grid"
+            onMouseEnter={() => setDesktopEvolutionHovered(true)}
+            onMouseLeave={() => {
+              setDesktopEvolutionHovered(false);
+              setDesktopEvolutionCycle((cycle) => cycle + 1);
+            }}
           >
-            {evolutionStages.map((stage, index) => {
-              const isActive = index === activeStageIndex;
+            <div
+              role="tablist"
+              aria-label="Company evolution stages"
+              className="col-span-4 flex h-full min-h-0 flex-col border-t border-white/15"
+            >
+              {evolutionStages.map((stage, index) => {
+                const isActive = index === activeStageIndex;
 
-              return (
-                <button
-                  key={stage.id}
-                  id={`company-stage-${stage.id}`}
-                  type="button"
-                  role="tab"
-                  aria-selected={isActive}
-                  aria-controls="company-evolution-panel"
-                  tabIndex={isActive ? 0 : -1}
-                  onClick={() => setActiveStageIndex(index)}
-                  onFocus={() => setActiveStageIndex(index)}
-                  onKeyDown={(event) => handleStageKeyDown(event, index)}
-                  className={`min-w-[210px] shrink-0 border px-5 py-5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary lg:flex lg:w-full lg:min-w-0 lg:items-center lg:justify-between lg:border-x-0 lg:border-t-0 lg:border-b lg:border-white/15 lg:px-0 lg:py-7 ${
-                    isActive
-                      ? "border-primary bg-primary text-primary-foreground lg:bg-transparent lg:text-background"
-                      : "border-white/20 text-background/45 hover:text-background"
-                  }`}
+                return (
+                  <button
+                    key={stage.id}
+                    id={`company-stage-${stage.id}`}
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive}
+                    aria-controls="company-evolution-panel"
+                    tabIndex={isActive ? 0 : -1}
+                    onClick={() => setActiveStageIndex(index)}
+                    onMouseEnter={() => {
+                      setDesktopEvolutionHovered(true);
+                      setActiveStageIndex(index);
+                    }}
+                    onFocus={() => {
+                      setDesktopEvolutionFocused(true);
+                      setActiveStageIndex(index);
+                    }}
+                    onBlur={() => {
+                      setDesktopEvolutionFocused(false);
+                      setDesktopEvolutionCycle((cycle) => cycle + 1);
+                    }}
+                    onKeyDown={(event) => handleStageKeyDown(event, index)}
+                    className={`flex min-h-0 w-full flex-1 items-center justify-between border-b border-white/15 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary xl:py-4 ${
+                      isActive ? "text-background" : "text-background/45 hover:text-background"
+                    }`}
+                  >
+                    <span>
+                      <span className="block text-[9px] font-bold uppercase tracking-widest">
+                        Stage {stage.step}
+                      </span>
+                      <span className="mt-2 block font-display text-xl font-bold leading-none tracking-tight xl:text-2xl">
+                        {stage.label}
+                      </span>
+                    </span>
+                    <span className="text-[10px] font-bold tracking-widest">{stage.step}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div
+              id="company-evolution-panel"
+              role="tabpanel"
+              aria-labelledby={`company-stage-${activeStage.id}`}
+              className="col-span-7 col-start-6 min-h-0"
+            >
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.article
+                  key={activeStage.id}
+                  initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={prefersReducedMotion ? undefined : { opacity: 0, y: -12 }}
+                  transition={{ duration: prefersReducedMotion ? 0 : 0.5 }}
+                  className="relative h-full min-h-0 overflow-hidden border border-white/15 bg-black"
                 >
-                  <span>
-                    <span className="block text-[9px] font-bold uppercase tracking-widest">
-                      Stage {stage.step}
-                    </span>
-                    <span className="mt-3 block font-display text-xl font-bold leading-none tracking-tight lg:text-2xl">
-                      {stage.label}
-                    </span>
-                  </span>
-                  <span className="hidden text-[10px] font-bold tracking-widest lg:block">
-                    {stage.step}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-
-          <div
-            id="company-evolution-panel"
-            role="tabpanel"
-            aria-labelledby={`company-stage-${activeStage.id}`}
-            className="col-span-12 lg:col-span-7 lg:col-start-6"
-          >
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.article
-                key={activeStage.id}
-                initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={prefersReducedMotion ? undefined : { opacity: 0, y: -12 }}
-                transition={{ duration: prefersReducedMotion ? 0 : 0.5 }}
-              >
-                <div className="relative aspect-[16/10] overflow-hidden bg-black lg:aspect-[16/11]">
                   <img
                     src={activeStage.image}
                     alt={activeStage.label}
-                    className="h-full w-full object-cover"
+                    className="absolute inset-0 h-full w-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-foreground/20" aria-hidden="true" />
-                  <span className="absolute left-5 top-5 bg-background px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-foreground lg:left-7 lg:top-7">
+                  <div className="absolute inset-0 bg-foreground/25" aria-hidden="true" />
+                  <span className="absolute left-6 top-6 bg-background px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-foreground">
                     {activeStage.step} / {String(evolutionStages.length).padStart(2, "0")}
                   </span>
-                </div>
-                <div className="border-x border-b border-white/15 p-6 lg:p-9">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.35em] text-primary">
-                    {activeStage.label}
-                  </span>
-                  <h3 className="mt-5 max-w-2xl font-display text-4xl font-extrabold leading-[0.94] tracking-tighter lg:text-5xl">
-                    {activeStage.title}
-                  </h3>
-                  <p className="mt-6 max-w-xl text-sm leading-relaxed text-background/70">
-                    {activeStage.body}
+                  <div className="absolute inset-x-0 bottom-0 bg-foreground/80 p-6 backdrop-blur-sm xl:p-8">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.35em] text-primary">
+                      {activeStage.label}
+                    </span>
+                    <h3 className="mt-3 max-w-2xl font-display text-3xl font-extrabold leading-[0.94] tracking-tighter xl:text-4xl">
+                      {activeStage.title}
+                    </h3>
+                    <p className="mt-4 max-w-xl text-xs leading-relaxed text-background/75 xl:text-sm">
+                      {activeStage.body}
+                    </p>
+                  </div>
+                </motion.article>
+              </AnimatePresence>
+            </div>
+          </div>
+
+          <div className="lg:hidden">
+            <div className="mb-6 flex items-center justify-between border-y border-white/15 py-4">
+              <div aria-live="polite">
+                <span className="block text-[9px] font-bold uppercase tracking-[0.3em] text-primary">
+                  Evolution chapter
+                </span>
+                <span className="mt-1 block font-display text-lg font-bold leading-none">
+                  {String(mobileStageIndex + 1).padStart(2, "0")} /{" "}
+                  {String(evolutionStages.length).padStart(2, "0")}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => scrollToMobileEvolutionStage(mobileStageIndex - 1)}
+                  disabled={mobileStageIndex === 0}
+                  className="inline-flex h-11 w-11 items-center justify-center border border-white/25 transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-30"
+                >
+                  <span className="sr-only">Previous evolution stage</span>
+                  <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scrollToMobileEvolutionStage(mobileStageIndex + 1)}
+                  disabled={mobileStageIndex === evolutionStages.length - 1}
+                  className="inline-flex h-11 w-11 items-center justify-center border border-white/25 transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-30"
+                >
+                  <span className="sr-only">Next evolution stage</span>
+                  <ChevronRight className="h-4 w-4" aria-hidden="true" />
+                </button>
+              </div>
+            </div>
+
+            <div
+              ref={mobileEvolutionRailRef}
+              onScroll={handleMobileEvolutionScroll}
+              aria-label="Company evolution chapters"
+              className="-mx-8 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain px-8 pb-6"
+            >
+              {evolutionStages.map((stage, index) => {
+                const isActive = index === mobileStageIndex;
+
+                return (
+                  <article
+                    key={stage.id}
+                    ref={(card) => {
+                      mobileEvolutionCardRefs.current[index] = card;
+                    }}
+                    aria-current={isActive ? "step" : undefined}
+                    className={`w-[calc(100vw-4rem)] min-w-[256px] max-w-[360px] shrink-0 snap-center overflow-hidden border bg-foreground transition-colors ${
+                      isActive ? "border-primary" : "border-white/15"
+                    }`}
+                  >
+                    <div className="relative aspect-[4/3] overflow-hidden bg-black">
+                      <img
+                        src={stage.image}
+                        alt={stage.label}
+                        loading={index === 0 ? "eager" : "lazy"}
+                        className="h-full w-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-foreground/20" aria-hidden="true" />
+                      <span className="absolute left-4 top-4 bg-accent px-3 py-2 text-[9px] font-bold uppercase tracking-widest text-accent-foreground">
+                        {stage.step} / {String(evolutionStages.length).padStart(2, "0")}
+                      </span>
+                    </div>
+                    <div className="flex min-h-[330px] flex-col p-6">
+                      <span className="text-[9px] font-bold uppercase tracking-[0.25em] text-primary">
+                        {stage.label}
+                      </span>
+                      <h3 className="mt-4 font-display text-3xl font-extrabold leading-[0.96] tracking-normal text-white">
+                        {stage.title}
+                      </h3>
+                      <p className="mt-6 text-sm leading-relaxed text-background/70">
+                        {stage.body}
+                      </p>
+                      <div
+                        className="mt-auto flex items-center gap-2 border-t border-white/15 pt-6"
+                        aria-hidden="true"
+                      >
+                        {evolutionStages.map((item, itemIndex) => (
+                          <span
+                            key={item.id}
+                            className={`h-1 flex-1 transition-colors ${
+                              itemIndex === index ? "bg-primary" : "bg-white/15"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+
+          <div
+            className="absolute inset-x-0 bottom-0 z-30 hidden h-1 bg-white/15 lg:block"
+            aria-hidden="true"
+          >
+            {prefersReducedMotion ? (
+              <span className="block h-full w-full bg-primary" />
+            ) : (
+              <span
+                key={`${activeStage.id}-${desktopEvolutionCycle}-${desktopEvolutionInView ? "visible" : "hidden"}`}
+                className="animate-evolution-progress block h-full w-full bg-primary"
+                style={{
+                  animationPlayState:
+                    desktopEvolutionPaused || !desktopEvolutionInView ? "paused" : "running",
+                }}
+              />
+            )}
+          </div>
+        </section>
+
+        <div className="hidden h-[25svh] lg:block" aria-hidden="true" />
+
+        <section className="relative z-20 border-b border-t-4 border-border border-t-accent bg-background px-8 py-24 shadow-[0_-24px_60px_rgba(7,29,52,0.22)] lg:px-16 lg:py-36 xl:px-20">
+          <SectionIntro
+            eyebrow="At a glance"
+            title="A group built for operating scale."
+            body="Our businesses combine specialist depth with the reach, investment, and shared systems of a connected corporate group."
+          />
+          <div className="grid border-l border-t border-border sm:grid-cols-2 lg:grid-cols-4">
+            {corporateStats.map((stat, index) => (
+              <article
+                key={stat.label}
+                className="flex min-h-64 flex-col justify-between border-b border-r border-border p-6 lg:min-h-72 lg:p-8"
+              >
+                <span className="text-[10px] font-bold tracking-widest opacity-40">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <div>
+                  <div className="font-display text-6xl font-extrabold leading-none tracking-tighter lg:text-7xl">
+                    {stat.value}
+                  </div>
+                  <p className="mt-4 text-[10px] font-bold uppercase tracking-widest opacity-60">
+                    {stat.label}
                   </p>
                 </div>
-              </motion.article>
-            </AnimatePresence>
+              </article>
+            ))}
           </div>
-        </div>
-      </section>
-
-      <section className="border-b border-border px-8 py-24 lg:px-16 lg:py-36 xl:px-20">
-        <SectionIntro
-          eyebrow="At a glance"
-          title="A group built for operating scale."
-          body="Our businesses combine specialist depth with the reach, investment, and shared systems of a connected corporate group."
-        />
-        <div className="grid border-l border-t border-border sm:grid-cols-2 lg:grid-cols-4">
-          {corporateStats.map((stat, index) => (
-            <article
-              key={stat.label}
-              className="flex min-h-64 flex-col justify-between border-b border-r border-border p-6 lg:min-h-72 lg:p-8"
-            >
-              <span className="text-[10px] font-bold tracking-widest opacity-40">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <div>
-                <div className="font-display text-6xl font-extrabold leading-none tracking-tighter lg:text-7xl">
-                  {stat.value}
-                </div>
-                <p className="mt-4 text-[10px] font-bold uppercase tracking-widest opacity-60">
-                  {stat.label}
-                </p>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
+        </section>
+      </div>
 
       <section className="border-b border-border px-8 py-24 lg:px-16 lg:py-36 xl:px-20">
         <SectionIntro
@@ -1829,7 +2056,7 @@ export function CompanyPage() {
         <SectionIntro
           eyebrow="Partner network"
           title="Built with organizations that know the work."
-          body="Stratos works with operating, technology, research, industrial, and public-sector partners to combine specialist knowledge with dependable delivery."
+          body="Lucid Aviation works with operating, technology, research, industrial, and public-sector partners to combine specialist knowledge with dependable delivery."
         />
         <div className="grid border-l border-t border-border sm:grid-cols-2 lg:grid-cols-4">
           {partnerNetworks.map((partner, index) => {
@@ -1952,7 +2179,7 @@ export function ContactPage({ service }: { service?: string }) {
       eyebrow: "Business inquiries",
       description:
         "Aircraft programs, autonomous systems, consulting engagements, research partnerships, and industrial operations.",
-      email: "partnerships@stratos.com",
+      email: "partnerships@lucidnovagroup.co.za",
       icon: Handshake,
     },
     {
@@ -1961,7 +2188,7 @@ export function ContactPage({ service }: { service?: string }) {
       eyebrow: "Corporate communications",
       description:
         "Press briefings, executive commentary, media assets, event participation, and corporate announcements.",
-      email: "media@stratos.com",
+      email: "media@lucidnovagroup.co.za",
       icon: Newspaper,
     },
     {
@@ -1970,7 +2197,7 @@ export function ContactPage({ service }: { service?: string }) {
       eyebrow: "Group inquiries",
       description:
         "Corporate information, governance questions, institutional engagement, and inquiries that span multiple group functions.",
-      email: "corporate@stratos.com",
+      email: "corporate@lucidnovagroup.co.za",
       icon: BriefcaseBusiness,
     },
     {
@@ -1979,7 +2206,7 @@ export function ContactPage({ service }: { service?: string }) {
       eyebrow: "Supply network",
       description:
         "Supplier onboarding, procurement, technical standards, responsible sourcing, and program opportunities.",
-      email: "suppliers@stratos.com",
+      email: "suppliers@lucidnovagroup.co.za",
       icon: PackageCheck,
     },
   ];
@@ -2056,7 +2283,7 @@ export function ContactPage({ service }: { service?: string }) {
       <header className="relative flex min-h-[78svh] items-end overflow-hidden bg-foreground text-white">
         <motion.img
           src={businessUnits[2].image}
-          alt="Stratos global operations"
+          alt="Lucid Aviation global operations"
           loading="eager"
           initial={prefersReducedMotion ? false : { scale: 1.04 }}
           animate={{ scale: 1 }}
@@ -2066,7 +2293,7 @@ export function ContactPage({ service }: { service?: string }) {
         <div className="absolute inset-0 bg-foreground/45" aria-hidden="true" />
         <div className="relative z-10 w-full px-8 pb-14 pt-40 lg:px-16 lg:pb-20 xl:px-20">
           <span className="mb-6 block text-[10px] font-bold uppercase tracking-[0.4em] text-primary">
-            Stratos Group / Contact
+            Lucid Aviation / Contact
           </span>
           <h1 className="max-w-6xl font-display text-6xl font-extrabold leading-[0.86] tracking-tighter text-balance sm:text-7xl lg:text-[clamp(5.5rem,10vw,9rem)]">
             Start the right conversation.
@@ -2074,7 +2301,7 @@ export function ContactPage({ service }: { service?: string }) {
           <div className="mt-9 flex flex-col gap-8 border-t border-white/35 pt-7 lg:flex-row lg:items-end lg:justify-between">
             <p className="max-w-2xl text-sm leading-relaxed text-white/90 lg:text-base">
               Connect with the team best placed to support your business, media, corporate, or
-              supplier inquiry across the Stratos Group.
+              supplier inquiry across the Lucid Aviation.
             </p>
             <a
               href="#contact-desk"
@@ -2320,7 +2547,7 @@ export function ContactPage({ service }: { service?: string }) {
                       className="mt-0.5 h-4 w-4 accent-primary"
                     />
                     <span>
-                      I agree that Stratos may use these details to respond to this inquiry.
+                      I agree that Lucid Aviation may use these details to respond to this inquiry.
                     </span>
                   </label>
                   <button

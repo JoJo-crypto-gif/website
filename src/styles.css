@@ -44,6 +44,14 @@
     transform: scaleX(1);
   }
 }
+@keyframes evolution-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
 
 @utility animate-mask {
   animation: mask-reveal 1.2s var(--ease-signature) both;
@@ -53,6 +61,10 @@
 }
 @utility animate-line {
   animation: line-grow 1.4s var(--ease-signature) both;
+  transform-origin: left;
+}
+@utility animate-evolution-progress {
+  animation: evolution-progress 5s linear both;
   transform-origin: left;
 }
 
@@ -86,5 +98,22 @@
   .brand-light {
     --color-primary: #0b4f8a;
     --color-primary-foreground: #ffffff;
+  }
+}
+
+@media (max-width: 63.999rem) {
+  html.homepage-division-snap {
+    scroll-snap-type: y proximity;
+  }
+
+  .homepage-division-snap-card {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+}
+
+@media (max-width: 63.999rem) and (prefers-reduced-motion: reduce) {
+  html.homepage-division-snap {
+    scroll-snap-type: none;
   }
 }

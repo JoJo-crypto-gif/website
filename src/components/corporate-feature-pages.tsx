@@ -228,9 +228,9 @@ export function InnovationPage() {
     <main className="min-h-screen overflow-x-clip bg-background font-mono text-foreground">
       <CorporateNav overlay />
       <PageHero
-        eyebrow="Stratos Group / Innovation"
+        eyebrow="Lucid Aviation / Innovation"
         title="Ideas become operating systems."
-        intro="Innovation at Stratos connects research, engineering, field operations, and customer insight to create technology that can work beyond the lab."
+        intro="Innovation at Lucid Aviation connects research, engineering, field operations, and customer insight to create technology that can work beyond the lab."
         image={remoteMedia.innovation.hero.src}
         imageAlt={remoteMedia.innovation.hero.alt}
         anchor="#innovation-domains"
@@ -511,7 +511,7 @@ export function SustainabilityPage() {
     <main className="min-h-screen overflow-x-clip bg-background font-mono text-foreground">
       <CorporateNav overlay />
       <PageHero
-        eyebrow="Stratos Group / Sustainability"
+        eyebrow="Lucid Aviation / Sustainability"
         title="Responsible growth has to be operational."
         intro="We bring safety, environmental performance, responsible sourcing, and transparent governance into the same systems used to run the business."
         image={remoteMedia.sustainability.hero.src}
@@ -813,7 +813,7 @@ export function CareersPage() {
     <main className="min-h-screen overflow-x-clip bg-background font-mono text-foreground">
       <CorporateNav overlay />
       <PageHero
-        eyebrow="Stratos Group / Careers"
+        eyebrow="Lucid Aviation / Careers"
         title="Build what the world has to operate."
         intro="Join teams working across aircraft, autonomous systems, research, consulting, digital operations, and responsible resource programs."
         image={remoteMedia.careers.hero.src}

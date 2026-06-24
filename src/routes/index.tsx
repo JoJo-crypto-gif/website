@@ -1,5 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect, useRef, type KeyboardEvent, type PointerEvent } from "react";
+import {
+  useCallback,
+  useState,
+  useEffect,
+  useRef,
+  type KeyboardEvent,
+  type PointerEvent,
+} from "react";
 import {
   AnimatePresence,
   motion,
@@ -9,8 +16,14 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { CorporateFooter, CorporateNav } from "@/components/corporate-layout";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi,
+} from "@/components/ui/carousel";
 import { corporateLeaders, featuredProducts } from "@/lib/corporate-data";
 import heroImg from "@/assets/hero.png";
 import heroVideo from "@/assets/hero/hero.mp4";
@@ -27,17 +40,17 @@ import researchLab from "@/assets/stock/research-lab.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Stratos Group | Aviation-Led Corporate Group" },
+      { title: "Lucid Aviation | Aviation-Led Corporate Group" },
       {
         name: "description",
         content:
-          "Stratos Group is a corporate aviation and industrial group operating across aviation, drones, consulting, research, and responsible resource operations.",
+          "Lucid Aviation is a corporate aviation and industrial group operating across aviation, drones, consulting, research, and responsible resource operations.",
       },
-      { property: "og:title", content: "Stratos Group | Aviation-Led Corporate Group" },
+      { property: "og:title", content: "Lucid Aviation | Aviation-Led Corporate Group" },
       {
         property: "og:description",
         content:
-          "Stratos Group is a corporate aviation and industrial group operating across aviation, drones, consulting, research, and responsible resource operations.",
+          "Lucid Aviation is a corporate aviation and industrial group operating across aviation, drones, consulting, research, and responsible resource operations.",
       },
       { property: "og:image", content: heroImg },
       { property: "og:type", content: "website" },
@@ -53,7 +66,7 @@ const pillars = [
     n: "01",
     eyebrow: "Innovation",
     title: "Practical technology for aviation and industry.",
-    body: "At Stratos, innovation connects aviation programs, drone operations, applied research, consulting, and responsible resource systems into practical work customers can deploy.",
+    body: "At Lucid Aviation, innovation connects aviation programs, drone operations, applied research, consulting, and responsible resource systems into practical work customers can deploy.",
     cta: "Explore innovation",
     href: "/innovation",
     img: researchLab,
@@ -160,7 +173,7 @@ const newsPosts = [
     date: "June 12, 2026",
     title: "Drone operations platform completes readiness review.",
     excerpt:
-      "Stratos teams completed a readiness review for a new drone operations platform, validating endurance, data quality, and operator handoff profiles.",
+      "Lucid Aviation teams completed a readiness review for a new drone operations platform, validating endurance, data quality, and operator handoff profiles.",
     readTime: "4 min read",
     img: dronePilot,
     href: "/news/drone-operations-readiness",
@@ -355,8 +368,8 @@ function WhoWeAre() {
           01 / Who we are
         </h2>
         <p className="text-2xl lg:text-3xl leading-[1.1] tracking-tight font-display font-medium text-balance">
-          Stratos is an aviation-led corporate group uniting aircraft programs, drones, consulting,
-          research, and responsible resource operations.
+          Lucid Aviation is an aviation-led corporate group uniting aircraft programs, drones,
+          consulting, research, and responsible resource operations.
         </p>
         <p className="mt-8 max-w-md opacity-70 leading-relaxed">
           Our divisions share engineering discipline, operational data, and applied research so
@@ -710,7 +723,7 @@ function Stats() {
           </h2>
         </div>
         <p className="max-w-sm text-background/60 text-[12px] leading-relaxed">
-          Stratos connects aircraft programs, autonomous drones, consulting, research, and
+          Lucid Aviation connects aircraft programs, autonomous drones, consulting, research, and
           responsible resource operations across a growing global footprint.
         </p>
       </div>
@@ -743,6 +756,14 @@ function Stats() {
 function BusinessGroups() {
   const sectionRef = useRef<HTMLElement>(null);
   const shouldReduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.add("homepage-division-snap");
+
+    return () => root.classList.remove("homepage-division-snap");
+  }, []);
+
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end end"],
@@ -881,7 +902,7 @@ function BusinessGroups() {
           {operatingDivisions.map((division, index) => (
             <article
               key={division.eyebrow}
-              className="sticky top-0 h-[100dvh] w-full overflow-hidden"
+              className="homepage-division-snap-card sticky top-0 h-[100dvh] w-full overflow-hidden"
               style={{ zIndex: index }}
             >
               <img
@@ -1132,18 +1153,150 @@ function LatestNews() {
 
 function Voices() {
   const [activeLeaderIndex, setActiveLeaderIndex] = useState(0);
+  const [mobileCarouselApi, setMobileCarouselApi] = useState<CarouselApi>();
+  const [isLeadershipVisible, setIsLeadershipVisible] = useState(false);
+  const [isLeadershipHovered, setIsLeadershipHovered] = useState(false);
+  const [isLeadershipFocused, setIsLeadershipFocused] = useState(false);
+  const [isLeadershipPointerDown, setIsLeadershipPointerDown] = useState(false);
+  const [isDocumentVisible, setIsDocumentVisible] = useState(true);
   const prefersReducedMotion = useReducedMotion();
+  const leadershipRef = useRef<HTMLElement | null>(null);
+  const mobileNameRailRef = useRef<HTMLDivElement | null>(null);
+  const mobileLeaderTabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const progressBarRefs = useRef<Array<HTMLSpanElement | null>>([]);
+  const progressValueRef = useRef(0);
+  const pointerInitiatedFocusRef = useRef(false);
   const portraitX = useMotionValue(0);
   const portraitY = useMotionValue(0);
   const smoothPortraitX = useSpring(portraitX, { stiffness: 110, damping: 24, mass: 0.6 });
   const smoothPortraitY = useSpring(portraitY, { stiffness: 110, damping: 24, mass: 0.6 });
   const activeLeader = corporateLeaders[activeLeaderIndex];
 
-  const activateLeader = (index: number) => {
-    setActiveLeaderIndex(index);
-    portraitX.set(0);
-    portraitY.set(0);
-  };
+  const updateProgressBars = useCallback((value: number) => {
+    progressBarRefs.current.forEach((bar) => {
+      if (bar) bar.style.transform = `scaleX(${value})`;
+    });
+  }, []);
+
+  const resetLeadershipProgress = useCallback(() => {
+    progressValueRef.current = 0;
+    updateProgressBars(prefersReducedMotion ? 1 : 0);
+  }, [prefersReducedMotion, updateProgressBars]);
+
+  const activateLeader = useCallback(
+    (index: number) => {
+      const nextIndex = (index + corporateLeaders.length) % corporateLeaders.length;
+      setActiveLeaderIndex(nextIndex);
+      if (mobileCarouselApi?.selectedScrollSnap() !== nextIndex) {
+        mobileCarouselApi?.scrollTo(nextIndex, Boolean(prefersReducedMotion));
+      }
+      portraitX.set(0);
+      portraitY.set(0);
+      resetLeadershipProgress();
+    },
+    [mobileCarouselApi, portraitX, portraitY, prefersReducedMotion, resetLeadershipProgress],
+  );
+
+  useEffect(() => {
+    const section = leadershipRef.current;
+    if (!section) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsLeadershipVisible(entry.isIntersecting),
+      { threshold: 0.2 },
+    );
+    observer.observe(section);
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => setIsDocumentVisible(!document.hidden);
+    handleVisibilityChange();
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, []);
+
+  useEffect(() => {
+    if (!mobileCarouselApi) return;
+
+    const handleSelect = () => {
+      const nextIndex = mobileCarouselApi.selectedScrollSnap();
+      setActiveLeaderIndex(nextIndex);
+      portraitX.set(0);
+      portraitY.set(0);
+      resetLeadershipProgress();
+    };
+    const handlePointerDown = () => setIsLeadershipPointerDown(true);
+    const handlePointerUp = () => {
+      setIsLeadershipPointerDown(false);
+      resetLeadershipProgress();
+    };
+
+    handleSelect();
+    mobileCarouselApi.on("select", handleSelect);
+    mobileCarouselApi.on("reInit", handleSelect);
+    mobileCarouselApi.on("pointerDown", handlePointerDown);
+    mobileCarouselApi.on("pointerUp", handlePointerUp);
+
+    return () => {
+      mobileCarouselApi.off("select", handleSelect);
+      mobileCarouselApi.off("reInit", handleSelect);
+      mobileCarouselApi.off("pointerDown", handlePointerDown);
+      mobileCarouselApi.off("pointerUp", handlePointerUp);
+    };
+  }, [mobileCarouselApi, portraitX, portraitY, resetLeadershipProgress]);
+
+  useEffect(() => {
+    const rail = mobileNameRailRef.current;
+    const tab = mobileLeaderTabRefs.current[activeLeaderIndex];
+    if (!rail || !tab) return;
+
+    rail.scrollTo({
+      left: tab.offsetLeft - (rail.clientWidth - tab.offsetWidth) / 2,
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+    });
+  }, [activeLeaderIndex, prefersReducedMotion]);
+
+  const shouldAutoplayLeadership =
+    isLeadershipVisible &&
+    isDocumentVisible &&
+    !prefersReducedMotion &&
+    !isLeadershipHovered &&
+    !isLeadershipFocused &&
+    !isLeadershipPointerDown;
+
+  useEffect(() => {
+    if (!shouldAutoplayLeadership) return;
+
+    let frame = 0;
+    let previousTimestamp = performance.now();
+
+    const tick = (timestamp: number) => {
+      const elapsed = timestamp - previousTimestamp;
+      previousTimestamp = timestamp;
+      progressValueRef.current += elapsed / 6000;
+
+      if (progressValueRef.current >= 1) {
+        progressValueRef.current = 0;
+        activateLeader(activeLeaderIndex + 1);
+      }
+
+      updateProgressBars(Math.min(progressValueRef.current, 1));
+      frame = requestAnimationFrame(tick);
+    };
+
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [activeLeaderIndex, activateLeader, shouldAutoplayLeadership, updateProgressBars]);
+
+  useEffect(() => {
+    if (prefersReducedMotion) {
+      progressValueRef.current = 1;
+      updateProgressBars(1);
+    }
+  }, [prefersReducedMotion, updateProgressBars]);
 
   const handlePortraitMove = (event: PointerEvent<HTMLDivElement>) => {
     if (prefersReducedMotion) return;
@@ -1177,11 +1330,13 @@ function Voices() {
 
     event.preventDefault();
     activateLeader(nextIndex);
-    document.getElementById(`leader-tab-${corporateLeaders[nextIndex].id}`)?.focus();
+    const surface = event.currentTarget.id.includes("-mobile-") ? "mobile" : "desktop";
+    document.getElementById(`leader-tab-${surface}-${corporateLeaders[nextIndex].id}`)?.focus();
   };
 
   return (
     <section
+      ref={leadershipRef}
       id="leadership"
       className="overflow-hidden border-b border-border px-8 py-28 lg:px-16 lg:py-40 xl:px-20"
     >
@@ -1200,87 +1355,129 @@ function Voices() {
         </p>
       </div>
 
-      <div className="grid grid-cols-12 gap-y-10 lg:gap-x-12 xl:gap-x-16">
-        <div
-          className="relative col-span-12 aspect-[4/5] overflow-hidden bg-foreground sm:aspect-[16/11] lg:col-span-7 lg:aspect-auto lg:min-h-[720px]"
-          onPointerMove={handlePortraitMove}
-          onPointerLeave={resetPortrait}
-        >
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.img
-              key={activeLeader.id}
-              src={activeLeader.image}
-              alt={activeLeader.imageAlt}
-              initial={prefersReducedMotion ? false : { opacity: 0, scale: 1.04 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={prefersReducedMotion ? undefined : { opacity: 0, scale: 0.985 }}
-              transition={{ duration: prefersReducedMotion ? 0 : 0.65, ease: [0.16, 1, 0.3, 1] }}
-              style={{
-                objectPosition: activeLeader.objectPosition,
-                x: prefersReducedMotion ? 0 : smoothPortraitX,
-                y: prefersReducedMotion ? 0 : smoothPortraitY,
-              }}
-              className="absolute -inset-3 h-[calc(100%+1.5rem)] w-[calc(100%+1.5rem)] max-w-none object-cover"
-            />
-          </AnimatePresence>
-          <div className="absolute left-5 top-5 z-10 bg-background px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-foreground lg:left-7 lg:top-7">
-            {String(activeLeaderIndex + 1).padStart(2, "0")} /{" "}
-            {String(corporateLeaders.length).padStart(2, "0")}
-          </div>
-        </div>
+      <div
+        onMouseEnter={() => setIsLeadershipHovered(true)}
+        onMouseLeave={() => {
+          setIsLeadershipHovered(false);
+          resetLeadershipProgress();
+        }}
+        onPointerDownCapture={() => {
+          pointerInitiatedFocusRef.current = true;
+          setIsLeadershipFocused(false);
+        }}
+        onPointerUpCapture={() => {
+          requestAnimationFrame(() => {
+            pointerInitiatedFocusRef.current = false;
+          });
+        }}
+        onPointerCancel={() => {
+          pointerInitiatedFocusRef.current = false;
+        }}
+        onFocusCapture={(event) => {
+          if (
+            !pointerInitiatedFocusRef.current &&
+            (event.target as HTMLElement).matches(":focus-visible")
+          ) {
+            setIsLeadershipFocused(true);
+          }
+        }}
+        onBlurCapture={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+            setIsLeadershipFocused(false);
+            resetLeadershipProgress();
+          }
+        }}
+      >
+        <div className="hidden lg:block">
+          <div className="grid h-[680px] grid-cols-12 border-y border-border">
+            <div
+              className="relative col-span-7 overflow-hidden bg-foreground"
+              onPointerMove={handlePortraitMove}
+              onPointerLeave={resetPortrait}
+            >
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.img
+                  key={activeLeader.id}
+                  src={activeLeader.image}
+                  alt={activeLeader.imageAlt}
+                  initial={prefersReducedMotion ? false : { opacity: 0, scale: 1.035 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={prefersReducedMotion ? undefined : { opacity: 0, scale: 0.99 }}
+                  transition={{
+                    duration: prefersReducedMotion ? 0 : 0.65,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
+                  style={{
+                    objectPosition: activeLeader.objectPosition,
+                    x: prefersReducedMotion ? 0 : smoothPortraitX,
+                    y: prefersReducedMotion ? 0 : smoothPortraitY,
+                  }}
+                  className="absolute -inset-3 h-[calc(100%+1.5rem)] w-[calc(100%+1.5rem)] max-w-none object-cover"
+                />
+              </AnimatePresence>
+              <div className="absolute left-7 top-7 z-10 bg-background px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-foreground">
+                {String(activeLeaderIndex + 1).padStart(2, "0")} /{" "}
+                {String(corporateLeaders.length).padStart(2, "0")}
+              </div>
+            </div>
 
-        <div className="col-span-12 flex min-w-0 flex-col lg:col-span-5">
-          <div
-            id="leader-panel"
-            role="tabpanel"
-            aria-labelledby={`leader-tab-${activeLeader.id}`}
-            tabIndex={0}
-            className="outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4 focus-visible:ring-offset-background"
-          >
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={activeLeader.id}
-                initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={prefersReducedMotion ? undefined : { opacity: 0, y: -12 }}
-                transition={{ duration: prefersReducedMotion ? 0 : 0.45, ease: [0.16, 1, 0.3, 1] }}
+            <div className="col-span-5 flex min-w-0 items-center border-l border-border px-8 py-10 xl:px-10">
+              <div
+                id="leader-panel-desktop"
+                role="tabpanel"
+                aria-labelledby={`leader-tab-desktop-${activeLeader.id}`}
+                tabIndex={0}
+                className="w-full outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4 focus-visible:ring-offset-background"
               >
-                <div className="mb-9 flex items-center gap-4 text-[10px] font-bold uppercase tracking-[0.3em] text-primary">
-                  Executive perspective
-                  <span className="h-px flex-1 bg-border" aria-hidden="true" />
-                </div>
-                <blockquote>
-                  <p className="text-balance font-display text-3xl font-semibold leading-[1.03] tracking-tight sm:text-4xl xl:text-5xl">
-                    “{activeLeader.body}”
-                  </p>
-                </blockquote>
-                <div className="mt-10 border-t border-border pt-7">
-                  <h3 className="font-display text-3xl font-bold leading-none tracking-tight lg:text-4xl">
-                    {activeLeader.name}
-                  </h3>
-                  <p className="mt-3 text-[10px] font-bold uppercase tracking-widest text-primary">
-                    {activeLeader.role}
-                  </p>
-                  <p className="mt-7 max-w-lg text-sm leading-relaxed opacity-70">
-                    {activeLeader.bio}
-                  </p>
-                  <a
-                    href="/about"
-                    className="mt-8 inline-flex items-center gap-2 border-b border-foreground pb-1 text-[10px] font-bold uppercase tracking-widest transition-colors hover:border-primary hover:text-primary"
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.div
+                    key={activeLeader.id}
+                    initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={prefersReducedMotion ? undefined : { opacity: 0, y: -10 }}
+                    transition={{
+                      duration: prefersReducedMotion ? 0 : 0.45,
+                      ease: [0.16, 1, 0.3, 1],
+                    }}
                   >
-                    Meet our leadership
-                    <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
-                  </a>
-                </div>
-              </motion.div>
-            </AnimatePresence>
+                    <div className="mb-8 flex items-center gap-4 text-[10px] font-bold uppercase tracking-[0.3em] text-primary">
+                      Executive perspective
+                      <span className="h-px flex-1 bg-border" aria-hidden="true" />
+                    </div>
+                    <blockquote>
+                      <p className="text-balance font-display text-3xl font-semibold leading-[1.03] tracking-tight 2xl:text-4xl">
+                        “{activeLeader.body}”
+                      </p>
+                    </blockquote>
+                    <div className="mt-9 border-t border-border pt-7">
+                      <h3 className="font-display text-3xl font-bold leading-none tracking-tight 2xl:text-4xl">
+                        {activeLeader.name}
+                      </h3>
+                      <p className="mt-3 text-[10px] font-bold uppercase tracking-widest text-primary">
+                        {activeLeader.role}
+                      </p>
+                      <p className="mt-6 max-w-lg text-sm leading-relaxed opacity-70">
+                        {activeLeader.bio}
+                      </p>
+                      <a
+                        href="/about"
+                        className="mt-8 inline-flex items-center gap-2 border-b border-foreground pb-1 text-[10px] font-bold uppercase tracking-widest transition-colors hover:border-primary hover:text-primary"
+                      >
+                        Meet our leadership
+                        <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+                      </a>
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+            </div>
           </div>
 
           <div
             role="tablist"
             aria-label="Corporate leaders"
             aria-orientation="horizontal"
-            className="mt-12 flex min-w-0 gap-2 overflow-x-auto border-t border-border pt-5 lg:mt-auto lg:block lg:overflow-visible lg:pt-0"
+            className="grid grid-cols-3 border-b border-l border-border"
           >
             {corporateLeaders.map((leader, index) => {
               const isActive = index === activeLeaderIndex;
@@ -1288,28 +1485,28 @@ function Voices() {
               return (
                 <button
                   key={leader.id}
-                  id={`leader-tab-${leader.id}`}
+                  id={`leader-tab-desktop-${leader.id}`}
                   type="button"
                   role="tab"
                   aria-selected={isActive}
-                  aria-controls="leader-panel"
+                  aria-controls="leader-panel-desktop"
                   tabIndex={isActive ? 0 : -1}
                   onClick={() => activateLeader(index)}
                   onMouseEnter={() => activateLeader(index)}
                   onFocus={() => activateLeader(index)}
                   onKeyDown={(event) => handleLeaderKeyDown(event, index)}
-                  className={`relative min-w-[220px] shrink-0 border-t px-1 py-5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary lg:block lg:w-full lg:min-w-0 lg:border-t-0 lg:border-b ${
+                  className={`relative min-h-28 border-r border-border px-6 py-5 text-left transition-colors focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary ${
                     isActive
-                      ? "border-primary text-foreground"
-                      : "border-border text-foreground/45 hover:text-foreground"
+                      ? "bg-surface text-foreground"
+                      : "text-foreground/45 hover:bg-muted hover:text-foreground"
                   }`}
                 >
-                  <span className="flex items-center justify-between gap-5">
+                  <span className="flex items-start justify-between gap-5">
                     <span>
-                      <span className="block font-display text-xl font-bold leading-none tracking-tight">
+                      <span className="block font-display text-xl font-bold leading-none tracking-tight xl:text-2xl">
                         {leader.name}
                       </span>
-                      <span className="mt-2 block text-[9px] font-bold uppercase tracking-widest">
+                      <span className="mt-2 block max-w-xs text-[9px] font-bold uppercase leading-relaxed tracking-widest">
                         {leader.role}
                       </span>
                     </span>
@@ -1317,18 +1514,161 @@ function Voices() {
                       {String(index + 1).padStart(2, "0")}
                     </span>
                   </span>
-                  <span className="absolute bottom-0 left-0 h-px w-full overflow-hidden bg-border">
-                    <motion.span
-                      className="block h-full bg-primary"
-                      initial={false}
-                      animate={{ scaleX: isActive ? 1 : 0 }}
-                      transition={{ duration: prefersReducedMotion ? 0 : 0.45 }}
-                      style={{ transformOrigin: "left" }}
+                  <span className="absolute bottom-0 left-0 h-1 w-full overflow-hidden bg-muted">
+                    <span
+                      ref={(bar) => {
+                        if (isActive) progressBarRefs.current[0] = bar;
+                      }}
+                      className={`block h-full origin-left bg-accent will-change-transform ${
+                        isActive ? "" : "scale-x-0"
+                      }`}
+                      style={{ transform: `scaleX(${isActive && prefersReducedMotion ? 1 : 0})` }}
                     />
                   </span>
                 </button>
               );
             })}
+          </div>
+        </div>
+
+        <div className="lg:hidden">
+          <div
+            ref={mobileNameRailRef}
+            role="tablist"
+            aria-label="Corporate leaders"
+            aria-orientation="horizontal"
+            className="-mx-8 mb-5 flex snap-x gap-2 overflow-x-auto px-8 pb-2"
+          >
+            {corporateLeaders.map((leader, index) => {
+              const isActive = index === activeLeaderIndex;
+              return (
+                <button
+                  key={leader.id}
+                  ref={(button) => {
+                    mobileLeaderTabRefs.current[index] = button;
+                  }}
+                  id={`leader-tab-mobile-${leader.id}`}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  aria-controls={`leader-panel-mobile-${leader.id}`}
+                  tabIndex={isActive ? 0 : -1}
+                  onClick={() => activateLeader(index)}
+                  onFocus={() => activateLeader(index)}
+                  onKeyDown={(event) => handleLeaderKeyDown(event, index)}
+                  className={`min-w-[9.5rem] snap-center border px-4 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                    isActive
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-surface text-foreground/55"
+                  }`}
+                >
+                  <span className="block text-[9px] font-bold tracking-widest">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <span className="mt-1 block font-display text-base font-bold leading-none">
+                    {leader.name}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <Carousel
+            setApi={setMobileCarouselApi}
+            opts={{ align: "start", loop: true, duration: prefersReducedMotion ? 0 : 24 }}
+            aria-label="Leadership profiles"
+          >
+            <CarouselContent className="ml-0">
+              {corporateLeaders.map((leader, index) => (
+                <CarouselItem key={leader.id} className="basis-full pl-0">
+                  <article
+                    id={`leader-panel-mobile-${leader.id}`}
+                    role="tabpanel"
+                    aria-labelledby={`leader-tab-mobile-${leader.id}`}
+                    aria-hidden={index !== activeLeaderIndex}
+                    className="overflow-hidden border border-border bg-surface"
+                  >
+                    <div className="relative aspect-[4/3] overflow-hidden bg-foreground">
+                      <img
+                        src={leader.image}
+                        alt={leader.imageAlt}
+                        loading={index === 0 ? "eager" : "lazy"}
+                        style={{ objectPosition: leader.objectPosition }}
+                        className="h-full w-full object-cover"
+                      />
+                      <span className="absolute left-4 top-4 bg-background px-3 py-2 text-[9px] font-bold uppercase tracking-widest text-foreground">
+                        {String(index + 1).padStart(2, "0")} /{" "}
+                        {String(corporateLeaders.length).padStart(2, "0")}
+                      </span>
+                    </div>
+
+                    <div className="flex min-h-[360px] flex-col p-5 sm:p-7">
+                      <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-primary">
+                        Executive perspective
+                      </span>
+                      <blockquote className="mt-4">
+                        <p className="font-display text-[1.35rem] font-semibold leading-[1.05] tracking-tight sm:text-2xl">
+                          “{leader.body}”
+                        </p>
+                      </blockquote>
+                      <div className="mt-5 border-t border-border pt-4">
+                        <h3 className="font-display text-2xl font-bold leading-none tracking-tight">
+                          {leader.name}
+                        </h3>
+                        <p className="mt-2 text-[9px] font-bold uppercase leading-relaxed tracking-widest text-primary">
+                          {leader.role}
+                        </p>
+                        <p className="mt-4 text-xs leading-relaxed text-muted-foreground sm:text-sm">
+                          {leader.bio}
+                        </p>
+                      </div>
+                      <a
+                        href="/about"
+                        tabIndex={index === activeLeaderIndex ? 0 : -1}
+                        className="mt-auto inline-flex items-center gap-2 self-start border-b border-foreground pt-5 pb-1 text-[9px] font-bold uppercase tracking-widest transition-colors hover:border-primary hover:text-primary"
+                      >
+                        Meet our leadership
+                        <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+                      </a>
+                    </div>
+                  </article>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+
+          <div className="mt-5 flex items-center justify-between border-y border-border py-4">
+            <span aria-live="polite" className="font-display text-xl font-bold leading-none">
+              {String(activeLeaderIndex + 1).padStart(2, "0")} /{" "}
+              {String(corporateLeaders.length).padStart(2, "0")}
+            </span>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => activateLeader(activeLeaderIndex - 1)}
+                className="inline-flex h-11 w-11 items-center justify-center border border-border bg-surface transition-colors hover:border-primary hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                aria-label="Previous leader"
+              >
+                <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                onClick={() => activateLeader(activeLeaderIndex + 1)}
+                className="inline-flex h-11 w-11 items-center justify-center border border-border bg-surface transition-colors hover:border-primary hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                aria-label="Next leader"
+              >
+                <ChevronRight className="h-4 w-4" aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+          <div className="mt-4 h-1 overflow-hidden bg-muted" aria-hidden="true">
+            <span
+              ref={(bar) => {
+                progressBarRefs.current[1] = bar;
+              }}
+              className="block h-full origin-left bg-accent will-change-transform"
+              style={{ transform: `scaleX(${prefersReducedMotion ? 1 : 0})` }}
+            />
           </div>
         </div>
       </div>
@@ -1374,8 +1714,8 @@ function Closing() {
                 Build what moves next.
               </h2>
               <p className="mt-7 max-w-xl text-sm leading-relaxed text-white/80 lg:text-base">
-                Choose where to begin with Stratos. Explore a product, engage a specialist service,
-                or bring us into the next program.
+                Choose where to begin with Lucid Aviation. Explore a product, engage a specialist
+                service, or bring us into the next program.
               </p>
             </div>
           </div>

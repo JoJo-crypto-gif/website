@@ -4,10 +4,10 @@ import { CareerApplicationPage } from "@/components/career-pages";
 export const Route = createFileRoute("/careers/$slug_/apply")({
   head: () => ({
     meta: [
-      { title: "Apply | Stratos Group Careers" },
+      { title: "Apply | Lucid Aviation Careers" },
       {
         name: "description",
-        content: "Submit your application for an Stratos Group career opportunity.",
+        content: "Submit your application for an Lucid Aviation career opportunity.",
       },
     ],
   }),

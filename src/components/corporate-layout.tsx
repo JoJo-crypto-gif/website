@@ -2,6 +2,46 @@ import { ArrowUpRight, ChevronDown, Mail, MapPin, Menu, Phone, X } from "lucide-
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { businessUnits, corporateNav } from "@/lib/corporate-data";
+import { brandIdentity } from "@/lib/brand-data";
+
+export function BrandLockup({
+  size = "nav",
+  inverse = false,
+  className = "",
+}: {
+  size?: "nav" | "footer";
+  inverse?: boolean;
+  className?: string;
+}) {
+  return (
+    <span
+      role="img"
+      aria-label={`${brandIdentity.publicName}, ${brandIdentity.relationship}`}
+      className={`inline-flex ${
+        size === "footer" ? "flex-wrap items-end gap-3 sm:gap-4" : "items-center gap-2 sm:gap-3"
+      } ${className}`}
+    >
+      <span
+        aria-hidden="true"
+        className={`whitespace-nowrap font-display font-extrabold leading-none tracking-tighter ${
+          size === "footer"
+            ? "text-4xl sm:text-6xl lg:text-7xl xl:text-8xl"
+            : "text-lg sm:text-xl lg:text-2xl"
+        }`}
+      >
+        {brandIdentity.displayName}
+      </span>
+      <span
+        aria-hidden="true"
+        className={`shrink-0 border uppercase tracking-widest ${
+          size === "footer" ? "mb-0.5 px-2 py-1 text-[9px] sm:mb-1" : "px-1.5 py-0.5 text-[8px]"
+        } ${inverse ? "border-white/25" : "border-foreground/25"}`}
+      >
+        {brandIdentity.partnerBadge}
+      </span>
+    </span>
+  );
+}
 
 export function CorporateNav({ overlay = false }: { overlay?: boolean }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -50,15 +90,8 @@ export function CorporateNav({ overlay = false }: { overlay?: boolean }) {
       className={`fixed top-0 z-50 w-full border-b backdrop-blur-md ${overlay ? "brand-dark" : ""} ${navTone}`}
     >
       <div className="flex items-center justify-between px-6 py-4 lg:px-10">
-        <a href="/" className="flex items-center gap-4">
-          <span className="font-display text-2xl font-extrabold tracking-tighter">STRATOS</span>
-          <span
-            className={`hidden border px-1.5 py-0.5 text-[9px] uppercase tracking-widest md:inline-block ${
-              overlay ? "border-white/25" : "border-foreground/25"
-            }`}
-          >
-            Group
-          </span>
+        <a href="/" className="min-w-0 shrink">
+          <BrandLockup inverse={overlay} />
         </a>
 
         <div className="hidden items-center gap-8 text-[10px] font-medium uppercase tracking-widest lg:flex">
@@ -359,7 +392,7 @@ export function CorporateFooter() {
       <div className="grid border-b border-border px-8 py-14 lg:grid-cols-[1fr_auto] lg:items-end lg:px-16 lg:py-20 xl:px-20">
         <div>
           <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary">
-            Work with Stratos
+            Work with {brandIdentity.publicName}
           </span>
           <h2 className="mt-5 max-w-4xl font-display text-4xl font-extrabold leading-[0.95] tracking-normal sm:text-5xl lg:text-6xl">
             A direct route to the right team.
@@ -385,17 +418,13 @@ export function CorporateFooter() {
 
       <div className="px-8 py-16 lg:px-16 lg:py-20 xl:px-20">
         <div className="border-b border-border pb-14">
-          <a href="/" className="inline-flex items-end gap-4">
-            <span className="font-display text-5xl font-extrabold leading-none tracking-normal sm:text-7xl lg:text-9xl">
-              STRATOS
-            </span>
-            <span className="mb-1 hidden border border-foreground/25 px-2 py-1 text-[9px] uppercase tracking-widest sm:inline-block lg:mb-2">
-              Group
-            </span>
+          <a href="/" className="inline-flex max-w-full">
+            <BrandLockup size="footer" />
           </a>
           <p className="mt-7 max-w-xl text-sm leading-relaxed text-muted-foreground">
-            An aviation-led corporate group delivering products and services across aircraft
-            programs, autonomous systems, consulting, research, and responsible resource operations.
+            {brandIdentity.legalName}, {brandIdentity.relationship.toLowerCase()}, delivers products
+            and services across aircraft programs, autonomous systems, consulting, research, and
+            responsible resource operations.
           </p>
         </div>
 
@@ -406,22 +435,22 @@ export function CorporateFooter() {
             </h3>
             <div className="space-y-5 text-xs">
               <a
-                href="mailto:partnerships@stratos.com"
+                href={`mailto:${brandIdentity.emails.partnerships}`}
                 className="group flex items-center gap-3 transition-colors hover:text-primary"
               >
                 <Mail className="h-4 w-4 text-primary" aria-hidden="true" />
-                partnerships@stratos.com
+                {brandIdentity.emails.partnerships}
               </a>
               <a
-                href="tel:+233302904500"
+                href={`tel:${brandIdentity.phone.href}`}
                 className="group flex items-center gap-3 transition-colors hover:text-primary"
               >
                 <Phone className="h-4 w-4 text-primary" aria-hidden="true" />
-                +233 30 290 4500
+                {brandIdentity.phone.display}
               </a>
               <p className="flex items-start gap-3 leading-relaxed text-muted-foreground">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />1
-                Aviation Square, Airport City, Accra, Ghana
+                {brandIdentity.address}
               </p>
             </div>
           </div>
@@ -472,7 +501,7 @@ export function CorporateFooter() {
         </div>
 
         <div className="flex flex-col justify-between gap-5 border-t border-border pt-7 text-[9px] uppercase tracking-widest text-muted-foreground md:flex-row">
-          <span>© 2026 Stratos Group. All rights reserved.</span>
+          <span>© 2026 {brandIdentity.legalName}. All rights reserved.</span>
           <div className="flex flex-wrap gap-x-8 gap-y-3">
             <a href="/about" className="transition-colors hover:text-primary">
               Governance

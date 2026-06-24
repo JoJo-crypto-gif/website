@@ -261,7 +261,7 @@ export const careerOpenings: CareerOpening[] = [
     summary:
       "Begin your career through structured rotations across engineering, operations, research, and business programs.",
     overview:
-      "The Graduate Engineering Program combines real project responsibility with mentoring, technical learning, and rotations across Stratos businesses. Placements are shaped around business demand, candidate discipline, and long-term development.",
+      "The Graduate Engineering Program combines real project responsibility with mentoring, technical learning, and rotations across Lucid Aviation businesses. Placements are shaped around business demand, candidate discipline, and long-term development.",
     team: "You will belong to a graduate cohort while working inside established aviation, drones, research, consulting, or resource teams.",
     responsibilities: [
       "Contribute to supervised engineering, analysis, testing, or operations work.",

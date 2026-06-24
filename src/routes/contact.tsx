@@ -7,10 +7,10 @@ export const Route = createFileRoute("/contact")({
   }),
   head: () => ({
     meta: [
-      { title: "Contact | Stratos Group" },
+      { title: "Contact | Lucid Aviation" },
       {
         name: "description",
-        content: "Contact Stratos Group for partnerships, media, careers, and business inquiries.",
+        content: "Contact Lucid Aviation for partnerships, media, careers, and business inquiries.",
       },
     ],
   }),

@@ -4,11 +4,11 @@ import { CompanyPage } from "@/components/corporate-pages";
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "About | Stratos Group" },
+      { title: "About | Lucid Aviation" },
       {
         name: "description",
         content:
-          "Learn about Stratos Group, its operating model, leadership, partners, and long-term corporate direction.",
+          "Learn about Lucid Aviation, its operating model, leadership, partners, and long-term corporate direction.",
       },
     ],
   }),

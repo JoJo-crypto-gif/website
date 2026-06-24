@@ -128,7 +128,7 @@ export function NewsroomPage() {
           </div>
           <p className="col-span-12 max-w-md text-sm leading-relaxed opacity-65 lg:col-span-4 lg:col-start-9 lg:self-end">
             Program milestones, operating insights, research, and corporate developments from every
-            Stratos business.
+            Lucid Aviation business.
           </p>
         </div>
         <div className="grid border-t border-border lg:grid-cols-2">

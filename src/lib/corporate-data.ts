@@ -35,7 +35,7 @@ export const businessUnits = [
     summary:
       "Commercial aircraft programs, maintenance ecosystems, and flight operations technologies for regional and global carriers.",
     description:
-      "Stratos Aviation develops aircraft platforms, digital flight operations, and lifecycle programs for operators that need safety, reliability, and fleet efficiency at scale.",
+      "Lucid Aviation Aviation develops aircraft platforms, digital flight operations, and lifecycle programs for operators that need safety, reliability, and fleet efficiency at scale.",
     image: aviationAirport,
     stats: ["Fleet programs", "Advanced manufacturing", "Operator services"],
   },
@@ -136,7 +136,7 @@ export const featuredProducts = [
     summary:
       "A regional aircraft concept built around efficient operations, passenger comfort, digital maintenance, and dependable fleet economics.",
     description:
-      "AeroLine A-90 is the flagship aviation product in the Stratos portfolio. It combines aircraft program planning, lifecycle support, and digital fleet operations into one concept designed for regional carriers and government-backed transport networks.",
+      "AeroLine A-90 is the flagship aviation product in the Lucid Aviation portfolio. It combines aircraft program planning, lifecycle support, and digital fleet operations into one concept designed for regional carriers and government-backed transport networks.",
     challenge:
       "Regional operators need aircraft programs that balance fuel efficiency, dispatch reliability, passenger experience, maintainability, and predictable long-term operating costs.",
     solution:
@@ -360,9 +360,9 @@ export const corporateNewsPosts = [
     date: "June 12, 2026",
     title: "Drone operations platform completes readiness review.",
     excerpt:
-      "Stratos teams completed a readiness review for a new drone operations platform, validating endurance, data quality, and operator handoff profiles.",
+      "Lucid Aviation teams completed a readiness review for a new drone operations platform, validating endurance, data quality, and operator handoff profiles.",
     body: "The review brings together aviation engineering, autonomy software, and field operations. The program is designed for infrastructure monitoring, logistics support, and remote industrial inspection where dependable aerial data matters.",
-    author: "Stratos Drones",
+    author: "Lucid Aviation Drones",
     readTime: "4 min read",
     image: dronePilot,
     href: "/news/drone-operations-readiness",
@@ -391,7 +391,7 @@ export const corporateNewsPosts = [
     excerpt:
       "New synchronized manufacturing cells are reducing integration cycles while improving traceability across materials and flight-critical systems.",
     body: "The production program connects digital work instructions, materials tracking, and quality checkpoints across the aircraft assembly process. It supports safer delivery schedules and better long-term maintainability.",
-    author: "Stratos Aviation",
+    author: "Lucid Aviation Aviation",
     readTime: "5 min read",
     image: aviationHangar,
     href: "/news/advanced-aircraft-production",
@@ -419,8 +419,8 @@ export const corporateNewsPosts = [
     title: "Research network expands industrial operations coverage.",
     excerpt:
       "A new connected operations program links aviation work, field teams, and industrial assets into a more resilient operating network.",
-    body: "Stratos research teams are studying how connected operations can help customers manage distributed aircraft, drones, and industrial systems with greater clarity and resilience.",
-    author: "Stratos Research",
+    body: "Lucid Aviation research teams are studying how connected operations can help customers manage distributed aircraft, drones, and industrial systems with greater clarity and resilience.",
+    author: "Lucid Aviation Research",
     readTime: "3 min read",
     image: researchLab,
     href: "/news/connected-operations-network",
@@ -448,7 +448,7 @@ export const corporateNewsPosts = [
     excerpt:
       "Consulting teams began field evaluation of a new modernization framework built for complex aviation and industrial environments.",
     body: "The framework supports clients as they modernize operations, improve governance, and introduce emerging technologies without interrupting essential service delivery.",
-    author: "Stratos Consulting",
+    author: "Lucid Aviation Consulting",
     readTime: "4 min read",
     image: consultingBriefing,
     href: "/news/industrial-systems-modernization",
@@ -506,7 +506,7 @@ export const corporateNewsPosts = [
     excerpt:
       "Integrated drone mapping and field verification are improving how resource teams understand land, water, and infrastructure before operations expand.",
     body: "The program combines aerial intelligence, environmental evidence, and site expertise to improve early planning and long-term operational monitoring.",
-    author: "Stratos Mining",
+    author: "Lucid Aviation Mining",
     readTime: "4 min read",
     image: miningAerial,
     href: "/news/responsible-resource-survey",
@@ -530,11 +530,11 @@ export const corporateNewsPosts = [
     category: "Company",
     type: "Corporate news",
     date: "February 26, 2026",
-    title: "Stratos opens technical learning hub in Accra.",
+    title: "Lucid Aviation opens technical learning hub in Accra.",
     excerpt:
       "The new learning hub supports early-career engineers, experienced specialists, and cross-business technical development across the group.",
     body: "The Accra hub creates shared space for technical academies, simulation, mentoring, and practical learning across aviation and industrial disciplines.",
-    author: "Stratos Group",
+    author: "Lucid Aviation",
     readTime: "3 min read",
     image: consultingTeam,
     href: "/news/accra-technical-learning-hub",
@@ -562,7 +562,7 @@ export const corporateNewsPosts = [
     excerpt:
       "A research demonstrator completed its first integrated ground tests, generating new evidence for efficient regional aviation systems.",
     body: "The test series brought together propulsion, energy management, thermal systems, controls, and operator-focused maintainability studies.",
-    author: "Stratos Innovation",
+    author: "Lucid Aviation Innovation",
     readTime: "5 min read",
     image: aviationHangar,
     href: "/news/efficient-propulsion-ground-test",

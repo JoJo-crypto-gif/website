@@ -1,9 +1,24 @@
-import { useState, type KeyboardEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { ArrowDown, ArrowUpRight, Check, MoveRight } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUpRight,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Maximize2,
+  MoveRight,
+} from "lucide-react";
 import { CorporateFooter, CorporateNav } from "@/components/corporate-layout";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi,
+} from "@/components/ui/carousel";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { businessUnits, featuredProducts } from "@/lib/corporate-data";
-import { getServiceProfile } from "@/lib/service-data";
+import { getServiceProfile, type ServiceProfile } from "@/lib/service-data";
 
 const sectionLinks = [
   ["Overview", "overview"],
@@ -14,15 +29,409 @@ const sectionLinks = [
   ["Contact", "service-contact"],
 ];
 
+const GALLERY_INTERVAL_MS = 5000;
+
+type ServiceMediaGalleryProps = {
+  images: ServiceProfile["mediaImages"];
+  prefersReducedMotion: boolean;
+  slug: string;
+};
+
+function ServiceMediaGallery({ images, prefersReducedMotion, slug }: ServiceMediaGalleryProps) {
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>();
+  const [modalApi, setModalApi] = useState<CarouselApi>();
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [modalIndex, setModalIndex] = useState(0);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isFocusWithin, setIsFocusWithin] = useState(false);
+  const [isPointerDown, setIsPointerDown] = useState(false);
+  const [isDocumentVisible, setIsDocumentVisible] = useState(true);
+  const galleryRef = useRef<HTMLDivElement | null>(null);
+  const progressRef = useRef<HTMLSpanElement | null>(null);
+  const progressValueRef = useRef(0);
+  const imageTriggerRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const openedImageIndexRef = useRef(0);
+
+  const resetProgress = useCallback(() => {
+    progressValueRef.current = 0;
+    if (progressRef.current) progressRef.current.style.transform = "scaleX(0)";
+  }, []);
+
+  useEffect(() => {
+    if (!carouselApi) return;
+
+    const handleSelect = () => {
+      setActiveIndex(carouselApi.selectedScrollSnap());
+      resetProgress();
+    };
+    const handlePointerDown = () => {
+      setIsPointerDown(true);
+    };
+    const handlePointerUp = () => {
+      setIsPointerDown(false);
+      resetProgress();
+    };
+
+    handleSelect();
+    carouselApi.on("select", handleSelect);
+    carouselApi.on("reInit", handleSelect);
+    carouselApi.on("pointerDown", handlePointerDown);
+    carouselApi.on("pointerUp", handlePointerUp);
+
+    return () => {
+      carouselApi.off("select", handleSelect);
+      carouselApi.off("reInit", handleSelect);
+      carouselApi.off("pointerDown", handlePointerDown);
+      carouselApi.off("pointerUp", handlePointerUp);
+    };
+  }, [carouselApi, resetProgress]);
+
+  useEffect(() => {
+    if (!modalApi) return;
+
+    const handleSelect = () => setModalIndex(modalApi.selectedScrollSnap());
+    handleSelect();
+    modalApi.on("select", handleSelect);
+    modalApi.on("reInit", handleSelect);
+
+    return () => {
+      modalApi.off("select", handleSelect);
+      modalApi.off("reInit", handleSelect);
+    };
+  }, [modalApi]);
+
+  useEffect(() => {
+    if (!galleryRef.current) return;
+
+    const observer = new IntersectionObserver(([entry]) => setIsVisible(entry.isIntersecting), {
+      threshold: 0.25,
+    });
+    observer.observe(galleryRef.current);
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => setIsDocumentVisible(!document.hidden);
+    handleVisibilityChange();
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, []);
+
+  const shouldAutoplay =
+    Boolean(carouselApi) &&
+    !prefersReducedMotion &&
+    isVisible &&
+    isDocumentVisible &&
+    !isHovered &&
+    !isFocusWithin &&
+    !isPointerDown &&
+    !modalOpen;
+
+  useEffect(() => {
+    if (!shouldAutoplay || !carouselApi) return;
+
+    let frame = 0;
+    let previousTimestamp = performance.now();
+
+    const tick = (timestamp: number) => {
+      const elapsed = timestamp - previousTimestamp;
+      previousTimestamp = timestamp;
+      progressValueRef.current += elapsed / GALLERY_INTERVAL_MS;
+
+      if (progressValueRef.current >= 1) {
+        progressValueRef.current = 0;
+        carouselApi.scrollNext();
+      }
+
+      if (progressRef.current) {
+        progressRef.current.style.transform = `scaleX(${Math.min(progressValueRef.current, 1)})`;
+      }
+      frame = requestAnimationFrame(tick);
+    };
+
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [carouselApi, shouldAutoplay]);
+
+  useEffect(() => {
+    if (!modalOpen || !modalApi) return;
+    modalApi.scrollTo(modalIndex, true);
+  }, [modalApi, modalOpen, modalIndex]);
+
+  const moveCarousel = (direction: "previous" | "next") => {
+    resetProgress();
+    if (direction === "previous") carouselApi?.scrollPrev();
+    else carouselApi?.scrollNext();
+  };
+
+  const openImage = (index: number) => {
+    openedImageIndexRef.current = index;
+    setModalIndex(index);
+    setModalOpen(true);
+  };
+
+  const handleModalChange = (open: boolean) => {
+    setModalOpen(open);
+    if (!open) {
+      openedImageIndexRef.current = modalIndex;
+      carouselApi?.scrollTo(modalIndex);
+      resetProgress();
+    }
+  };
+
+  return (
+    <div
+      ref={galleryRef}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onFocusCapture={() => setIsFocusWithin(true)}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+          setIsFocusWithin(false);
+        }
+      }}
+      className="mt-5"
+    >
+      <div className="mb-5 flex items-center justify-between border-y border-border py-4">
+        <div aria-live="polite" className="flex items-center gap-4">
+          <span className="font-display text-xl font-bold leading-none">
+            {String(activeIndex + 1).padStart(2, "0")} / {String(images.length).padStart(2, "0")}
+          </span>
+          <span className="hidden text-[9px] font-bold uppercase tracking-[0.25em] text-muted-foreground sm:block">
+            Image gallery
+          </span>
+        </div>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => moveCarousel("previous")}
+            className="inline-flex h-11 w-11 items-center justify-center border border-border bg-surface transition-colors hover:border-primary hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            aria-label="Previous gallery image"
+          >
+            <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            onClick={() => moveCarousel("next")}
+            className="inline-flex h-11 w-11 items-center justify-center border border-border bg-surface transition-colors hover:border-primary hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            aria-label="Next gallery image"
+          >
+            <ChevronRight className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </div>
+      </div>
+
+      <Carousel
+        setApi={setCarouselApi}
+        opts={{ align: "start", loop: true, duration: prefersReducedMotion ? 0 : 28 }}
+        aria-label={`${slug} media gallery`}
+      >
+        <CarouselContent className="ml-0 sm:-ml-4">
+          {images.map((image, index) => (
+            <CarouselItem
+              key={`${image.caption}-${image.src}`}
+              className="basis-full pl-0 sm:basis-1/2 sm:pl-4 lg:basis-1/3"
+            >
+              <figure className="group h-full overflow-hidden border border-border bg-surface">
+                <button
+                  ref={(button) => {
+                    imageTriggerRefs.current[index] = button;
+                  }}
+                  type="button"
+                  onClick={() => openImage(index)}
+                  className="relative block w-full overflow-hidden bg-muted text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
+                  aria-label={`Open ${image.caption} image ${index + 1} of ${images.length}`}
+                >
+                  <img
+                    src={image.src}
+                    alt={image.alt}
+                    loading="lazy"
+                    className="aspect-[4/3] w-full object-cover transition duration-[1200ms] group-hover:scale-[1.04]"
+                  />
+                  <span className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center bg-foreground/80 text-white backdrop-blur-sm transition-colors group-hover:bg-accent group-hover:text-accent-foreground">
+                    <Maximize2 className="h-4 w-4" aria-hidden="true" />
+                  </span>
+                </button>
+                <figcaption className="flex min-h-16 items-center justify-between gap-4 px-5 py-4 text-[9px] font-bold uppercase tracking-widest">
+                  <span>{image.caption}</span>
+                  <span className="shrink-0 text-primary">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                </figcaption>
+              </figure>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </Carousel>
+
+      <div className="mt-5 h-1 overflow-hidden bg-muted" aria-hidden="true">
+        <span
+          ref={progressRef}
+          className="block h-full origin-left scale-x-0 bg-accent will-change-transform"
+        />
+      </div>
+
+      <Dialog open={modalOpen} onOpenChange={handleModalChange}>
+        <DialogContent
+          onCloseAutoFocus={(event) => {
+            event.preventDefault();
+            imageTriggerRefs.current[openedImageIndexRef.current]?.focus();
+          }}
+          className="brand-dark block h-svh w-screen max-w-none translate-x-[-50%] translate-y-[-50%] overflow-hidden border-0 bg-foreground p-0 text-white shadow-none sm:rounded-none [&>button]:right-5 [&>button]:top-5 [&>button]:z-20 [&>button]:flex [&>button]:h-11 [&>button]:w-11 [&>button]:items-center [&>button]:justify-center [&>button]:bg-white/10 [&>button]:text-white [&>button]:opacity-100"
+        >
+          <DialogTitle className="sr-only">{slug} image gallery</DialogTitle>
+          <DialogDescription className="sr-only">
+            Swipe, use the arrow keys, or choose a thumbnail to explore the gallery.
+          </DialogDescription>
+
+          <div className="flex h-20 items-center justify-between border-b border-white/15 px-5 pr-20 sm:px-8 sm:pr-24">
+            <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-primary">
+              {slug} / Gallery
+            </span>
+            <span aria-live="polite" className="font-display text-xl font-bold">
+              {String(modalIndex + 1).padStart(2, "0")} / {String(images.length).padStart(2, "0")}
+            </span>
+          </div>
+
+          <div className="relative flex h-[calc(100svh-12.5rem)] items-center">
+            <Carousel
+              setApi={setModalApi}
+              opts={{ align: "start", loop: true, duration: prefersReducedMotion ? 0 : 24 }}
+              className="w-full"
+              aria-label={`${slug} expanded image gallery`}
+            >
+              <CarouselContent className="ml-0">
+                {images.map((image, index) => (
+                  <CarouselItem key={`modal-${image.src}`} className="basis-full pl-0">
+                    <figure className="flex h-[calc(100svh-12.5rem)] flex-col items-center justify-center px-5 pb-5 sm:px-24">
+                      <img
+                        src={image.src}
+                        alt={image.alt}
+                        className="min-h-0 max-h-[calc(100%-3.5rem)] w-full flex-1 object-contain"
+                      />
+                      <figcaption className="mt-4 text-center text-[10px] font-bold uppercase tracking-[0.22em] text-white/75">
+                        {image.caption} / {String(index + 1).padStart(2, "0")}
+                      </figcaption>
+                    </figure>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+            </Carousel>
+
+            <button
+              type="button"
+              onClick={() => modalApi?.scrollPrev()}
+              className="absolute left-3 top-1/2 z-10 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent sm:left-8"
+              aria-label="Previous expanded image"
+            >
+              <ChevronLeft className="h-5 w-5" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              onClick={() => modalApi?.scrollNext()}
+              className="absolute right-3 top-1/2 z-10 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent sm:right-8"
+              aria-label="Next expanded image"
+            >
+              <ChevronRight className="h-5 w-5" aria-hidden="true" />
+            </button>
+          </div>
+
+          <div className="h-[7.5rem] border-t border-white/15 px-5 py-4 sm:px-8">
+            <div className="mx-auto flex h-full max-w-4xl gap-3 overflow-x-auto">
+              {images.map((image, index) => (
+                <button
+                  key={`thumbnail-${image.src}`}
+                  type="button"
+                  onClick={() => {
+                    setModalIndex(index);
+                    modalApi?.scrollTo(index);
+                  }}
+                  aria-label={`View ${image.caption}`}
+                  aria-current={modalIndex === index ? "true" : undefined}
+                  className={`h-full min-w-24 overflow-hidden border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent sm:min-w-28 ${
+                    modalIndex === index ? "border-accent" : "border-white/20 hover:border-white/60"
+                  }`}
+                >
+                  <img src={image.src} alt="" className="h-full w-full object-cover" />
+                </button>
+              ))}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
 export function ServiceDetailPage({ slug }: { slug: string }) {
   const profile = getServiceProfile(slug);
   const [activeCapabilityIndex, setActiveCapabilityIndex] = useState(0);
+  const [mobileCapabilityIndex, setMobileCapabilityIndex] = useState(0);
   const prefersReducedMotion = useReducedMotion();
+  const mobileCapabilityRailRef = useRef<HTMLDivElement | null>(null);
+  const mobileCapabilityCardRefs = useRef<Array<HTMLElement | null>>([]);
+  const mobileCapabilityFrame = useRef<number | null>(null);
   const activeCapability = profile.capabilities[activeCapabilityIndex];
   const relatedProducts = profile.productSlugs
     .map((productSlug) => featuredProducts.find((product) => product.slug === productSlug))
     .filter((product): product is (typeof featuredProducts)[number] => Boolean(product));
   const connectedServices = businessUnits.filter((unit) => unit.slug !== profile.slug).slice(0, 3);
+
+  const syncMobileCapabilityIndex = useCallback(() => {
+    const rail = mobileCapabilityRailRef.current;
+    if (!rail) return;
+
+    const railCenter = rail.scrollLeft + rail.clientWidth / 2;
+    let nearestIndex = 0;
+    let nearestDistance = Number.POSITIVE_INFINITY;
+
+    mobileCapabilityCardRefs.current.forEach((card, index) => {
+      if (!card) return;
+      const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+      const distance = Math.abs(cardCenter - railCenter);
+
+      if (distance < nearestDistance) {
+        nearestDistance = distance;
+        nearestIndex = index;
+      }
+    });
+
+    setMobileCapabilityIndex(nearestIndex);
+    mobileCapabilityFrame.current = null;
+  }, []);
+
+  const handleMobileCapabilityScroll = () => {
+    if (mobileCapabilityFrame.current) cancelAnimationFrame(mobileCapabilityFrame.current);
+    mobileCapabilityFrame.current = requestAnimationFrame(syncMobileCapabilityIndex);
+  };
+
+  const scrollToMobileCapability = (index: number) => {
+    const nextIndex = Math.max(0, Math.min(index, profile.capabilities.length - 1));
+    const rail = mobileCapabilityRailRef.current;
+    const card = mobileCapabilityCardRefs.current[nextIndex];
+
+    setMobileCapabilityIndex(nextIndex);
+    if (!rail || !card) return;
+
+    rail.scrollTo({
+      left: card.offsetLeft - (rail.clientWidth - card.offsetWidth) / 2,
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+    });
+  };
+
+  useEffect(() => {
+    mobileCapabilityFrame.current = requestAnimationFrame(syncMobileCapabilityIndex);
+    const restorationTimer = window.setTimeout(syncMobileCapabilityIndex, 750);
+
+    return () => {
+      if (mobileCapabilityFrame.current) cancelAnimationFrame(mobileCapabilityFrame.current);
+      window.clearTimeout(restorationTimer);
+    };
+  }, [profile.slug, syncMobileCapabilityIndex]);
 
   const handleCapabilityKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
     let nextIndex = index;
@@ -161,14 +570,14 @@ export function ServiceDetailPage({ slug }: { slug: string }) {
 
       <section
         id="capabilities"
-        className="brand-dark scroll-mt-32 bg-foreground px-8 py-24 text-background lg:px-16 lg:py-36 xl:px-20"
+        className="brand-dark scroll-mt-32 bg-foreground px-8 py-20 text-background lg:px-16 lg:py-36 xl:px-20"
       >
         <div className="mb-14 grid grid-cols-12 gap-y-8 lg:mb-20">
           <div className="col-span-12 lg:col-span-8">
             <span className="mb-5 block text-[10px] font-bold uppercase tracking-[0.4em] text-primary">
               02 / Capabilities
             </span>
-            <h2 className="max-w-5xl font-display text-5xl font-extrabold leading-[0.92] tracking-tighter text-balance lg:text-7xl">
+            <h2 className="max-w-5xl font-display text-4xl font-extrabold leading-[0.92] tracking-tighter text-balance sm:text-5xl lg:text-7xl">
               {profile.capabilitiesTitle}
             </h2>
           </div>
@@ -177,10 +586,121 @@ export function ServiceDetailPage({ slug }: { slug: string }) {
           </p>
         </div>
 
+        <div className="lg:hidden">
+          <div className="mb-6 flex items-center justify-between border-y border-white/15 py-4">
+            <div aria-live="polite">
+              <span className="block text-[9px] font-bold uppercase tracking-[0.3em] text-primary">
+                Current capability
+              </span>
+              <span className="mt-1 block font-display text-lg font-bold leading-none">
+                {String(mobileCapabilityIndex + 1).padStart(2, "0")} /{" "}
+                {String(profile.capabilities.length).padStart(2, "0")}
+              </span>
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => scrollToMobileCapability(mobileCapabilityIndex - 1)}
+                disabled={mobileCapabilityIndex === 0}
+                className="inline-flex h-11 w-11 items-center justify-center border border-white/25 transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-30"
+              >
+                <span className="sr-only">Previous capability</span>
+                <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollToMobileCapability(mobileCapabilityIndex + 1)}
+                disabled={mobileCapabilityIndex === profile.capabilities.length - 1}
+                className="inline-flex h-11 w-11 items-center justify-center border border-white/25 transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-30"
+              >
+                <span className="sr-only">Next capability</span>
+                <ChevronRight className="h-4 w-4" aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+
+          <div
+            ref={mobileCapabilityRailRef}
+            onScroll={handleMobileCapabilityScroll}
+            aria-label={`${profile.slug} capability cards`}
+            className="-mx-8 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain px-4 pb-6"
+          >
+            {profile.capabilities.map((capability, index) => {
+              const isActive = mobileCapabilityIndex === index;
+
+              return (
+                <article
+                  key={capability.label}
+                  ref={(card) => {
+                    mobileCapabilityCardRefs.current[index] = card;
+                  }}
+                  aria-current={isActive ? "true" : undefined}
+                  className={`w-[calc(100vw-2rem)] min-w-[288px] max-w-[380px] shrink-0 snap-center overflow-hidden border bg-foreground transition-colors ${
+                    isActive ? "border-primary" : "border-white/15"
+                  }`}
+                >
+                  <div className="relative aspect-[16/10] overflow-hidden bg-black">
+                    <img
+                      src={capability.image}
+                      alt={capability.imageAlt}
+                      loading="lazy"
+                      onLoad={handleMobileCapabilityScroll}
+                      className="h-full w-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-foreground/10" aria-hidden="true" />
+                    <span className="absolute left-4 top-4 bg-accent px-3 py-2 text-[9px] font-bold uppercase tracking-widest text-accent-foreground">
+                      {String(index + 1).padStart(2, "0")} /{" "}
+                      {String(profile.capabilities.length).padStart(2, "0")}
+                    </span>
+                  </div>
+
+                  <div className="flex min-h-[390px] flex-col p-5 sm:p-6">
+                    <span className="text-[9px] font-bold uppercase tracking-[0.25em] text-primary">
+                      {capability.label}
+                    </span>
+                    <h3 className="mt-4 font-display text-2xl font-extrabold leading-[0.96] tracking-normal text-white sm:text-3xl">
+                      {capability.title}
+                    </h3>
+                    <p className="mt-4 text-xs leading-relaxed text-background/70 sm:mt-5 sm:text-sm">
+                      {capability.body}
+                    </p>
+
+                    <ul className="mt-5 border-t border-white/15 pt-1 sm:mt-7 sm:pt-2">
+                      {capability.bullets.map((bullet) => (
+                        <li
+                          key={bullet}
+                          className="flex items-start gap-3 border-b border-white/15 py-2.5 text-[8px] font-bold uppercase leading-relaxed tracking-[0.12em] text-background/80 sm:py-3 sm:text-[9px]"
+                        >
+                          <Check
+                            className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary"
+                            aria-hidden="true"
+                          />
+                          <span>{bullet}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <div className="mt-auto flex gap-2 pt-5 sm:pt-6" aria-hidden="true">
+                      {profile.capabilities.map((item, itemIndex) => (
+                        <span
+                          key={item.label}
+                          className={`h-1 flex-1 transition-colors ${
+                            itemIndex === index ? "bg-primary" : "bg-white/15"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </div>
+
         <div
           role="tablist"
           aria-label={`${profile.slug} capabilities`}
-          className="grid border-l border-t border-white/15 lg:grid-cols-3"
+          className="hidden border-l border-t border-white/15 lg:grid lg:grid-cols-3"
         >
           {profile.capabilities.map((capability, index) => {
             const isActive = activeCapabilityIndex === index;
@@ -218,7 +738,7 @@ export function ServiceDetailPage({ slug }: { slug: string }) {
           id={`capability-panel-${profile.slug}`}
           role="tabpanel"
           aria-labelledby={`capability-tab-${profile.slug}-${activeCapabilityIndex}`}
-          className="grid min-h-[640px] overflow-hidden border-x border-b border-white/15 lg:grid-cols-[1.15fr_0.85fr]"
+          className="hidden min-h-[640px] overflow-hidden border-x border-b border-white/15 lg:grid lg:grid-cols-[1.15fr_0.85fr]"
         >
           <div className="relative min-h-[360px] overflow-hidden bg-black lg:min-h-[640px]">
             <AnimatePresence mode="sync" initial={false}>
@@ -333,33 +853,17 @@ export function ServiceDetailPage({ slug }: { slug: string }) {
             playsInline
             preload="metadata"
             poster={profile.mediaPoster}
-            className="aspect-video w-full object-cover"
+            className="aspect-[4/3] w-full object-cover md:aspect-video"
           >
             <source src={profile.mediaVideo} type="video/mp4" />
           </video>
         </div>
 
-        <div className="mt-5 grid gap-5 md:grid-cols-3">
-          {profile.mediaImages.map((image, index) => (
-            <figure
-              key={image.caption}
-              className="group overflow-hidden border border-border bg-surface"
-            >
-              <div className="overflow-hidden bg-muted">
-                <img
-                  src={image.src}
-                  alt={image.alt}
-                  loading="lazy"
-                  className="aspect-[4/3] w-full object-cover transition duration-[1200ms] group-hover:scale-[1.04]"
-                />
-              </div>
-              <figcaption className="flex items-center justify-between p-5 text-[9px] font-bold uppercase tracking-widest">
-                <span>{image.caption}</span>
-                <span className="text-primary">0{index + 1}</span>
-              </figcaption>
-            </figure>
-          ))}
-        </div>
+        <ServiceMediaGallery
+          images={profile.mediaImages}
+          prefersReducedMotion={Boolean(prefersReducedMotion)}
+          slug={profile.slug}
+        />
       </section>
 
       <section

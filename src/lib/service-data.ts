@@ -49,7 +49,7 @@ export const serviceProfiles: ServiceProfile[] = [
     eyebrow: "Flagship Service / Aviation",
     heroTitle: "Aircraft programs built around the operator.",
     heroIntro:
-      "From early fleet strategy to lifecycle support, Stratos Aviation brings aircraft, operations, people, and data into one dependable program.",
+      "From early fleet strategy to lifecycle support, Lucid Aviation Aviation brings aircraft, operations, people, and data into one dependable program.",
     heroImage: remoteMedia.services.aviation.hero.src,
     heroVideo,
     heroPoster: remoteMedia.services.aviation.hero.src,
@@ -111,7 +111,7 @@ export const serviceProfiles: ServiceProfile[] = [
     ],
     deliveryTitle: "A program model with clear gates and shared accountability.",
     deliveryIntro:
-      "Stratos adapts the sequence to the operator, while keeping decisions visible from discovery through long-term support.",
+      "Lucid Aviation adapts the sequence to the operator, while keeping decisions visible from discovery through long-term support.",
     delivery: [
       {
         title: "Define the mission",
@@ -152,6 +152,21 @@ export const serviceProfiles: ServiceProfile[] = [
         alt: remoteMedia.services.aviation.gallery[2].alt,
         caption: "Connected operations",
       },
+      {
+        src: remoteMedia.services.aviation.gallery[3].src,
+        alt: remoteMedia.services.aviation.gallery[3].alt,
+        caption: "Fleet readiness",
+      },
+      {
+        src: remoteMedia.services.aviation.gallery[4].src,
+        alt: remoteMedia.services.aviation.gallery[4].alt,
+        caption: "Manufacturing integration",
+      },
+      {
+        src: remoteMedia.services.aviation.gallery[5].src,
+        alt: remoteMedia.services.aviation.gallery[5].alt,
+        caption: "Hangar support",
+      },
     ],
     productSlugs: ["aeroline-a-90", "aerodigital-network"],
     inquiryLabel: "Aviation inquiry",
@@ -165,7 +180,7 @@ export const serviceProfiles: ServiceProfile[] = [
     eyebrow: "Aerial Intelligence / Autonomous Systems",
     heroTitle: "Autonomy designed for real field work.",
     heroIntro:
-      "Stratos develops drone operations that connect aircraft, sensors, mission control, and usable data for infrastructure and industrial teams.",
+      "Lucid Aviation develops drone operations that connect aircraft, sensors, mission control, and usable data for infrastructure and industrial teams.",
     heroImage: remoteMedia.services.drones.hero.src,
     overviewLabel: "Beyond the airframe",
     overviewTitle: "Repeatable aerial intelligence from mission design to decision.",
@@ -266,6 +281,21 @@ export const serviceProfiles: ServiceProfile[] = [
         alt: remoteMedia.services.drones.gallery[2].alt,
         caption: "Site intelligence",
       },
+      {
+        src: remoteMedia.services.drones.gallery[3].src,
+        alt: remoteMedia.services.drones.gallery[3].alt,
+        caption: "Remote terrain",
+      },
+      {
+        src: remoteMedia.services.drones.gallery[4].src,
+        alt: remoteMedia.services.drones.gallery[4].alt,
+        caption: "Mission platform",
+      },
+      {
+        src: remoteMedia.services.drones.gallery[5].src,
+        alt: remoteMedia.services.drones.gallery[5].alt,
+        caption: "Aerial inspection",
+      },
     ],
     productSlugs: ["skygrid-uas", "aerodigital-network"],
     inquiryLabel: "Drone operations inquiry",
@@ -279,7 +309,7 @@ export const serviceProfiles: ServiceProfile[] = [
     eyebrow: "Advisory / Operational Transformation",
     heroTitle: "Strategy that survives contact with operations.",
     heroIntro:
-      "Stratos Consulting helps leadership teams modernize complex aviation and industrial organizations while keeping delivery, people, and accountability in view.",
+      "Lucid Aviation Consulting helps leadership teams modernize complex aviation and industrial organizations while keeping delivery, people, and accountability in view.",
     heroImage: remoteMedia.services.consulting.hero.src,
     overviewLabel: "Advice built to move",
     overviewTitle: "From an executive decision to an executable operating plan.",
@@ -380,6 +410,21 @@ export const serviceProfiles: ServiceProfile[] = [
         alt: remoteMedia.services.consulting.gallery[2].alt,
         caption: "Delivery partnership",
       },
+      {
+        src: remoteMedia.services.consulting.gallery[3].src,
+        alt: remoteMedia.services.consulting.gallery[3].alt,
+        caption: "Operational review",
+      },
+      {
+        src: remoteMedia.services.consulting.gallery[4].src,
+        alt: remoteMedia.services.consulting.gallery[4].alt,
+        caption: "Program leadership",
+      },
+      {
+        src: remoteMedia.services.consulting.gallery[5].src,
+        alt: remoteMedia.services.consulting.gallery[5].alt,
+        caption: "Technical delivery",
+      },
     ],
     productSlugs: ["fleetops-advisory", "aerodigital-network"],
     inquiryLabel: "Consulting inquiry",
@@ -393,7 +438,7 @@ export const serviceProfiles: ServiceProfile[] = [
     eyebrow: "Applied Discovery / Research",
     heroTitle: "Move promising ideas into operational proof.",
     heroIntro:
-      "Stratos Research connects science, engineering, simulation, and field partners to turn emerging capability into prototypes, evidence, and standards.",
+      "Lucid Aviation Research connects science, engineering, simulation, and field partners to turn emerging capability into prototypes, evidence, and standards.",
     heroImage: remoteMedia.services.research.hero.src,
     overviewLabel: "Research with a destination",
     overviewTitle: "Built around the transition from possibility to use.",
@@ -494,6 +539,21 @@ export const serviceProfiles: ServiceProfile[] = [
         alt: remoteMedia.services.research.gallery[2].alt,
         caption: "Technology transition",
       },
+      {
+        src: remoteMedia.services.research.gallery[3].src,
+        alt: remoteMedia.services.research.gallery[3].alt,
+        caption: "Prototype systems",
+      },
+      {
+        src: remoteMedia.services.research.gallery[4].src,
+        alt: remoteMedia.services.research.gallery[4].alt,
+        caption: "Field robotics",
+      },
+      {
+        src: remoteMedia.services.research.gallery[5].src,
+        alt: remoteMedia.services.research.gallery[5].alt,
+        caption: "Engineering validation",
+      },
     ],
     productSlugs: ["research-campus-04", "aerodigital-network"],
     inquiryLabel: "Research partnership",
@@ -507,7 +567,7 @@ export const serviceProfiles: ServiceProfile[] = [
     eyebrow: "Resource Operations / Mining",
     heroTitle: "Resource intelligence for safer, clearer operations.",
     heroIntro:
-      "Stratos Mining combines aerial survey, field information, environmental monitoring, and logistics planning for responsible resource programs.",
+      "Lucid Aviation Mining combines aerial survey, field information, environmental monitoring, and logistics planning for responsible resource programs.",
     heroImage: remoteMedia.services.mining.hero.src,
     overviewLabel: "A clearer operating picture",
     overviewTitle: "Connect terrain, assets, activity, and responsibility.",
@@ -607,6 +667,21 @@ export const serviceProfiles: ServiceProfile[] = [
         src: remoteMedia.services.mining.gallery[2].src,
         alt: remoteMedia.services.mining.gallery[2].alt,
         caption: "Field coordination",
+      },
+      {
+        src: remoteMedia.services.mining.gallery[3].src,
+        alt: remoteMedia.services.mining.gallery[3].alt,
+        caption: "Extraction systems",
+      },
+      {
+        src: remoteMedia.services.mining.gallery[4].src,
+        alt: remoteMedia.services.mining.gallery[4].alt,
+        caption: "Terrain operations",
+      },
+      {
+        src: remoteMedia.services.mining.gallery[5].src,
+        alt: remoteMedia.services.mining.gallery[5].alt,
+        caption: "Haulage coordination",
       },
     ],
     productSlugs: ["terrasight", "skygrid-uas"],

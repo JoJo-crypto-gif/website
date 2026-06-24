@@ -4,10 +4,10 @@ import { CompanyPage } from "@/components/corporate-pages";
 export const Route = createFileRoute("/company")({
   head: () => ({
     meta: [
-      { title: "Company | Stratos Group" },
+      { title: "Company | Lucid Aviation" },
       {
         name: "description",
-        content: "Learn about Stratos Group, an aviation-led corporate group.",
+        content: "Learn about Lucid Aviation, an aviation-led corporate group.",
       },
     ],
   }),

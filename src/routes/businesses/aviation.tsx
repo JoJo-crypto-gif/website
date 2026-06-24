@@ -4,10 +4,10 @@ import { ServiceDetailPage } from "@/components/service-pages";
 export const Route = createFileRoute("/businesses/aviation")({
   head: () => ({
     meta: [
-      { title: "Aviation | Stratos Group" },
+      { title: "Aviation | Lucid Aviation" },
       {
         name: "description",
-        content: "Stratos Aviation develops aircraft platforms and lifecycle programs.",
+        content: "Lucid Aviation Aviation develops aircraft platforms and lifecycle programs.",
       },
     ],
   }),
