@@ -483,7 +483,7 @@ export function CareerApplicationPage({ slug }: { slug: string }) {
               <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary">
                 Your application
               </span>
-              <ol className="mt-8 border-t border-border">
+              <ol className="mt-8 flex flex-row lg:flex-col overflow-x-auto gap-x-6 lg:gap-x-0 snap-x border-t border-border lg:border-t-0 select-none scrollbar-none">
                 {[
                   "Personal details",
                   "Professional profile",
@@ -492,7 +492,7 @@ export function CareerApplicationPage({ slug }: { slug: string }) {
                 ].map((step, index) => (
                   <li
                     key={step}
-                    className="flex items-center gap-4 border-b border-border py-4 text-[10px] font-bold uppercase tracking-widest"
+                    className="flex shrink-0 snap-start items-center gap-3 border-b border-border py-4 text-[10px] font-bold uppercase tracking-widest lg:w-full lg:gap-4"
                   >
                     <span className="text-primary">{String(index + 1).padStart(2, "0")}</span>
                     <span className="opacity-65">{step}</span>

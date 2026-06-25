@@ -198,7 +198,7 @@ export function InnovationPage() {
     },
   ];
 
-  const activeDomain = domains[activeDomainIndex];
+  const activeDomain = domains[activeDomainIndex] || domains[0];
   const ActiveDomainIcon = activeDomain.icon;
 
   const innovationProcess = [
@@ -269,104 +269,217 @@ export function InnovationPage() {
           title="Explore where we innovate."
           body="Select a domain to see how research moves across the group and into practical operating capability."
         />
-        <div
-          role="tablist"
-          aria-label="Innovation domains"
-          className="grid border-l border-t border-white/15 md:grid-cols-2 lg:grid-cols-4"
-        >
-          {domains.map((domain, index) => {
-            const Icon = domain.icon;
-            const isActive = index === activeDomainIndex;
+        {/* Desktop Version */}
+        <div className="hidden lg:block">
+          <div
+            role="tablist"
+            aria-label="Innovation domains"
+            className="grid border-l border-t border-white/15 md:grid-cols-2 lg:grid-cols-4"
+          >
+            {domains.map((domain, index) => {
+              const Icon = domain.icon;
+              const isActive = index === activeDomainIndex;
 
-            return (
-              <button
-                key={domain.id}
-                id={`innovation-tab-${domain.id}`}
-                type="button"
-                role="tab"
-                aria-selected={isActive}
-                aria-controls="innovation-domain-panel"
-                tabIndex={isActive ? 0 : -1}
-                onClick={() => setActiveDomainIndex(index)}
-                onKeyDown={(event) =>
-                  moveTabFocus(
-                    event,
-                    index,
-                    domains.length,
-                    setActiveDomainIndex,
-                    (next) => `innovation-tab-${domains[next].id}`,
-                  )
-                }
-                className={`min-h-44 border-b border-r border-white/15 p-6 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary lg:min-h-52 lg:p-8 ${
-                  isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-background/55 hover:text-background"
-                }`}
-              >
-                <div className="mb-12 flex items-center justify-between">
-                  <Icon className="h-5 w-5" aria-hidden="true" />
-                  <span className="text-[10px] font-bold tracking-widest opacity-55">
-                    {String(index + 1).padStart(2, "0")}
+              return (
+                <button
+                  key={domain.id}
+                  id={`innovation-tab-${domain.id}`}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  aria-controls="innovation-domain-panel"
+                  tabIndex={isActive ? 0 : -1}
+                  onClick={() => setActiveDomainIndex(index)}
+                  onKeyDown={(event) =>
+                    moveTabFocus(
+                      event,
+                      index,
+                      domains.length,
+                      setActiveDomainIndex,
+                      (next) => `innovation-tab-${domains[next].id}`,
+                    )
+                  }
+                  className={`min-h-44 border-b border-r border-white/15 p-6 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary lg:min-h-52 lg:p-8 ${
+                    isActive
+                      ? "bg-primary text-primary-foreground"
+                      : "text-background/55 hover:text-background"
+                  }`}
+                >
+                  <div className="mb-12 flex items-center justify-between">
+                    <Icon className="h-5 w-5" aria-hidden="true" />
+                    <span className="text-[10px] font-bold tracking-widest opacity-55">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                  </div>
+                  <span className="font-display text-2xl font-bold leading-none tracking-tight">
+                    {domain.label}
                   </span>
-                </div>
-                <span className="font-display text-2xl font-bold leading-none tracking-tight">
-                  {domain.label}
-                </span>
-              </button>
-            );
-          })}
+                </button>
+              );
+            })}
+          </div>
+
+          <div
+            id="innovation-domain-panel"
+            role="tabpanel"
+            aria-labelledby={`innovation-tab-${activeDomain.id}`}
+            className="mt-12 grid grid-cols-12 gap-y-10 lg:mt-20"
+          >
+            <div className="col-span-12 overflow-hidden bg-black lg:col-span-7">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.img
+                  key={activeDomain.id}
+                  src={activeDomain.image}
+                  alt={activeDomain.label}
+                  initial={prefersReducedMotion ? false : { opacity: 0, scale: 1.025 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={prefersReducedMotion ? undefined : { opacity: 0 }}
+                  transition={{ duration: prefersReducedMotion ? 0 : 0.55 }}
+                  className="aspect-[16/11] w-full object-cover"
+                />
+              </AnimatePresence>
+            </div>
+            <div className="col-span-12 lg:col-span-4 lg:col-start-9 lg:self-center">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={activeDomain.id}
+                  initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={prefersReducedMotion ? undefined : { opacity: 0, y: -10 }}
+                  transition={{ duration: prefersReducedMotion ? 0 : 0.4 }}
+                >
+                  <ActiveDomainIcon className="h-7 w-7 text-primary" aria-hidden="true" />
+                  <h3 className="mt-7 font-display text-4xl font-extrabold leading-[0.94] tracking-tighter lg:text-5xl">
+                    {activeDomain.title}
+                  </h3>
+                  <p className="mt-6 text-sm leading-relaxed text-background/70">
+                    {activeDomain.body}
+                  </p>
+                  <ul className="mt-8 border-t border-white/15">
+                    {activeDomain.signals.map((signal) => (
+                      <li
+                        key={signal}
+                        className="flex items-center gap-3 border-b border-white/15 py-4 text-[10px] font-bold uppercase tracking-widest"
+                      >
+                        <CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" />
+                        {signal}
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </div>
         </div>
 
-        <div
-          id="innovation-domain-panel"
-          role="tabpanel"
-          aria-labelledby={`innovation-tab-${activeDomain.id}`}
-          className="mt-12 grid grid-cols-12 gap-y-10 lg:mt-20"
-        >
-          <div className="col-span-12 overflow-hidden bg-black lg:col-span-7">
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.img
-                key={activeDomain.id}
-                src={activeDomain.image}
-                alt={activeDomain.label}
-                initial={prefersReducedMotion ? false : { opacity: 0, scale: 1.025 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={prefersReducedMotion ? undefined : { opacity: 0 }}
-                transition={{ duration: prefersReducedMotion ? 0 : 0.55 }}
-                className="aspect-[16/11] w-full object-cover"
-              />
-            </AnimatePresence>
-          </div>
-          <div className="col-span-12 lg:col-span-4 lg:col-start-9 lg:self-center">
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={activeDomain.id}
-                initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={prefersReducedMotion ? undefined : { opacity: 0, y: -10 }}
-                transition={{ duration: prefersReducedMotion ? 0 : 0.4 }}
-              >
-                <ActiveDomainIcon className="h-7 w-7 text-primary" aria-hidden="true" />
-                <h3 className="mt-7 font-display text-4xl font-extrabold leading-[0.94] tracking-tighter lg:text-5xl">
-                  {activeDomain.title}
-                </h3>
-                <p className="mt-6 text-sm leading-relaxed text-background/70">
-                  {activeDomain.body}
-                </p>
-                <ul className="mt-8 border-t border-white/15">
-                  {activeDomain.signals.map((signal) => (
-                    <li
-                      key={signal}
-                      className="flex items-center gap-3 border-b border-white/15 py-4 text-[10px] font-bold uppercase tracking-widest"
+        {/* Mobile Version (Interactive Accordion) */}
+        <div className="block lg:hidden border-t border-white/10 mt-8">
+          {domains.map((domain, index) => {
+            const isActive = index === activeDomainIndex;
+            const DomainIcon = domain.icon;
+
+            return (
+              <div key={domain.id} className="border-b border-white/10">
+                {/* Header trigger */}
+                <button
+                  type="button"
+                  onClick={() => setActiveDomainIndex(isActive ? -1 : index)}
+                  className="w-full flex items-start justify-between py-6 text-left focus:outline-none group focus-visible:ring-1 focus-visible:ring-primary"
+                >
+                  <div className="flex items-center gap-4 pr-4">
+                    <DomainIcon className={`h-5 w-5 shrink-0 ${isActive ? "text-primary" : "text-white/60"}`} aria-hidden="true" />
+                    <div>
+                      <span className="text-[10px] font-bold tracking-widest text-white/50 block mb-1">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      <h3 className={`font-display text-xl sm:text-2xl font-bold leading-tight transition-colors duration-200 ${
+                        isActive ? "text-primary" : "text-white/60 group-hover:text-white"
+                      }`}>
+                        {domain.label}
+                      </h3>
+                    </div>
+                  </div>
+                  <div className="mt-1 p-1 rounded-full border border-white/10 bg-white/5 shrink-0 flex items-center justify-center transition-colors group-hover:border-white/20 group-hover:bg-white/10">
+                    <motion.div
+                      animate={{ rotate: isActive ? 45 : 0 }}
+                      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                     >
-                      <CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" />
-                      {signal}
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            </AnimatePresence>
-          </div>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-4 w-4 text-white/70"
+                      >
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                      </svg>
+                    </motion.div>
+                  </div>
+                </button>
+
+                {/* Expandable content area */}
+                <motion.div
+                  initial={false}
+                  animate={{
+                    height: isActive ? "auto" : 0,
+                    opacity: isActive ? 1 : 0,
+                  }}
+                  transition={{
+                    duration: prefersReducedMotion ? 0 : 0.35,
+                    ease: [0.16, 1, 0.3, 1]
+                  }}
+                  style={{ willChange: prefersReducedMotion ? "none" : "height, opacity" }}
+                  className="overflow-hidden"
+                >
+                  <div className="pb-6">
+                    {/* Image banner with Ken Burns effect */}
+                    <div className="relative aspect-[16/10] w-full overflow-hidden rounded-lg bg-black border border-white/10 mb-6">
+                      <motion.img
+                        src={domain.image}
+                        alt={domain.label}
+                        animate={{
+                          scale: prefersReducedMotion ? 1 : (isActive ? 1 : 1.12),
+                          opacity: isActive ? 1 : 0.4,
+                        }}
+                        transition={{
+                          duration: prefersReducedMotion ? 0 : 0.6,
+                          ease: [0.16, 1, 0.3, 1]
+                        }}
+                        style={{ willChange: prefersReducedMotion ? "none" : "transform, opacity" }}
+                        className="absolute inset-0 h-full w-full object-cover"
+                      />
+                    </div>
+
+                    <h4 className="font-display text-2xl font-extrabold leading-none sm:text-3xl text-white">
+                      {domain.title}
+                    </h4>
+                    <p className="mt-4 text-xs sm:text-sm leading-relaxed text-background/70">
+                      {domain.body}
+                    </p>
+
+                    {/* Signals Bullet List */}
+                    <ul className="mt-6 border-t border-white/10">
+                      {domain.signals.map((signal) => (
+                        <li
+                          key={signal}
+                          className="flex items-center gap-3 border-b border-white/10 py-3.5 text-[10px] font-bold uppercase tracking-widest text-background/80"
+                        >
+                          <CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" />
+                          {signal}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </motion.div>
+              </div>
+            );
+          })}
         </div>
       </section>
 
@@ -486,7 +599,7 @@ export function SustainabilityPage() {
     },
   ];
 
-  const activeCommitment = commitments[activeCommitmentIndex];
+  const activeCommitment = commitments[activeCommitmentIndex] || commitments[0];
   const ActiveCommitmentIcon = activeCommitment.icon;
 
   const lifecycleActions: Array<[ReactNode, string, string]> = [
@@ -558,114 +671,236 @@ export function SustainabilityPage() {
           title="Three dimensions of responsible operation."
           body="Select a commitment area to explore current priorities and illustrative progress indicators."
         />
-        <div
-          role="tablist"
-          aria-label="Sustainability commitments"
-          className="grid border-l border-t border-white/15 md:grid-cols-3"
-        >
-          {commitments.map((commitment, index) => {
-            const Icon = commitment.icon;
-            const isActive = index === activeCommitmentIndex;
+        {/* Desktop Version */}
+        <div className="hidden lg:block">
+          <div
+            role="tablist"
+            aria-label="Sustainability commitments"
+            className="grid border-l border-t border-white/15 md:grid-cols-3"
+          >
+            {commitments.map((commitment, index) => {
+              const Icon = commitment.icon;
+              const isActive = index === activeCommitmentIndex;
 
-            return (
-              <button
-                key={commitment.id}
-                id={`commitment-tab-${commitment.id}`}
-                type="button"
-                role="tab"
-                aria-selected={isActive}
-                aria-controls="commitment-panel"
-                tabIndex={isActive ? 0 : -1}
-                onClick={() => setActiveCommitmentIndex(index)}
-                onKeyDown={(event) =>
-                  moveTabFocus(
-                    event,
-                    index,
-                    commitments.length,
-                    setActiveCommitmentIndex,
-                    (next) => `commitment-tab-${commitments[next].id}`,
-                  )
-                }
-                className={`min-h-44 border-b border-r border-white/15 p-6 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary lg:min-h-52 lg:p-8 ${
-                  isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-background/50 hover:text-background"
-                }`}
-              >
-                <div className="mb-12 flex items-center justify-between">
-                  <Icon className="h-5 w-5" aria-hidden="true" />
-                  <span className="text-[10px] font-bold tracking-widest opacity-55">
-                    {String(index + 1).padStart(2, "0")}
+              return (
+                <button
+                  key={commitment.id}
+                  id={`commitment-tab-${commitment.id}`}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  aria-controls="commitment-panel"
+                  tabIndex={isActive ? 0 : -1}
+                  onClick={() => setActiveCommitmentIndex(index)}
+                  onKeyDown={(event) =>
+                    moveTabFocus(
+                      event,
+                      index,
+                      commitments.length,
+                      setActiveCommitmentIndex,
+                      (next) => `commitment-tab-${commitments[next].id}`,
+                    )
+                  }
+                  className={`min-h-44 border-b border-r border-white/15 p-6 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary lg:min-h-52 lg:p-8 ${
+                    isActive
+                      ? "bg-primary text-primary-foreground"
+                      : "text-background/50 hover:text-background"
+                  }`}
+                >
+                  <div className="mb-12 flex items-center justify-between">
+                    <Icon className="h-5 w-5" aria-hidden="true" />
+                    <span className="text-[10px] font-bold tracking-widest opacity-55">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                  </div>
+                  <span className="font-display text-3xl font-bold leading-none tracking-tight">
+                    {commitment.label}
                   </span>
-                </div>
-                <span className="font-display text-3xl font-bold leading-none tracking-tight">
-                  {commitment.label}
-                </span>
-              </button>
-            );
-          })}
+                </button>
+              );
+            })}
+          </div>
+
+          <div
+            id="commitment-panel"
+            role="tabpanel"
+            aria-labelledby={`commitment-tab-${activeCommitment.id}`}
+            className="mt-12 grid grid-cols-12 gap-y-10 lg:mt-20"
+          >
+            <div className="col-span-12 overflow-hidden bg-black lg:col-span-6">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.img
+                  key={activeCommitment.id}
+                  src={activeCommitment.image}
+                  alt={activeCommitment.label}
+                  initial={prefersReducedMotion ? false : { opacity: 0, scale: 1.025 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={prefersReducedMotion ? undefined : { opacity: 0 }}
+                  transition={{ duration: prefersReducedMotion ? 0 : 0.55 }}
+                  className="aspect-[16/12] w-full object-cover lg:h-full"
+                />
+              </AnimatePresence>
+            </div>
+            <div className="col-span-12 lg:col-span-5 lg:col-start-8">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={activeCommitment.id}
+                  initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={prefersReducedMotion ? undefined : { opacity: 0, y: -10 }}
+                  transition={{ duration: prefersReducedMotion ? 0 : 0.4 }}
+                >
+                  <ActiveCommitmentIcon className="h-7 w-7 text-primary" aria-hidden="true" />
+                  <h3 className="mt-7 font-display text-4xl font-extrabold leading-[0.94] tracking-tighter lg:text-5xl">
+                    {activeCommitment.title}
+                  </h3>
+                  <p className="mt-6 text-sm leading-relaxed text-background/70">
+                    {activeCommitment.body}
+                  </p>
+                  <div className="mt-10 space-y-7 border-t border-white/15 pt-8">
+                    {activeCommitment.targets.map(([label, value, progress]) => (
+                      <div key={label}>
+                        <div className="mb-3 flex items-end justify-between gap-6">
+                          <span className="text-[9px] font-bold uppercase tracking-widest text-background/55">
+                            {label}
+                          </span>
+                          <span className="font-display text-2xl font-bold">{value}</span>
+                        </div>
+                        <div className="h-px overflow-hidden bg-white/20">
+                          <motion.div
+                            key={`${activeCommitment.id}-${label}`}
+                            initial={prefersReducedMotion ? { width: `${progress}%` } : { width: 0 }}
+                            animate={{ width: `${progress}%` }}
+                            transition={{ duration: prefersReducedMotion ? 0 : 0.8 }}
+                            className="h-full bg-primary"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </div>
         </div>
 
-        <div
-          id="commitment-panel"
-          role="tabpanel"
-          aria-labelledby={`commitment-tab-${activeCommitment.id}`}
-          className="mt-12 grid grid-cols-12 gap-y-10 lg:mt-20"
-        >
-          <div className="col-span-12 overflow-hidden bg-black lg:col-span-6">
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.img
-                key={activeCommitment.id}
-                src={activeCommitment.image}
-                alt={activeCommitment.label}
-                initial={prefersReducedMotion ? false : { opacity: 0, scale: 1.025 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={prefersReducedMotion ? undefined : { opacity: 0 }}
-                transition={{ duration: prefersReducedMotion ? 0 : 0.55 }}
-                className="aspect-[16/12] w-full object-cover lg:h-full"
-              />
-            </AnimatePresence>
-          </div>
-          <div className="col-span-12 lg:col-span-5 lg:col-start-8">
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={activeCommitment.id}
-                initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={prefersReducedMotion ? undefined : { opacity: 0, y: -10 }}
-                transition={{ duration: prefersReducedMotion ? 0 : 0.4 }}
-              >
-                <ActiveCommitmentIcon className="h-7 w-7 text-primary" aria-hidden="true" />
-                <h3 className="mt-7 font-display text-4xl font-extrabold leading-[0.94] tracking-tighter lg:text-5xl">
-                  {activeCommitment.title}
-                </h3>
-                <p className="mt-6 text-sm leading-relaxed text-background/70">
-                  {activeCommitment.body}
-                </p>
-                <div className="mt-10 space-y-7 border-t border-white/15 pt-8">
-                  {activeCommitment.targets.map(([label, value, progress]) => (
-                    <div key={label}>
-                      <div className="mb-3 flex items-end justify-between gap-6">
-                        <span className="text-[9px] font-bold uppercase tracking-widest text-background/55">
-                          {label}
-                        </span>
-                        <span className="font-display text-2xl font-bold">{value}</span>
-                      </div>
-                      <div className="h-px overflow-hidden bg-white/20">
-                        <motion.div
-                          key={`${activeCommitment.id}-${label}`}
-                          initial={prefersReducedMotion ? { width: `${progress}%` } : { width: 0 }}
-                          animate={{ width: `${progress}%` }}
-                          transition={{ duration: prefersReducedMotion ? 0 : 0.8 }}
-                          className="h-full bg-primary"
-                        />
-                      </div>
+        {/* Mobile Version (Interactive Accordion) */}
+        <div className="block lg:hidden border-t border-white/10 mt-8">
+          {commitments.map((commitment, index) => {
+            const isActive = index === activeCommitmentIndex;
+            const CommitmentIcon = commitment.icon;
+
+            return (
+              <div key={commitment.id} className="border-b border-white/10">
+                {/* Header trigger */}
+                <button
+                  type="button"
+                  onClick={() => setActiveCommitmentIndex(isActive ? -1 : index)}
+                  className="w-full flex items-start justify-between py-6 text-left focus:outline-none group focus-visible:ring-1 focus-visible:ring-primary"
+                >
+                  <div className="flex items-center gap-4 pr-4">
+                    <CommitmentIcon className={`h-5 w-5 shrink-0 ${isActive ? "text-primary" : "text-white/60"}`} aria-hidden="true" />
+                    <div>
+                      <span className="text-[10px] font-bold tracking-widest text-white/50 block mb-1">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      <h3 className={`font-display text-xl sm:text-2xl font-bold leading-tight transition-colors duration-200 ${
+                        isActive ? "text-primary" : "text-white/60 group-hover:text-white"
+                      }`}>
+                        {commitment.label}
+                      </h3>
                     </div>
-                  ))}
-                </div>
-              </motion.div>
-            </AnimatePresence>
-          </div>
+                  </div>
+                  <div className="mt-1 p-1 rounded-full border border-white/10 bg-white/5 shrink-0 flex items-center justify-center transition-colors group-hover:border-white/20 group-hover:bg-white/10">
+                    <motion.div
+                      animate={{ rotate: isActive ? 45 : 0 }}
+                      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-4 w-4 text-white/70"
+                      >
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                      </svg>
+                    </motion.div>
+                  </div>
+                </button>
+
+                {/* Expandable content area */}
+                <motion.div
+                  initial={false}
+                  animate={{
+                    height: isActive ? "auto" : 0,
+                    opacity: isActive ? 1 : 0,
+                  }}
+                  transition={{
+                    duration: prefersReducedMotion ? 0 : 0.35,
+                    ease: [0.16, 1, 0.3, 1]
+                  }}
+                  style={{ willChange: prefersReducedMotion ? "none" : "height, opacity" }}
+                  className="overflow-hidden"
+                >
+                  <div className="pb-6">
+                    {/* Image banner with Ken Burns effect */}
+                    <div className="relative aspect-[16/10] w-full overflow-hidden rounded-lg bg-black border border-white/10 mb-6">
+                      <motion.img
+                        src={commitment.image}
+                        alt={commitment.label}
+                        animate={{
+                          scale: prefersReducedMotion ? 1 : (isActive ? 1 : 1.12),
+                          opacity: isActive ? 1 : 0.4,
+                        }}
+                        transition={{
+                          duration: prefersReducedMotion ? 0 : 0.6,
+                          ease: [0.16, 1, 0.3, 1]
+                        }}
+                        style={{ willChange: prefersReducedMotion ? "none" : "transform, opacity" }}
+                        className="absolute inset-0 h-full w-full object-cover"
+                      />
+                    </div>
+
+                    <h4 className="font-display text-2xl font-extrabold leading-none sm:text-3xl text-white">
+                      {commitment.title}
+                    </h4>
+                    <p className="mt-4 text-xs sm:text-sm leading-relaxed text-background/70">
+                      {commitment.body}
+                    </p>
+
+                    {/* Targets Progress Bars */}
+                    <div className="mt-6 space-y-5 border-t border-white/10 pt-5">
+                      {commitment.targets.map(([label, value, progress]) => (
+                        <div key={label}>
+                          <div className="mb-2 flex items-end justify-between gap-6">
+                            <span className="text-[9px] font-bold uppercase tracking-widest text-background/55">
+                              {label}
+                            </span>
+                            <span className="font-display text-lg font-bold text-white">{value}</span>
+                          </div>
+                          <div className="h-px overflow-hidden bg-white/20">
+                            <motion.div
+                              initial={prefersReducedMotion ? { width: `${progress}%` } : { width: 0 }}
+                              animate={{ width: isActive ? `${progress}%` : 0 }}
+                              transition={{ duration: prefersReducedMotion ? 0 : 0.8 }}
+                              className="h-full bg-primary"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+            );
+          })}
         </div>
       </section>
 
@@ -779,7 +1014,7 @@ export function CareersPage() {
   ];
 
   const locations = ["All locations", "Accra", "Washington", "London", "Multiple"];
-  const activeDiscipline = disciplines[activeDisciplineIndex];
+  const activeDiscipline = disciplines[activeDisciplineIndex] || disciplines[0];
   const ActiveDisciplineIcon = activeDiscipline.icon;
 
   const query = searchQuery.trim().toLowerCase();
@@ -830,102 +1065,214 @@ export function CareersPage() {
           title="Find where your discipline can move."
           body="Select an area to explore the work, teams, and technical pathways available across the group."
         />
-        <div
-          role="tablist"
-          aria-label="Career disciplines"
-          className="grid border-l border-t border-border md:grid-cols-2 lg:grid-cols-4"
-        >
-          {disciplines.map((discipline, index) => {
-            const Icon = discipline.icon;
-            const isActive = index === activeDisciplineIndex;
+        {/* Desktop Version */}
+        <div className="hidden lg:block">
+          <div
+            role="tablist"
+            aria-label="Career disciplines"
+            className="grid border-l border-t border-border md:grid-cols-2 lg:grid-cols-4"
+          >
+            {disciplines.map((discipline, index) => {
+              const Icon = discipline.icon;
+              const isActive = index === activeDisciplineIndex;
 
-            return (
-              <button
-                key={discipline.id}
-                id={`discipline-tab-${discipline.id}`}
-                type="button"
-                role="tab"
-                aria-selected={isActive}
-                aria-controls="discipline-panel"
-                tabIndex={isActive ? 0 : -1}
-                onClick={() => setActiveDisciplineIndex(index)}
-                onKeyDown={(event) =>
-                  moveTabFocus(
-                    event,
-                    index,
-                    disciplines.length,
-                    setActiveDisciplineIndex,
-                    (next) => `discipline-tab-${disciplines[next].id}`,
-                  )
-                }
-                className={`min-h-44 border-b border-r border-border p-6 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary lg:min-h-52 lg:p-8 ${
-                  isActive ? "bg-primary text-primary-foreground" : "hover:bg-muted/60"
-                }`}
-              >
-                <div className="mb-12 flex items-center justify-between">
-                  <Icon
-                    className={`h-5 w-5 ${isActive ? "text-primary-foreground" : "opacity-55"}`}
-                  />
-                  <span className="text-[10px] font-bold tracking-widest opacity-45">
-                    {String(index + 1).padStart(2, "0")}
+              return (
+                <button
+                  key={discipline.id}
+                  id={`discipline-tab-${discipline.id}`}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  aria-controls="discipline-panel"
+                  tabIndex={isActive ? 0 : -1}
+                  onClick={() => setActiveDisciplineIndex(index)}
+                  onKeyDown={(event) =>
+                    moveTabFocus(
+                      event,
+                      index,
+                      disciplines.length,
+                      setActiveDisciplineIndex,
+                      (next) => `discipline-tab-${disciplines[next].id}`,
+                    )
+                  }
+                  className={`min-h-44 border-b border-r border-border p-6 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary lg:min-h-52 lg:p-8 ${
+                    isActive ? "bg-primary text-primary-foreground" : "hover:bg-muted/60"
+                  }`}
+                >
+                  <div className="mb-12 flex items-center justify-between">
+                    <Icon
+                      className={`h-5 w-5 ${isActive ? "text-primary-foreground" : "opacity-55"}`}
+                    />
+                    <span className="text-[10px] font-bold tracking-widest opacity-45">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                  </div>
+                  <span className="font-display text-2xl font-bold leading-none tracking-tight">
+                    {discipline.label}
                   </span>
-                </div>
-                <span className="font-display text-2xl font-bold leading-none tracking-tight">
-                  {discipline.label}
-                </span>
-              </button>
-            );
-          })}
+                </button>
+              );
+            })}
+          </div>
+
+          <div
+            id="discipline-panel"
+            role="tabpanel"
+            aria-labelledby={`discipline-tab-${activeDiscipline.id}`}
+            className="mt-12 grid grid-cols-12 gap-y-10 lg:mt-20"
+          >
+            <div className="col-span-12 overflow-hidden bg-muted lg:col-span-7">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.img
+                  key={activeDiscipline.id}
+                  src={activeDiscipline.image}
+                  alt={activeDiscipline.label}
+                  initial={prefersReducedMotion ? false : { opacity: 0, scale: 1.025 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={prefersReducedMotion ? undefined : { opacity: 0 }}
+                  transition={{ duration: prefersReducedMotion ? 0 : 0.55 }}
+                  className="aspect-[16/11] w-full object-cover"
+                />
+              </AnimatePresence>
+            </div>
+            <div className="col-span-12 lg:col-span-4 lg:col-start-9 lg:self-center">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={activeDiscipline.id}
+                  initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={prefersReducedMotion ? undefined : { opacity: 0, y: -10 }}
+                  transition={{ duration: prefersReducedMotion ? 0 : 0.4 }}
+                >
+                  <ActiveDisciplineIcon className="h-7 w-7 text-primary" aria-hidden="true" />
+                  <h3 className="mt-7 font-display text-4xl font-extrabold leading-[0.94] tracking-tighter lg:text-5xl">
+                    {activeDiscipline.title}
+                  </h3>
+                  <p className="mt-6 text-sm leading-relaxed opacity-70">{activeDiscipline.body}</p>
+                  <ul className="mt-8 border-t border-border">
+                    {activeDiscipline.roles.map((role) => (
+                      <li
+                        key={role}
+                        className="flex items-center gap-3 border-b border-border py-4 text-[10px] font-bold uppercase tracking-widest"
+                      >
+                        <CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" />
+                        {role}
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </div>
         </div>
 
-        <div
-          id="discipline-panel"
-          role="tabpanel"
-          aria-labelledby={`discipline-tab-${activeDiscipline.id}`}
-          className="mt-12 grid grid-cols-12 gap-y-10 lg:mt-20"
-        >
-          <div className="col-span-12 overflow-hidden bg-muted lg:col-span-7">
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.img
-                key={activeDiscipline.id}
-                src={activeDiscipline.image}
-                alt={activeDiscipline.label}
-                initial={prefersReducedMotion ? false : { opacity: 0, scale: 1.025 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={prefersReducedMotion ? undefined : { opacity: 0 }}
-                transition={{ duration: prefersReducedMotion ? 0 : 0.55 }}
-                className="aspect-[16/11] w-full object-cover"
-              />
-            </AnimatePresence>
-          </div>
-          <div className="col-span-12 lg:col-span-4 lg:col-start-9 lg:self-center">
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={activeDiscipline.id}
-                initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={prefersReducedMotion ? undefined : { opacity: 0, y: -10 }}
-                transition={{ duration: prefersReducedMotion ? 0 : 0.4 }}
-              >
-                <ActiveDisciplineIcon className="h-7 w-7 text-primary" aria-hidden="true" />
-                <h3 className="mt-7 font-display text-4xl font-extrabold leading-[0.94] tracking-tighter lg:text-5xl">
-                  {activeDiscipline.title}
-                </h3>
-                <p className="mt-6 text-sm leading-relaxed opacity-70">{activeDiscipline.body}</p>
-                <ul className="mt-8 border-t border-border">
-                  {activeDiscipline.roles.map((role) => (
-                    <li
-                      key={role}
-                      className="flex items-center gap-3 border-b border-border py-4 text-[10px] font-bold uppercase tracking-widest"
+        {/* Mobile Version (Interactive Accordion) */}
+        <div className="block lg:hidden border-t border-border mt-8">
+          {disciplines.map((discipline, index) => {
+            const isActive = index === activeDisciplineIndex;
+            const DisciplineIcon = discipline.icon;
+
+            return (
+              <div key={discipline.id} className="border-b border-border">
+                {/* Header Trigger */}
+                <button
+                  type="button"
+                  onClick={() => setActiveDisciplineIndex(isActive ? -1 : index)}
+                  className="w-full flex items-start justify-between py-6 text-left focus:outline-none group focus-visible:ring-1 focus-visible:ring-primary"
+                >
+                  <div className="flex items-center gap-4 pr-4">
+                    <DisciplineIcon className={`h-5 w-5 shrink-0 ${isActive ? "text-primary" : "opacity-55"}`} aria-hidden="true" />
+                    <div>
+                      <span className="text-[10px] font-bold tracking-widest opacity-50 block mb-1">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      <h3 className={`font-display text-xl sm:text-2xl font-bold leading-tight transition-colors duration-200 ${
+                        isActive ? "text-primary" : "group-hover:text-primary"
+                      }`}>
+                        {discipline.label}
+                      </h3>
+                    </div>
+                  </div>
+                  <div className="mt-1 p-1 rounded-full border border-border bg-muted/20 shrink-0 flex items-center justify-center transition-colors group-hover:border-primary/20 group-hover:bg-muted/40">
+                    <motion.div
+                      animate={{ rotate: isActive ? 45 : 0 }}
+                      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                     >
-                      <CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" />
-                      {role}
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            </AnimatePresence>
-          </div>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-4 w-4 opacity-70"
+                      >
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                      </svg>
+                    </motion.div>
+                  </div>
+                </button>
+
+                {/* Content Panel */}
+                <motion.div
+                  initial={false}
+                  animate={{
+                    height: isActive ? "auto" : 0,
+                    opacity: isActive ? 1 : 0,
+                  }}
+                  transition={{
+                    duration: prefersReducedMotion ? 0 : 0.35,
+                    ease: [0.16, 1, 0.3, 1]
+                  }}
+                  style={{ willChange: prefersReducedMotion ? "none" : "height, opacity" }}
+                  className="overflow-hidden"
+                >
+                  <div className="pb-8 pt-2">
+                    {/* Image with Ken Burns zoom effect */}
+                    <div className="relative aspect-[16/10] w-full overflow-hidden rounded-lg bg-black border border-border mb-6">
+                      <motion.img
+                        src={discipline.image}
+                        alt={discipline.label}
+                        animate={{
+                          scale: prefersReducedMotion ? 1 : (isActive ? 1 : 1.12),
+                          opacity: isActive ? 1 : 0.4,
+                        }}
+                        transition={{
+                          duration: prefersReducedMotion ? 0 : 0.6,
+                          ease: [0.16, 1, 0.3, 1]
+                        }}
+                        style={{ willChange: prefersReducedMotion ? "none" : "transform, opacity" }}
+                        className="absolute inset-0 h-full w-full object-cover"
+                      />
+                    </div>
+
+                    <h4 className="font-display text-2xl font-extrabold leading-none sm:text-3xl">
+                      {discipline.title}
+                    </h4>
+                    <p className="mt-4 text-xs sm:text-sm leading-relaxed opacity-70">
+                      {discipline.body}
+                    </p>
+
+                    <ul className="mt-6 border-t border-border">
+                      {discipline.roles.map((role) => (
+                        <li
+                          key={role}
+                          className="flex items-center gap-3 border-b border-border py-4 text-[10px] font-bold uppercase tracking-widest"
+                        >
+                          <CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" />
+                          {role}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </motion.div>
+              </div>
+            );
+          })}
         </div>
       </section>
 

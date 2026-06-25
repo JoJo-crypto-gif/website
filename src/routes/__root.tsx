@@ -7,7 +7,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { brandIdentity } from "@/lib/brand-data";
 
 import appCss from "../styles.css?url";
@@ -120,6 +120,70 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  useEffect(() => {
+    const handleAnchorClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const anchor = target.closest("a");
+      if (!anchor) return;
+
+      const href = anchor.getAttribute("href");
+      if (href && href.startsWith("#") && href.length > 1) {
+        const targetElement = document.querySelector(href);
+        if (targetElement) {
+          e.preventDefault();
+
+          // Get computed scroll margin top (respect CSS settings like scroll-mt)
+          const computedStyle = window.getComputedStyle(targetElement);
+          const scrollMarginTop = parseInt(computedStyle.scrollMarginTop || "0", 10);
+
+          const targetPosition =
+            targetElement.getBoundingClientRect().top + window.scrollY - scrollMarginTop;
+          const startPosition = window.scrollY;
+          const distance = targetPosition - startPosition;
+
+          // Slower, premium scroll: 1200ms duration
+          const duration = 1200;
+          let start: number | null = null;
+
+          // Accessibility check for reduced motion
+          const prefersReducedMotion = window.matchMedia(
+            "(prefers-reduced-motion: reduce)"
+          ).matches;
+
+          if (prefersReducedMotion) {
+            window.scrollTo(0, targetPosition);
+            window.history.pushState(null, "", href);
+            return;
+          }
+
+          // Premium easing function (easeInOutCubic)
+          const easeInOutCubic = (t: number) => {
+            return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+          };
+
+          const step = (timestamp: number) => {
+            if (!start) start = timestamp;
+            const progress = timestamp - start;
+            const percentage = Math.min(progress / duration, 1);
+
+            window.scrollTo(0, startPosition + distance * easeInOutCubic(percentage));
+
+            if (progress < duration) {
+              window.requestAnimationFrame(step);
+            } else {
+              window.history.pushState(null, "", href);
+            }
+          };
+
+          window.requestAnimationFrame(step);
+        }
+      }
+    };
+
+    document.addEventListener("click", handleAnchorClick, { capture: true });
+    return () => document.removeEventListener("click", handleAnchorClick, { capture: true });
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

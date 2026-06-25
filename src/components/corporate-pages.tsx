@@ -724,7 +724,42 @@ export function ProductsOverviewPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activePathIndex, setActivePathIndex] = useState(0);
   const prefersReducedMotion = useReducedMotion();
-  const activeProduct = featuredProducts[activeProductIndex];
+  const activeProduct = featuredProducts[activeProductIndex] || featuredProducts[0];
+
+  const tabListRef = useRef<HTMLDivElement | null>(null);
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.targetTouches[0].clientX;
+    touchEndX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    const diffX = touchStartX.current - touchEndX.current;
+    if (Math.abs(diffX) > 60) {
+      if (diffX > 0) {
+        setActiveProductIndex((prev) => (prev + 1) % featuredProducts.length);
+      } else {
+        setActiveProductIndex((prev) => (prev - 1 + featuredProducts.length) % featuredProducts.length);
+      }
+    }
+  };
+
+  useEffect(() => {
+    const activeTab = document.getElementById(`product-stage-tab-${activeProduct.slug}`);
+    if (activeTab && tabListRef.current) {
+      activeTab.scrollIntoView({
+        behavior: prefersReducedMotion ? "auto" : "smooth",
+        inline: "center",
+        block: "nearest",
+      });
+    }
+  }, [activeProductIndex, activeProduct.slug, prefersReducedMotion]);
 
   const categories = ["All products", ...featuredProducts.map((product) => product.category)];
   const uniqueCategories = categories.filter(
@@ -766,7 +801,7 @@ export function ProductsOverviewPage() {
     },
   ];
 
-  const activePath = productPaths[activePathIndex];
+  const activePath = productPaths[activePathIndex] || productPaths[0];
   const pathProducts = activePath.productSlugs
     .map((slug) => featuredProducts.find((product) => product.slug === slug))
     .filter((product): product is (typeof featuredProducts)[number] => Boolean(product));
@@ -796,7 +831,12 @@ export function ProductsOverviewPage() {
     <main className="min-h-screen overflow-x-clip bg-background font-mono text-foreground">
       <CorporateNav overlay />
 
-      <header className="relative flex min-h-[90svh] flex-col justify-end overflow-hidden bg-foreground text-white">
+      <header
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        className="relative flex min-h-[90svh] flex-col justify-end overflow-hidden bg-foreground text-white select-none"
+      >
         <AnimatePresence mode="sync" initial={false}>
           <motion.img
             key={activeProduct.slug}
@@ -855,6 +895,7 @@ export function ProductsOverviewPage() {
         </div>
 
         <div
+          ref={tabListRef}
           role="tablist"
           aria-label="Featured product stage"
           className="relative z-10 flex w-full snap-x overflow-x-auto border-t border-white/25 bg-foreground/35 backdrop-blur-sm lg:grid lg:grid-cols-6"
@@ -1038,7 +1079,8 @@ export function ProductsOverviewPage() {
           body="Choose the operating need closest to your program. We will connect the relevant product systems and specialist teams."
         />
 
-        <div className="grid grid-cols-12 gap-y-12">
+        {/* Desktop Version */}
+        <div className="hidden lg:grid grid-cols-12 gap-y-12">
           <div
             role="tablist"
             aria-label="Product pathways"
@@ -1108,6 +1150,122 @@ export function ProductsOverviewPage() {
               </motion.div>
             </AnimatePresence>
           </div>
+        </div>
+
+        {/* Mobile Version (Interactive Accordion) */}
+        <div className="block lg:hidden border-t border-white/10 mt-8">
+          {productPaths.map((path, index) => {
+            const isActive = index === activePathIndex;
+            const currentPathProducts = path.productSlugs
+              .map((slug) => featuredProducts.find((product) => product.slug === slug))
+              .filter((product): product is (typeof featuredProducts)[number] => Boolean(product));
+            const currentLeadProduct = currentPathProducts[0];
+
+            return (
+              <div key={path.id} className="border-b border-white/10">
+                {/* Header trigger */}
+                <button
+                  type="button"
+                  onClick={() => setActivePathIndex(isActive ? -1 : index)}
+                  className="w-full flex items-start justify-between py-6 text-left focus:outline-none group focus-visible:ring-1 focus-visible:ring-accent"
+                >
+                  <div className="pr-4">
+                    <span className="text-[10px] font-bold tracking-widest text-white/50 block mb-1">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <h3 className={`font-display text-xl sm:text-2xl font-bold leading-tight transition-colors duration-200 ${
+                      isActive ? "text-accent" : "text-white/60 group-hover:text-white"
+                    }`}>
+                      {path.label}
+                    </h3>
+                  </div>
+                  <div className="mt-1 p-1 rounded-full border border-white/10 bg-white/5 shrink-0 flex items-center justify-center transition-colors group-hover:border-white/20 group-hover:bg-white/10">
+                    <motion.div
+                      animate={{ rotate: isActive ? 45 : 0 }}
+                      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-4 w-4 text-white/70"
+                      >
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                      </svg>
+                    </motion.div>
+                  </div>
+                </button>
+
+                {/* Expandable content area */}
+                <motion.div
+                  initial={false}
+                  animate={{
+                    height: isActive ? "auto" : 0,
+                    opacity: isActive ? 1 : 0,
+                  }}
+                  transition={{
+                    duration: prefersReducedMotion ? 0 : 0.35,
+                    ease: [0.16, 1, 0.3, 1]
+                  }}
+                  style={{ willChange: prefersReducedMotion ? "none" : "height, opacity" }}
+                  className="overflow-hidden"
+                >
+                  <div className="pb-6">
+                    {/* Lead Product Image banner with Ken Burns effect */}
+                    {currentLeadProduct && (
+                      <div className="relative aspect-[16/9] w-full overflow-hidden rounded-lg bg-black border border-white/10 mb-6">
+                        <motion.img
+                          src={currentLeadProduct.image}
+                          alt={currentLeadProduct.name}
+                          animate={{
+                            scale: prefersReducedMotion ? 1 : (isActive ? 1 : 1.12),
+                            opacity: isActive ? 1 : 0.4,
+                          }}
+                          transition={{
+                            duration: prefersReducedMotion ? 0 : 0.6,
+                            ease: [0.16, 1, 0.3, 1]
+                          }}
+                          style={{ willChange: prefersReducedMotion ? "none" : "transform, opacity" }}
+                          className="absolute inset-0 h-full w-full object-cover"
+                        />
+                      </div>
+                    )}
+
+                    <span className="block text-[10px] font-bold uppercase tracking-[0.4em] text-accent mb-3">
+                      {path.eyebrow}
+                    </span>
+                    <h4 className="font-display text-2xl font-extrabold leading-none sm:text-3xl text-white">
+                      {path.title}
+                    </h4>
+                    <p className="mt-4 text-xs sm:text-sm leading-relaxed text-background/70">
+                      {path.body}
+                    </p>
+
+                    {/* Product Links */}
+                    <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3 border-t border-white/10 pt-4">
+                      {currentPathProducts.map((product) => (
+                        <LinkArrow
+                          key={product.slug}
+                          href={product.href}
+                          tabIndex={isActive ? 0 : -1}
+                          className="text-background"
+                        >
+                          {product.name}
+                        </LinkArrow>
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+            );
+          })}
         </div>
       </section>
 
@@ -2241,8 +2399,8 @@ export function ContactPage({ service }: { service?: string }) {
     },
   ];
 
-  const activeInquiry = inquiryDesks[activeInquiryIndex];
-  const activeOffice = offices[activeOfficeIndex];
+  const activeInquiry = inquiryDesks[activeInquiryIndex] || inquiryDesks[0];
+  const activeOffice = offices[activeOfficeIndex] || offices[0];
   const ActiveInquiryIcon = activeInquiry.icon;
 
   const activateInquiry = (index: number) => {
@@ -2333,234 +2491,472 @@ export function ContactPage({ service }: { service?: string }) {
           </p>
         </div>
 
-        <div
-          role="tablist"
-          aria-label="Contact inquiry desks"
-          className="grid border-l border-t border-border md:grid-cols-2 lg:grid-cols-4"
-        >
+        {/* Desktop Version */}
+        <div className="hidden lg:block">
+          <div
+            role="tablist"
+            aria-label="Contact inquiry desks"
+            className="grid border-l border-t border-border md:grid-cols-2 lg:grid-cols-4"
+          >
+            {inquiryDesks.map((desk, index) => {
+              const Icon = desk.icon;
+              const isActive = index === activeInquiryIndex;
+
+              return (
+                <button
+                  key={desk.id}
+                  id={`inquiry-tab-${desk.id}`}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  aria-controls="contact-inquiry-panel"
+                  tabIndex={isActive ? 0 : -1}
+                  onClick={() => activateInquiry(index)}
+                  onKeyDown={(event) => handleInquiryKeyDown(event, index)}
+                  className={`group min-h-44 border-b border-r border-border p-6 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary lg:min-h-52 lg:p-8 ${
+                    isActive ? "bg-primary text-primary-foreground" : "hover:bg-muted/60"
+                  }`}
+                >
+                  <div className="mb-10 flex items-center justify-between">
+                    <Icon
+                      className={`h-5 w-5 ${isActive ? "text-primary-foreground" : "opacity-55"}`}
+                    />
+                    <span className="text-[10px] font-bold tracking-widest opacity-45">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                  </div>
+                  <span className="block text-[9px] font-bold uppercase tracking-widest opacity-55">
+                    {desk.eyebrow}
+                  </span>
+                  <span className="mt-3 block font-display text-2xl font-bold leading-none tracking-tight">
+                    {desk.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div
+            id="contact-inquiry-panel"
+            role="tabpanel"
+            aria-labelledby={`inquiry-tab-${activeInquiry.id}`}
+            className="mt-16 grid grid-cols-12 gap-y-14 lg:mt-24"
+          >
+            <div className="col-span-12 lg:col-span-4">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={activeInquiry.id}
+                  initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={prefersReducedMotion ? undefined : { opacity: 0, y: -10 }}
+                  transition={{ duration: prefersReducedMotion ? 0 : 0.4 }}
+                >
+                  <ActiveInquiryIcon className="h-8 w-8 text-primary" aria-hidden="true" />
+                  <h3 className="mt-8 max-w-md font-display text-4xl font-extrabold leading-[0.95] tracking-tighter lg:text-5xl">
+                    {activeInquiry.label}
+                  </h3>
+                  <p className="mt-6 max-w-sm text-sm leading-relaxed opacity-70">
+                    {activeInquiry.description}
+                  </p>
+                  <a
+                    href={`mailto:${activeInquiry.email}`}
+                    className="mt-8 inline-flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest transition-colors hover:text-primary"
+                  >
+                    <Mail className="h-4 w-4" aria-hidden="true" />
+                    {activeInquiry.email}
+                  </a>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            <div className="col-span-12 lg:col-span-7 lg:col-start-6">
+              <div className="border-t border-border pt-8">
+                <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary">
+                  02 / Share your details
+                </span>
+              </div>
+
+              <AnimatePresence mode="wait" initial={false}>
+                {submitted ? (
+                  <motion.div
+                    key="success"
+                    role="status"
+                    aria-live="polite"
+                    initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={prefersReducedMotion ? undefined : { opacity: 0 }}
+                    transition={{ duration: prefersReducedMotion ? 0 : 0.45 }}
+                    className="flex min-h-[560px] flex-col justify-center"
+                  >
+                    <CircleCheckBig className="h-10 w-10 text-primary" aria-hidden="true" />
+                    <h3 className="mt-8 max-w-xl font-display text-5xl font-extrabold leading-[0.92] tracking-tighter lg:text-6xl">
+                      Thank you. Your inquiry is in the right place.
+                    </h3>
+                    <p className="mt-6 max-w-lg text-sm leading-relaxed opacity-70">
+                      The {activeInquiry.label.toLowerCase()} desk has received your details and will
+                      follow up through the email address supplied.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setSubmitted(false)}
+                      className="mt-10 inline-flex w-fit items-center gap-2 border-b border-foreground pb-1 text-[10px] font-bold uppercase tracking-widest transition-colors hover:border-primary hover:text-primary"
+                    >
+                      <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+                      Send another inquiry
+                    </button>
+                  </motion.div>
+                ) : (
+                  <motion.form
+                    key={`${activeInquiry.id}-${prefilledService}`}
+                    name="corporate-contact"
+                    onSubmit={handleContactSubmit}
+                    initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={prefersReducedMotion ? undefined : { opacity: 0, y: -8 }}
+                    transition={{ duration: prefersReducedMotion ? 0 : 0.35 }}
+                    className="mt-8 grid gap-x-8 gap-y-2 md:grid-cols-2"
+                  >
+                    <input type="hidden" name="inquiryDesk" value={activeInquiry.label} />
+                    <label className="block border-b border-border py-4 focus-within:border-primary">
+                      <span className="text-[9px] font-bold uppercase tracking-widest opacity-55">
+                        Full name
+                      </span>
+                      <input
+                        required
+                        name="fullName"
+                        autoComplete="name"
+                        placeholder="Your name"
+                        className="mt-2 w-full bg-transparent py-2 text-sm outline-none placeholder:text-foreground/35"
+                      />
+                    </label>
+                    <label className="block border-b border-border py-4 focus-within:border-primary">
+                      <span className="text-[9px] font-bold uppercase tracking-widest opacity-55">
+                        Work email
+                      </span>
+                      <input
+                        required
+                        type="email"
+                        name="email"
+                        autoComplete="email"
+                        placeholder="name@company.com"
+                        className="mt-2 w-full bg-transparent py-2 text-sm outline-none placeholder:text-foreground/35"
+                      />
+                    </label>
+                    <label className="block border-b border-border py-4 focus-within:border-primary">
+                      <span className="text-[9px] font-bold uppercase tracking-widest opacity-55">
+                        Company
+                      </span>
+                      <input
+                        required
+                        name="company"
+                        autoComplete="organization"
+                        placeholder="Organization name"
+                        className="mt-2 w-full bg-transparent py-2 text-sm outline-none placeholder:text-foreground/35"
+                      />
+                    </label>
+                    <label className="block border-b border-border py-4 focus-within:border-primary">
+                      <span className="text-[9px] font-bold uppercase tracking-widest opacity-55">
+                        Country or region
+                      </span>
+                      <input
+                        required
+                        name="region"
+                        autoComplete="country-name"
+                        placeholder="Location"
+                        className="mt-2 w-full bg-transparent py-2 text-sm outline-none placeholder:text-foreground/35"
+                      />
+                    </label>
+                    <label className="block border-b border-border py-4 focus-within:border-primary md:col-span-2">
+                      <span className="text-[9px] font-bold uppercase tracking-widest opacity-55">
+                        Service or product area
+                      </span>
+                      <select
+                        required
+                        name="businessArea"
+                        defaultValue={prefilledService}
+                        className="mt-2 w-full appearance-none bg-transparent py-2 text-sm outline-none"
+                      >
+                        <option value="" disabled>
+                          Select a business
+                        </option>
+                        {businessUnits.map((unit) => (
+                          <option key={unit.slug} value={unit.slug}>
+                            {unit.name}
+                          </option>
+                        ))}
+                        <option value="group">Group / Multiple businesses</option>
+                      </select>
+                    </label>
+                    <label className="block border-b border-border py-4 focus-within:border-primary md:col-span-2">
+                      <span className="text-[9px] font-bold uppercase tracking-widest opacity-55">
+                        How can we help?
+                      </span>
+                      <textarea
+                        required
+                        name="message"
+                        rows={5}
+                        placeholder="Tell us about the opportunity, request, or question."
+                        className="mt-3 w-full resize-none bg-transparent py-2 text-sm leading-relaxed outline-none placeholder:text-foreground/35"
+                      />
+                    </label>
+                    <label className="mt-6 flex items-start gap-3 text-[10px] leading-relaxed opacity-65 md:col-span-2">
+                      <input
+                        required
+                        type="checkbox"
+                        name="consent"
+                        className="mt-0.5 h-4 w-4 accent-primary"
+                      />
+                      <span>
+                        I agree that Lucid Aviation may use these details to respond to this inquiry.
+                      </span>
+                    </label>
+                    <button
+                      type="submit"
+                      className="mt-7 inline-flex items-center justify-between bg-accent px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-accent-foreground transition-colors hover:bg-primary hover:text-primary-foreground md:col-span-2"
+                    >
+                      Submit inquiry
+                      <Send className="h-4 w-4" aria-hidden="true" />
+                    </button>
+                  </motion.form>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Version (Interactive Accordion) */}
+        <div className="block lg:hidden border-t border-border mt-8">
           {inquiryDesks.map((desk, index) => {
             const Icon = desk.icon;
             const isActive = index === activeInquiryIndex;
 
             return (
-              <button
-                key={desk.id}
-                id={`inquiry-tab-${desk.id}`}
-                type="button"
-                role="tab"
-                aria-selected={isActive}
-                aria-controls="contact-inquiry-panel"
-                tabIndex={isActive ? 0 : -1}
-                onClick={() => activateInquiry(index)}
-                onKeyDown={(event) => handleInquiryKeyDown(event, index)}
-                className={`group min-h-44 border-b border-r border-border p-6 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary lg:min-h-52 lg:p-8 ${
-                  isActive ? "bg-primary text-primary-foreground" : "hover:bg-muted/60"
-                }`}
-              >
-                <div className="mb-10 flex items-center justify-between">
-                  <Icon
-                    className={`h-5 w-5 ${isActive ? "text-primary-foreground" : "opacity-55"}`}
-                  />
-                  <span className="text-[10px] font-bold tracking-widest opacity-45">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                </div>
-                <span className="block text-[9px] font-bold uppercase tracking-widest opacity-55">
-                  {desk.eyebrow}
-                </span>
-                <span className="mt-3 block font-display text-2xl font-bold leading-none tracking-tight">
-                  {desk.label}
-                </span>
-              </button>
+              <div key={desk.id} className="border-b border-border">
+                {/* Header Trigger */}
+                <button
+                  type="button"
+                  onClick={() => activateInquiry(isActive ? -1 : index)}
+                  className="w-full flex items-start justify-between py-6 text-left focus:outline-none group focus-visible:ring-1 focus-visible:ring-primary"
+                >
+                  <div className="flex items-center gap-4 pr-4">
+                    <Icon className={`h-5 w-5 shrink-0 ${isActive ? "text-primary" : "opacity-55"}`} aria-hidden="true" />
+                    <div>
+                      <span className="text-[10px] font-bold tracking-widest opacity-50 block mb-1">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      <span className="block text-[9px] font-bold uppercase tracking-widest opacity-55">
+                        {desk.eyebrow}
+                      </span>
+                      <h3 className={`font-display text-xl sm:text-2xl font-bold leading-tight transition-colors duration-200 ${
+                        isActive ? "text-primary" : "group-hover:text-primary"
+                      }`}>
+                        {desk.label}
+                      </h3>
+                    </div>
+                  </div>
+                  <div className="mt-1 p-1 rounded-full border border-border bg-muted/20 shrink-0 flex items-center justify-center transition-colors group-hover:border-primary/20 group-hover:bg-muted/40">
+                    <motion.div
+                      animate={{ rotate: isActive ? 45 : 0 }}
+                      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-4 w-4 opacity-70"
+                      >
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                      </svg>
+                    </motion.div>
+                  </div>
+                </button>
+
+                {/* Content Panel */}
+                <motion.div
+                  initial={false}
+                  animate={{
+                    height: isActive ? "auto" : 0,
+                    opacity: isActive ? 1 : 0,
+                  }}
+                  transition={{
+                    duration: prefersReducedMotion ? 0 : 0.35,
+                    ease: [0.16, 1, 0.3, 1]
+                  }}
+                  style={{ willChange: prefersReducedMotion ? "none" : "height, opacity" }}
+                  className="overflow-hidden"
+                >
+                  <div className="pb-8 pt-2">
+                    <p className="text-sm leading-relaxed opacity-70 mb-4">
+                      {desk.description}
+                    </p>
+                    <a
+                      href={`mailto:${desk.email}`}
+                      tabIndex={isActive ? 0 : -1}
+                      className="inline-flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest transition-colors hover:text-primary mb-8"
+                    >
+                      <Mail className="h-4 w-4" aria-hidden="true" />
+                      {desk.email}
+                    </a>
+
+                    <div className="border-t border-border pt-6">
+                      <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary block mb-4">
+                        02 / Share your details
+                      </span>
+                      
+                      {submitted ? (
+                        <div
+                          role="status"
+                          aria-live="polite"
+                          className="flex min-h-[300px] flex-col justify-center animate-fadeIn"
+                        >
+                          <CircleCheckBig className="h-10 w-10 text-primary" aria-hidden="true" />
+                          <h3 className="mt-8 font-display text-3xl font-extrabold leading-[0.92] tracking-tighter">
+                            Thank you. Your inquiry is in the right place.
+                          </h3>
+                          <p className="mt-4 text-xs sm:text-sm leading-relaxed opacity-70">
+                            The {desk.label.toLowerCase()} desk has received your details and will
+                            follow up through the email address supplied.
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => setSubmitted(false)}
+                            tabIndex={isActive ? 0 : -1}
+                            className="mt-8 inline-flex w-fit items-center gap-2 border-b border-foreground pb-1 text-[10px] font-bold uppercase tracking-widest transition-colors hover:border-primary hover:text-primary"
+                          >
+                            <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+                            Send another inquiry
+                          </button>
+                        </div>
+                      ) : (
+                        <form
+                          name={`corporate-contact-${desk.id}`}
+                          onSubmit={handleContactSubmit}
+                          className="grid gap-x-8 gap-y-2"
+                        >
+                          <input type="hidden" name="inquiryDesk" value={desk.label} />
+                          <label className="block border-b border-border py-4 focus-within:border-primary">
+                            <span className="text-[9px] font-bold uppercase tracking-widest opacity-55">
+                              Full name
+                            </span>
+                            <input
+                              required
+                              name="fullName"
+                              autoComplete="name"
+                              placeholder="Your name"
+                              tabIndex={isActive ? 0 : -1}
+                              className="mt-2 w-full bg-transparent py-2 text-sm outline-none placeholder:text-foreground/35"
+                            />
+                          </label>
+                          <label className="block border-b border-border py-4 focus-within:border-primary">
+                            <span className="text-[9px] font-bold uppercase tracking-widest opacity-55">
+                              Work email
+                            </span>
+                            <input
+                              required
+                              type="email"
+                              name="email"
+                              autoComplete="email"
+                              placeholder="name@company.com"
+                              tabIndex={isActive ? 0 : -1}
+                              className="mt-2 w-full bg-transparent py-2 text-sm outline-none placeholder:text-foreground/35"
+                            />
+                          </label>
+                          <label className="block border-b border-border py-4 focus-within:border-primary">
+                            <span className="text-[9px] font-bold uppercase tracking-widest opacity-55">
+                              Company
+                            </span>
+                            <input
+                              required
+                              name="company"
+                              autoComplete="organization"
+                              placeholder="Organization name"
+                              tabIndex={isActive ? 0 : -1}
+                              className="mt-2 w-full bg-transparent py-2 text-sm outline-none placeholder:text-foreground/35"
+                            />
+                          </label>
+                          <label className="block border-b border-border py-4 focus-within:border-primary">
+                            <span className="text-[9px] font-bold uppercase tracking-widest opacity-55">
+                              Country or region
+                            </span>
+                            <input
+                              required
+                              name="region"
+                              autoComplete="country-name"
+                              placeholder="Location"
+                              tabIndex={isActive ? 0 : -1}
+                              className="mt-2 w-full bg-transparent py-2 text-sm outline-none placeholder:text-foreground/35"
+                            />
+                          </label>
+                          <label className="block border-b border-border py-4 focus-within:border-primary">
+                            <span className="text-[9px] font-bold uppercase tracking-widest opacity-55">
+                              Service or product area
+                            </span>
+                            <select
+                              required
+                              name="businessArea"
+                              defaultValue={prefilledService}
+                              tabIndex={isActive ? 0 : -1}
+                              className="mt-2 w-full appearance-none bg-transparent py-2 text-sm outline-none"
+                            >
+                              <option value="" disabled>
+                                Select a business
+                              </option>
+                              {businessUnits.map((unit) => (
+                                <option key={unit.slug} value={unit.slug}>
+                                  {unit.name}
+                                </option>
+                              ))}
+                              <option value="group">Group / Multiple businesses</option>
+                            </select>
+                          </label>
+                          <label className="block border-b border-border py-4 focus-within:border-primary">
+                            <span className="text-[9px] font-bold uppercase tracking-widest opacity-55">
+                              How can we help?
+                            </span>
+                            <textarea
+                              required
+                              name="message"
+                              rows={5}
+                              placeholder="Tell us about the opportunity, request, or question."
+                              tabIndex={isActive ? 0 : -1}
+                              className="mt-3 w-full resize-none bg-transparent py-2 text-sm leading-relaxed outline-none placeholder:text-foreground/35"
+                            />
+                          </label>
+                          <label className="mt-6 flex items-start gap-3 text-[10px] leading-relaxed opacity-65">
+                            <input
+                              required
+                              type="checkbox"
+                              name="consent"
+                              tabIndex={isActive ? 0 : -1}
+                              className="mt-0.5 h-4 w-4 accent-primary"
+                            />
+                            <span>
+                              I agree that Lucid Aviation may use these details to respond to this inquiry.
+                            </span>
+                          </label>
+                          <button
+                            type="submit"
+                            tabIndex={isActive ? 0 : -1}
+                            className="mt-7 inline-flex items-center justify-between bg-accent px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-accent-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
+                          >
+                            Submit inquiry
+                            <Send className="h-4 w-4" aria-hidden="true" />
+                          </button>
+                        </form>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
             );
           })}
-        </div>
-
-        <div
-          id="contact-inquiry-panel"
-          role="tabpanel"
-          aria-labelledby={`inquiry-tab-${activeInquiry.id}`}
-          className="mt-16 grid grid-cols-12 gap-y-14 lg:mt-24"
-        >
-          <div className="col-span-12 lg:col-span-4">
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={activeInquiry.id}
-                initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={prefersReducedMotion ? undefined : { opacity: 0, y: -10 }}
-                transition={{ duration: prefersReducedMotion ? 0 : 0.4 }}
-              >
-                <ActiveInquiryIcon className="h-8 w-8 text-primary" aria-hidden="true" />
-                <h3 className="mt-8 max-w-md font-display text-4xl font-extrabold leading-[0.95] tracking-tighter lg:text-5xl">
-                  {activeInquiry.label}
-                </h3>
-                <p className="mt-6 max-w-sm text-sm leading-relaxed opacity-70">
-                  {activeInquiry.description}
-                </p>
-                <a
-                  href={`mailto:${activeInquiry.email}`}
-                  className="mt-8 inline-flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest transition-colors hover:text-primary"
-                >
-                  <Mail className="h-4 w-4" aria-hidden="true" />
-                  {activeInquiry.email}
-                </a>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-
-          <div className="col-span-12 lg:col-span-7 lg:col-start-6">
-            <div className="border-t border-border pt-8">
-              <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary">
-                02 / Share your details
-              </span>
-            </div>
-
-            <AnimatePresence mode="wait" initial={false}>
-              {submitted ? (
-                <motion.div
-                  key="success"
-                  role="status"
-                  aria-live="polite"
-                  initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={prefersReducedMotion ? undefined : { opacity: 0 }}
-                  transition={{ duration: prefersReducedMotion ? 0 : 0.45 }}
-                  className="flex min-h-[560px] flex-col justify-center"
-                >
-                  <CircleCheckBig className="h-10 w-10 text-primary" aria-hidden="true" />
-                  <h3 className="mt-8 max-w-xl font-display text-5xl font-extrabold leading-[0.92] tracking-tighter lg:text-6xl">
-                    Thank you. Your inquiry is in the right place.
-                  </h3>
-                  <p className="mt-6 max-w-lg text-sm leading-relaxed opacity-70">
-                    The {activeInquiry.label.toLowerCase()} desk has received your details and will
-                    follow up through the email address supplied.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setSubmitted(false)}
-                    className="mt-10 inline-flex w-fit items-center gap-2 border-b border-foreground pb-1 text-[10px] font-bold uppercase tracking-widest transition-colors hover:border-primary hover:text-primary"
-                  >
-                    <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
-                    Send another inquiry
-                  </button>
-                </motion.div>
-              ) : (
-                <motion.form
-                  key={`${activeInquiry.id}-${prefilledService}`}
-                  name="corporate-contact"
-                  onSubmit={handleContactSubmit}
-                  initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={prefersReducedMotion ? undefined : { opacity: 0, y: -8 }}
-                  transition={{ duration: prefersReducedMotion ? 0 : 0.35 }}
-                  className="mt-8 grid gap-x-8 gap-y-2 md:grid-cols-2"
-                >
-                  <input type="hidden" name="inquiryDesk" value={activeInquiry.label} />
-                  <label className="block border-b border-border py-4 focus-within:border-primary">
-                    <span className="text-[9px] font-bold uppercase tracking-widest opacity-55">
-                      Full name
-                    </span>
-                    <input
-                      required
-                      name="fullName"
-                      autoComplete="name"
-                      placeholder="Your name"
-                      className="mt-2 w-full bg-transparent py-2 text-sm outline-none placeholder:text-foreground/35"
-                    />
-                  </label>
-                  <label className="block border-b border-border py-4 focus-within:border-primary">
-                    <span className="text-[9px] font-bold uppercase tracking-widest opacity-55">
-                      Work email
-                    </span>
-                    <input
-                      required
-                      type="email"
-                      name="email"
-                      autoComplete="email"
-                      placeholder="name@company.com"
-                      className="mt-2 w-full bg-transparent py-2 text-sm outline-none placeholder:text-foreground/35"
-                    />
-                  </label>
-                  <label className="block border-b border-border py-4 focus-within:border-primary">
-                    <span className="text-[9px] font-bold uppercase tracking-widest opacity-55">
-                      Company
-                    </span>
-                    <input
-                      required
-                      name="company"
-                      autoComplete="organization"
-                      placeholder="Organization name"
-                      className="mt-2 w-full bg-transparent py-2 text-sm outline-none placeholder:text-foreground/35"
-                    />
-                  </label>
-                  <label className="block border-b border-border py-4 focus-within:border-primary">
-                    <span className="text-[9px] font-bold uppercase tracking-widest opacity-55">
-                      Country or region
-                    </span>
-                    <input
-                      required
-                      name="region"
-                      autoComplete="country-name"
-                      placeholder="Location"
-                      className="mt-2 w-full bg-transparent py-2 text-sm outline-none placeholder:text-foreground/35"
-                    />
-                  </label>
-                  <label className="block border-b border-border py-4 focus-within:border-primary md:col-span-2">
-                    <span className="text-[9px] font-bold uppercase tracking-widest opacity-55">
-                      Service or product area
-                    </span>
-                    <select
-                      required
-                      name="businessArea"
-                      defaultValue={prefilledService}
-                      className="mt-2 w-full appearance-none bg-transparent py-2 text-sm outline-none"
-                    >
-                      <option value="" disabled>
-                        Select a business
-                      </option>
-                      {businessUnits.map((unit) => (
-                        <option key={unit.slug} value={unit.slug}>
-                          {unit.name}
-                        </option>
-                      ))}
-                      <option value="group">Group / Multiple businesses</option>
-                    </select>
-                  </label>
-                  <label className="block border-b border-border py-4 focus-within:border-primary md:col-span-2">
-                    <span className="text-[9px] font-bold uppercase tracking-widest opacity-55">
-                      How can we help?
-                    </span>
-                    <textarea
-                      required
-                      name="message"
-                      rows={5}
-                      placeholder="Tell us about the opportunity, request, or question."
-                      className="mt-3 w-full resize-none bg-transparent py-2 text-sm leading-relaxed outline-none placeholder:text-foreground/35"
-                    />
-                  </label>
-                  <label className="mt-6 flex items-start gap-3 text-[10px] leading-relaxed opacity-65 md:col-span-2">
-                    <input
-                      required
-                      type="checkbox"
-                      name="consent"
-                      className="mt-0.5 h-4 w-4 accent-primary"
-                    />
-                    <span>
-                      I agree that Lucid Aviation may use these details to respond to this inquiry.
-                    </span>
-                  </label>
-                  <button
-                    type="submit"
-                    className="mt-7 inline-flex items-center justify-between bg-accent px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-accent-foreground transition-colors hover:bg-primary hover:text-primary-foreground md:col-span-2"
-                  >
-                    Submit inquiry
-                    <Send className="h-4 w-4" aria-hidden="true" />
-                  </button>
-                </motion.form>
-              )}
-            </AnimatePresence>
-          </div>
         </div>
       </section>
 
@@ -2580,85 +2976,199 @@ export function ContactPage({ service }: { service?: string }) {
           </p>
         </div>
 
-        <div className="grid grid-cols-12 gap-y-10">
-          <div className="col-span-12 border-t border-white/15 lg:col-span-4">
-            {offices.map((office, index) => {
-              const isActive = index === activeOfficeIndex;
+        {/* Desktop Version */}
+        <div className="hidden lg:block">
+          <div className="grid grid-cols-12 gap-y-10">
+            <div className="col-span-12 border-t border-white/15 lg:col-span-4">
+              {offices.map((office, index) => {
+                const isActive = index === activeOfficeIndex;
 
-              return (
-                <button
-                  key={office.city}
-                  type="button"
-                  aria-pressed={isActive}
-                  onClick={() => setActiveOfficeIndex(index)}
-                  className={`group flex w-full items-center justify-between border-b border-white/15 py-6 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary ${
-                    isActive ? "text-white" : "text-background/45 hover:text-background"
-                  }`}
+                return (
+                  <button
+                    key={office.city}
+                    type="button"
+                    aria-pressed={isActive}
+                    onClick={() => setActiveOfficeIndex(index)}
+                    className={`group flex w-full items-center justify-between border-b border-white/15 py-6 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary ${
+                      isActive ? "text-white" : "text-background/45 hover:text-background"
+                    }`}
+                  >
+                    <span>
+                      <span className="block text-[9px] font-bold uppercase tracking-widest">
+                        {office.label}
+                      </span>
+                      <span className="mt-2 block font-display text-3xl font-bold leading-none tracking-tight">
+                        {office.city}
+                      </span>
+                    </span>
+                    <span className="text-[10px] font-bold tracking-widest">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="col-span-12 lg:col-span-7 lg:col-start-6">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={activeOffice.city}
+                  initial={prefersReducedMotion ? false : { opacity: 0, x: 24 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={prefersReducedMotion ? undefined : { opacity: 0, x: -16 }}
+                  transition={{ duration: prefersReducedMotion ? 0 : 0.45 }}
                 >
-                  <span>
-                    <span className="block text-[9px] font-bold uppercase tracking-widest">
-                      {office.label}
-                    </span>
-                    <span className="mt-2 block font-display text-3xl font-bold leading-none tracking-tight">
-                      {office.city}
-                    </span>
-                  </span>
-                  <span className="text-[10px] font-bold tracking-widest">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="col-span-12 lg:col-span-7 lg:col-start-6">
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={activeOffice.city}
-                initial={prefersReducedMotion ? false : { opacity: 0, x: 24 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={prefersReducedMotion ? undefined : { opacity: 0, x: -16 }}
-                transition={{ duration: prefersReducedMotion ? 0 : 0.45 }}
-              >
-                <div className="flex items-start justify-between gap-6 border-b border-white/15 pb-8">
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-[0.35em] text-primary">
-                      {activeOffice.coordinates}
-                    </span>
-                    <h3 className="mt-5 font-display text-6xl font-extrabold leading-none tracking-tighter sm:text-7xl lg:text-8xl">
-                      {activeOffice.city}
-                    </h3>
+                  <div className="flex items-start justify-between gap-6 border-b border-white/15 pb-8">
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-[0.35em] text-primary">
+                        {activeOffice.coordinates}
+                      </span>
+                      <h3 className="mt-5 font-display text-6xl font-extrabold leading-none tracking-tighter sm:text-7xl lg:text-8xl">
+                        {activeOffice.city}
+                      </h3>
+                    </div>
+                    <MapPin className="h-7 w-7 shrink-0 text-primary" aria-hidden="true" />
                   </div>
-                  <MapPin className="h-7 w-7 shrink-0 text-primary" aria-hidden="true" />
-                </div>
-                <dl className="grid border-l border-white/15 sm:grid-cols-2">
-                  {[
-                    [MapPin, "Address", activeOffice.address],
-                    [Phone, "Telephone", activeOffice.phone],
-                    [Clock3, "Office hours", activeOffice.hours],
-                    [Network, "Coverage", activeOffice.coverage],
-                  ].map(([Icon, label, value]) => {
-                    const DetailIcon = Icon as typeof MapPin;
+                  <dl className="grid border-l border-white/15 sm:grid-cols-2">
+                    {[
+                      [MapPin, "Address", activeOffice.address],
+                      [Phone, "Telephone", activeOffice.phone],
+                      [Clock3, "Office hours", activeOffice.hours],
+                      [Network, "Coverage", activeOffice.coverage],
+                    ].map(([Icon, label, value]) => {
+                      const DetailIcon = Icon as typeof MapPin;
 
-                    return (
-                      <div
-                        key={String(label)}
-                        className="border-b border-r border-white/15 p-6 lg:p-8"
-                      >
-                        <DetailIcon className="h-4 w-4 text-primary" aria-hidden="true" />
-                        <dt className="mt-8 text-[9px] font-bold uppercase tracking-widest text-background/45">
-                          {String(label)}
-                        </dt>
-                        <dd className="mt-3 max-w-sm text-sm leading-relaxed text-background/85">
-                          {String(value)}
-                        </dd>
-                      </div>
-                    );
-                  })}
-                </dl>
-              </motion.div>
-            </AnimatePresence>
+                      return (
+                        <div
+                          key={String(label)}
+                          className="border-b border-r border-white/15 p-6 lg:p-8"
+                        >
+                          <DetailIcon className="h-4 w-4 text-primary" aria-hidden="true" />
+                          <dt className="mt-8 text-[9px] font-bold uppercase tracking-widest text-background/45">
+                            {String(label)}
+                          </dt>
+                          <dd className="mt-3 max-w-sm text-sm leading-relaxed text-background/85">
+                            {String(value)}
+                          </dd>
+                        </div>
+                      );
+                    })}
+                  </dl>
+                </motion.div>
+              </AnimatePresence>
+            </div>
           </div>
+        </div>
+
+        {/* Mobile Version (Interactive Accordion) */}
+        <div className="block lg:hidden border-t border-white/10 mt-8">
+          {offices.map((office, index) => {
+            const isActive = index === activeOfficeIndex;
+
+            return (
+              <div key={office.city} className="border-b border-white/10">
+                {/* Header Trigger */}
+                <button
+                  type="button"
+                  onClick={() => setActiveOfficeIndex(isActive ? -1 : index)}
+                  className="w-full flex items-start justify-between py-6 text-left focus:outline-none group focus-visible:ring-1 focus-visible:ring-primary"
+                >
+                  <div className="flex items-center gap-4 pr-4">
+                    <div>
+                      <span className="text-[10px] font-bold tracking-widest text-white/50 block mb-1">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      <span className="block text-[9px] font-bold uppercase tracking-widest text-white/50">
+                        {office.label}
+                      </span>
+                      <h3 className={`font-display text-xl sm:text-2xl font-bold leading-tight transition-colors duration-200 ${
+                        isActive ? "text-primary" : "text-white/60 group-hover:text-white"
+                      }`}>
+                        {office.city}
+                      </h3>
+                    </div>
+                  </div>
+                  <div className="mt-1 p-1 rounded-full border border-white/10 bg-white/5 shrink-0 flex items-center justify-center transition-colors group-hover:border-white/20 group-hover:bg-white/10">
+                    <motion.div
+                      animate={{ rotate: isActive ? 45 : 0 }}
+                      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-4 w-4 text-white/70"
+                      >
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                      </svg>
+                    </motion.div>
+                  </div>
+                </button>
+
+                {/* Content Panel */}
+                <motion.div
+                  initial={false}
+                  animate={{
+                    height: isActive ? "auto" : 0,
+                    opacity: isActive ? 1 : 0,
+                  }}
+                  transition={{
+                    duration: prefersReducedMotion ? 0 : 0.35,
+                    ease: [0.16, 1, 0.3, 1]
+                  }}
+                  style={{ willChange: prefersReducedMotion ? "none" : "height, opacity" }}
+                  className="overflow-hidden"
+                >
+                  <div className="pb-8 pt-2">
+                    <div className="flex items-start justify-between gap-6 border-b border-white/10 pb-6 mb-6">
+                      <div>
+                        <span className="text-[10px] font-bold uppercase tracking-[0.35em] text-primary">
+                          {office.coordinates}
+                        </span>
+                        <h4 className="mt-2 font-display text-4xl font-extrabold leading-none tracking-tighter text-white">
+                          {office.city}
+                        </h4>
+                      </div>
+                      <MapPin className="h-6 w-6 shrink-0 text-primary" aria-hidden="true" />
+                    </div>
+                    
+                    <dl className="grid grid-cols-1 sm:grid-cols-2 border-l border-white/10">
+                      {[
+                        [MapPin, "Address", office.address],
+                        [Phone, "Telephone", office.phone],
+                        [Clock3, "Office hours", office.hours],
+                        [Network, "Coverage", office.coverage],
+                      ].map(([Icon, label, value]) => {
+                        const DetailIcon = Icon as typeof MapPin;
+
+                        return (
+                          <div
+                            key={String(label)}
+                            className="border-b border-r border-white/10 p-5 pl-6"
+                          >
+                            <DetailIcon className="h-4 w-4 text-primary" aria-hidden="true" />
+                            <dt className="mt-4 text-[9px] font-bold uppercase tracking-widest text-background/45">
+                              {String(label)}
+                            </dt>
+                            <dd className="mt-2 text-xs sm:text-sm leading-relaxed text-background/85">
+                              {String(value)}
+                            </dd>
+                          </div>
+                        );
+                      })}
+                    </dl>
+                  </div>
+                </motion.div>
+              </div>
+            );
+          })}
         </div>
       </section>
 

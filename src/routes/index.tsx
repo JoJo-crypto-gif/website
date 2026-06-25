@@ -1679,14 +1679,15 @@ function Voices() {
 function Closing() {
   const [activePathIndex, setActivePathIndex] = useState(0);
   const prefersReducedMotion = useReducedMotion();
-  const activePath = closingPaths[activePathIndex];
+  const activePath = closingPaths[activePathIndex] || closingPaths[0];
 
   return (
     <section
       id="contact"
       className="brand-dark overflow-hidden bg-foreground text-background lg:min-h-screen"
     >
-      <div className="grid min-h-[900px] lg:min-h-screen lg:grid-cols-[1.08fr_0.92fr]">
+      {/* Desktop Version */}
+      <div className="hidden lg:grid min-h-[900px] lg:min-h-screen lg:grid-cols-[1.08fr_0.92fr]">
         <div className="relative min-h-[620px] overflow-hidden lg:min-h-screen">
           <AnimatePresence mode="sync" initial={false}>
             <motion.img
@@ -1732,7 +1733,7 @@ function Closing() {
               </p>
             </div>
             <span className="text-[10px] font-bold tracking-widest text-background/45">
-              {String(activePathIndex + 1).padStart(2, "0")} / 03
+              {String((activePathIndex === -1 ? 0 : activePathIndex) + 1).padStart(2, "0")} / 03
             </span>
           </div>
 
@@ -1784,6 +1785,124 @@ function Closing() {
               );
             })}
           </div>
+        </div>
+      </div>
+
+      {/* Mobile Version (Interactive Accordion) */}
+      <div className="block lg:hidden px-6 py-16 sm:px-8 max-w-3xl mx-auto">
+        <div className="mb-10">
+          <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary">
+            09 / Building the future
+          </span>
+          <h2 className="mt-4 font-display text-4xl font-extrabold leading-[0.9] tracking-normal text-balance sm:text-5xl">
+            Build what moves next.
+          </h2>
+          <p className="mt-4 text-xs leading-relaxed text-white/75 sm:text-sm">
+            Choose where to begin with Lucid Aviation. Explore a product, engage a specialist
+            service, or bring us into the next program.
+          </p>
+        </div>
+
+        <div className="border-t border-white/10 mt-8">
+          {closingPaths.map((path, index) => {
+            const isActive = index === activePathIndex;
+
+            return (
+              <div key={path.title} className="border-b border-white/10">
+                {/* Header trigger */}
+                <button
+                  onClick={() => setActivePathIndex(isActive ? -1 : index)}
+                  className="w-full flex items-start justify-between py-6 text-left focus:outline-none group focus-visible:ring-1 focus-visible:ring-primary"
+                >
+                  <div className="pr-4">
+                    <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-primary block mb-1">
+                      {path.number} / {path.eyebrow}
+                    </span>
+                    <h3 className={`font-display text-xl sm:text-2xl font-bold leading-tight transition-colors duration-200 ${
+                      isActive ? "text-white" : "text-white/60 group-hover:text-white"
+                    }`}>
+                      {path.title}
+                    </h3>
+                  </div>
+                  <div className="mt-1 p-1 rounded-full border border-white/10 bg-white/5 shrink-0 flex items-center justify-center transition-colors group-hover:border-white/20 group-hover:bg-white/10">
+                    <motion.div
+                      animate={{ rotate: isActive ? 45 : 0 }}
+                      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-4 w-4 text-white/70"
+                      >
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                      </svg>
+                    </motion.div>
+                  </div>
+                </button>
+
+                {/* Expandable content area */}
+                <motion.div
+                  initial={false}
+                  animate={{
+                    height: isActive ? "auto" : 0,
+                    opacity: isActive ? 1 : 0,
+                  }}
+                  transition={{
+                    duration: prefersReducedMotion ? 0 : 0.35,
+                    ease: [0.16, 1, 0.3, 1]
+                  }}
+                  style={{ willChange: prefersReducedMotion ? "none" : "height, opacity" }}
+                  className="overflow-hidden"
+                >
+                  <div className="pb-6">
+                    {/* Image banner with Ken Burns effect */}
+                    <div className="relative aspect-[16/10] w-full overflow-hidden rounded-lg bg-white/5 border border-white/10 mb-4">
+                      <motion.img
+                        src={path.image}
+                        alt=""
+                        animate={{
+                          scale: prefersReducedMotion ? 1 : (isActive ? 1 : 1.12),
+                          opacity: isActive ? 1 : 0.4,
+                        }}
+                        transition={{
+                          duration: prefersReducedMotion ? 0 : 0.6,
+                          ease: [0.16, 1, 0.3, 1]
+                        }}
+                        style={{ willChange: prefersReducedMotion ? "none" : "transform, opacity" }}
+                        className="absolute inset-0 h-full w-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-foreground/20" aria-hidden="true" />
+                    </div>
+
+                    {/* Body description */}
+                    <p className="text-xs sm:text-sm leading-relaxed text-white/70 mb-5">
+                      {path.body}
+                    </p>
+
+                    {/* CTA Link */}
+                    <div>
+                      <a
+                        href={path.href}
+                        tabIndex={isActive ? 0 : -1}
+                        className="inline-flex items-center gap-2 border border-white/15 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-primary transition-all duration-300 hover:border-primary hover:bg-primary/5 hover:text-white"
+                      >
+                        <span>{path.cta}</span>
+                        <ArrowUpRight className="h-3.5 w-3.5 shrink-0 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                      </a>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
